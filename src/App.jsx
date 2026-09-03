@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Stethoscope, Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, ShieldCheck, Sparkles, Calendar, Clock } from 'lucide-react';
+import { Stethoscope, Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, ShieldCheck, Sparkles, Calendar, Clock, Settings } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import AIChat from './components/AIChat';
+import AdminScheduleModal from './components/AdminScheduleModal';
 
 const STEPS = {
   CHAT: 'chat',         // 一体型問診・カレンダー空き枠提案・即確定チャット
@@ -12,6 +13,8 @@ const STEPS = {
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(true);
+  const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
+  const [scheduleVersion, setScheduleVersion] = useState(0);
   const [step, setStep] = useState(STEPS.CHAT);
   const [finalReservation, setFinalReservation] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -78,16 +81,41 @@ function App() {
               <RefreshCw size={11} />
               患者切替
             </button>
+            <span className="opacity-40">|</span>
+            <button
+              onClick={() => setIsAdminModalOpen(true)}
+              className="text-[10px] text-white/80 hover:text-brand-orange flex items-center gap-1 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full transition-colors"
+            >
+              <Settings size={11} className="text-brand-orange" />
+              開院・時間設定
+            </button>
           </div>
         ) : (
-          <button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="text-brand-orange hover:text-white underline text-[10px] font-bold"
-          >
-            ログイン / 本人認証
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setIsAuthModalOpen(true)}
+              className="text-brand-orange hover:text-white underline text-[10px] font-bold"
+            >
+              ログイン / 本人認証
+            </button>
+            <span className="opacity-40">|</span>
+            <button
+              onClick={() => setIsAdminModalOpen(true)}
+              className="text-[10px] text-white/80 hover:text-brand-orange flex items-center gap-1 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full transition-colors"
+            >
+              <Settings size={11} className="text-brand-orange" />
+              開院・時間設定
+            </button>
+          </div>
         )}
       </div>
+
+      {/* 管理者用スケジュール設定モーダル */}
+      <AdminScheduleModal
+        isOpen={isAdminModalOpen}
+        onClose={() => setIsAdminModalOpen(false)}
+        onConfigSaved={() => setScheduleVersion((v) => v + 1)}
+      />
 
       {/* Navigation */}
       <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-gold/10 px-6 py-4 flex items-center justify-between">
@@ -213,12 +241,13 @@ function App() {
               {/* STEP 1: シームレスAI予約チャット（問診 ＋ カレンダー提案 ＋ 即確定） */}
               {step === STEPS.CHAT && (
                 <motion.div
-                  key="chat"
+                  key={`chat-${scheduleVersion}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
                   <AIChat
+                    key={scheduleVersion}
                     patient={currentUser}
                     onReservationComplete={handleReservationComplete}
                   />
