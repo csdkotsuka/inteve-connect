@@ -1,0 +1,57 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-orange: #FF9701;
+  --color-brand-gold: #BA9155;
+  --color-brand-ivory: #FAF7EF;
+  --color-brand-brown: #6D5236;
+  --color-medical-blue: #FF9701; /* Aliasing brand-orange for compatibility */
+  --color-medical-blue-light: #FFF4E5;
+  --color-mint: #BA9155; /* Aliasing brand-gold for compatibility */
+  --color-mint-light: #F4F0E8;
+  --color-dental-white: #FAF7EF;
+}
+
+:root {
+  font-family: 'Hiragino Kaku Gothic ProN', 'Meiryo', sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light;
+  color: #555555;
+  background-color: #FAF7EF;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Serif font for headings */
+h1, h2, h3, h4, .font-serif {
+  font-family: "Yu Mincho", "Hiragino Mincho ProN", serif;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+/* Custom scrollbar matching the new palette */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #BA915566;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #BA9155;
+}
