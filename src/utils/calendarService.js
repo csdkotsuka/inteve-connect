@@ -82,22 +82,19 @@ export async function createReservation({ patient, service, slot }) {
   // 1. Googleカレンダー（GAS）に予定を書き込む
   if (GAS_API_URL) {
     try {
-      // GASのCORS制限を考慮しno-corsまたは通常fetch
-      await fetch(GAS_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain', // GASのdoPostで受け取りやすいようにtext/plain
-        },
-        body: JSON.stringify({
-          patient_name: patient.name,
-          phone: patient.phone,
-          patient_type: patient.patient_type_label || (patient.patient_type === 'returning' ? '再診' : '新患'),
-          menu_type: service.service_label,
-          duration: service.estimated_duration,
-          start_at: slot.datetime,
-          symptom: service.symptom_detail,
-        }),
+      const params = new URLSearchParams({
+        action: 'book',
+        patient_name: patient.name,
+        phone: patient.phone,
+        patient_type: patient.patient_type_label || (patient.patient_type === 'returning' ? '再診' : '新患'),
+        menu_type: service.service_label,
+        duration: String(service.estimated_duration),
+        start_at: slot.datetime,
+        symptom: service.symptom_detail || '',
       });
+
+      // GETリクエストで確実にGASに予約作成を指示
+      await fetch(`${GAS_API_URL}?${params.toString()}`);
       result.googleCalendarSaved = true;
     } catch (err) {
       console.warn('Googleカレンダー書き込みエラー:', err);
