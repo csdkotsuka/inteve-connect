@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake, Shield, Sparkle } from 'lucide-react';
+import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import AIChat from './components/AIChat';
 import AdminScheduleModal from './components/AdminScheduleModal';
@@ -69,7 +69,7 @@ function App() {
           </span>
           <span className="hidden md:inline opacity-40">|</span>
           <span className="hidden md:inline opacity-90 text-xs text-brand-ivory/80">
-            まつやま城山歯科クリニック オンライン予約
+            つばき歯科クリニック オンライン予約
           </span>
         </div>
 
@@ -137,10 +137,10 @@ function App() {
           </div>
           <div className="flex flex-col -gap-0.5">
             <span className="text-[10px] text-brand-gold font-serif italic leading-none tracking-widest">
-              MATSUYAMA JOYAMA DENTAL CLINIC
+              TSUBAKI DENTAL CLINIC
             </span>
             <span className="text-xl md:text-2xl font-bold font-serif text-brand-brown leading-none mt-1">
-              まつやま城山歯科クリニック
+              つばき歯科クリニック
             </span>
           </div>
         </div>
@@ -193,7 +193,7 @@ function App() {
                 <span className="text-brand-orange">健康なお口から。</span>
               </h1>
               <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-serif">
-                まつやま城山歯科クリニックでは、患者様のお悩みやご希望に寄り添い、痛みの少ない丁寧な診療を心がけております。WEBより24時間いつでも簡単にご予約いただけます。
+                つばき歯科クリニックでは、患者様のお悩みやご希望に寄り添い、痛みの少ない丁寧な診療を心がけております。WEBより24時間いつでも簡単にご予約いただけます。
               </p>
             </motion.div>
 
@@ -236,7 +236,7 @@ function App() {
                 </div>
                 <div>
                   <p className="text-[9px] text-brand-gold font-serif italic uppercase">Access</p>
-                  <p className="font-bold text-xs text-brand-brown">松山市駅 徒歩1分 / 提携駐車場完備</p>
+                  <p className="font-bold text-xs text-brand-brown">椿神社前 徒歩1分 / 駐車場完備</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
@@ -341,14 +341,14 @@ function App() {
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] text-brand-gold font-serif italic leading-none">
-                MATSUYAMA JOYAMA DENTAL CLINIC
+                TSUBAKI DENTAL CLINIC
               </span>
-              <span className="text-lg font-bold font-serif text-white">まつやま城山歯科クリニック</span>
+              <span className="text-lg font-bold font-serif text-white">つばき歯科クリニック</span>
             </div>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-xs">〒790-0000 愛媛県松山市〇〇 1-2-3</p>
-            <p className="text-xs mt-1 opacity-60">© 2026 Matsuyama Joyama Dental Clinic. All rights reserved.</p>
+            <p className="text-xs">〒790-0000 愛媛県松山市居相 1-2-3（椿神社近く）</p>
+            <p className="text-xs mt-1 opacity-60">© 2026 Tsubaki Dental Clinic. All rights reserved.</p>
           </div>
         </div>
       </footer>

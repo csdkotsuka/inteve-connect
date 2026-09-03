@@ -66,8 +66,8 @@ export default function AIChat({ patient, onReservationComplete }) {
     if (!patient) return;
 
     const greeting = patient.isReturning
-      ? `${patient.name}様、こんにちは！まつやま城山歯科クリニックです。\nいつもご来院いただきありがとうございます。\n本日はどのようなご相談でしょうか？`
-      : `${patient.name}様、初めまして！まつやま城山歯科クリニックです。\n当院への受診をご検討いただきありがとうございます。\n本日はどのようなご症状・ご希望でしょうか？`;
+      ? `${patient.name}様、こんにちは！つばき歯科クリニックです。\nいつもご来院いただきありがとうございます。\n本日はどのようなご相談でしょうか？`
+      : `${patient.name}様、初めまして！つばき歯科クリニックです。\n当院への受診をご検討いただきありがとうございます。\n本日はどのようなご症状・ご希望でしょうか？`;
 
     setMessages([
       {
