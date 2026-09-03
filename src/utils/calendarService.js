@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 import { format, addDays, setHours, setMinutes } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { isClosedDay, getSlotsForDate } from './clinicSchedule';
 
 const GAS_API_URL = import.meta.env.VITE_GAS_API_URL;
 
@@ -26,20 +27,15 @@ export async function fetchAvailableSlots(durationMinutes = 30) {
     }
   }
 
-  // 候補日（明日、明後日、3日後）の営業時間枠（10:00, 11:30, 14:00, 15:30, 16:30）
-  const candidateHours = [
-    { h: 10, m: 0 },
-    { h: 11, m: 30 },
-    { h: 14, m: 0 },
-    { h: 15, m: 30 },
-    { h: 16, m: 30 },
-  ];
-
+  // 医院の開院・休診スケジュールをもとに今後7日間の空き枠を探索
   const slots = [];
-  for (let dayOffset = 1; dayOffset <= 3; dayOffset++) {
+  // 明日から順に最大7日間探索
+  for (let dayOffset = 1; dayOffset <= 7 && slots.length < 6; dayOffset++) {
     const targetDate = addDays(new Date(), dayOffset);
-    // 日曜・祝日を避けるならここでスキップも可能
-    for (const ch of candidateHours) {
+    if (isClosedDay(targetDate)) continue; // 日曜・木曜などの休診日はスキップ！
+
+    const dayCandidateSlots = getSlotsForDate(targetDate);
+    for (const ch of dayCandidateSlots) {
       const slotTime = setMinutes(setHours(targetDate, ch.h), ch.m);
       const slotEnd = new Date(slotTime.getTime() + durationMinutes * 60000);
 
@@ -59,12 +55,13 @@ export async function fetchAvailableSlots(durationMinutes = 30) {
           datetime: slotTime.toISOString(),
           formattedStartAt: `${format(slotTime, 'yyyy-MM-dd HH:mm:ss')}+09`,
         });
+
+        if (slots.length >= 6) break;
       }
     }
   }
 
-  // 直近4〜6件の空きスロットを返す
-  return slots.slice(0, 6);
+  return slots;
 }
 
 /**
