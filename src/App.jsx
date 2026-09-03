@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Stethoscope, Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, ShieldCheck, Sparkles, Calendar, Clock, Settings } from 'lucide-react';
+import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake, Shield, Sparkle } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import AIChat from './components/AIChat';
 import AdminScheduleModal from './components/AdminScheduleModal';
@@ -9,6 +9,15 @@ const STEPS = {
   CHAT: 'chat',         // 一体型問診・カレンダー空き枠提案・即確定チャット
   COMPLETE: 'complete', // 予約確定
 };
+
+// 歯科医院らしい清潔でエレガントな歯のエムブレムロゴ
+function DentalToothLogo({ className = "w-6 h-6 text-white" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M7 3C4.23858 3 2 5.23858 2 8C2 12 4 16 7 21C7.8 19 8.5 15.5 9 13C9.5 10.5 10 9 12 9C14 9 14.5 10.5 15 13C15.5 15.5 16.2 19 17 21C20 16 22 12 22 8C22 5.23858 19.7614 3 17 3C15 3 13.5 4 12 5C10.5 4 9 3 7 3Z" />
+    </svg>
+  );
+}
 
 function App() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -51,23 +60,26 @@ function App() {
         onAuthenticated={handleAuthenticated}
       />
 
-      {/* Patient Status Bar */}
-      <div className="bg-brand-brown text-white/90 text-[11px] py-1.5 px-6 flex justify-between items-center font-serif">
-        <div className="flex items-center gap-2">
-          <span className="text-brand-gold tracking-widest uppercase text-[10px]">Smart Dental Reception</span>
-          <span className="hidden sm:inline opacity-60">|</span>
-          <span className="hidden sm:inline opacity-90 text-[10px]">
-            Googleカレンダー ＆ Supabase リアルタイム完全連動
+      {/* Patient Status Bar（高さを1.5倍、文字サイズを拡大） */}
+      <div className="bg-brand-brown text-white/95 text-xs md:text-sm py-3 px-6 md:px-10 flex justify-between items-center font-serif shadow-xs">
+        <div className="flex items-center gap-3">
+          <span className="text-brand-gold tracking-wider font-bold text-xs uppercase flex items-center gap-1.5">
+            <Sparkles size={14} className="text-brand-orange" />
+            24時間 WEB受付システム
+          </span>
+          <span className="hidden md:inline opacity-40">|</span>
+          <span className="hidden md:inline opacity-90 text-xs text-brand-ivory/80">
+            まつやま城山歯科クリニック オンライン予約
           </span>
         </div>
 
         {currentUser ? (
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5">
-              <UserCheck size={13} className="text-brand-orange" />
-              <span>{currentUser.name} 様</span>
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-2 text-sm font-medium">
+              <UserCheck size={16} className="text-brand-orange" />
+              <span className="font-bold text-white text-sm md:text-base">{currentUser.name} 様</span>
               <span
-                className={`px-1.5 py-0.2 rounded text-[9px] font-bold ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                   currentUser.isReturning ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
                 }`}
               >
@@ -76,17 +88,17 @@ function App() {
             </span>
             <button
               onClick={handleSwitchPatient}
-              className="text-[10px] text-brand-gold hover:text-white underline flex items-center gap-1 cursor-pointer ml-1"
+              className="text-xs text-brand-gold hover:text-white underline flex items-center gap-1 cursor-pointer font-medium transition-colors"
             >
-              <RefreshCw size={11} />
+              <RefreshCw size={13} />
               患者切替
             </button>
-            <span className="opacity-40">|</span>
+            <span className="opacity-30">|</span>
             <button
               onClick={() => setIsAdminModalOpen(true)}
-              className="text-[10px] text-white/80 hover:text-brand-orange flex items-center gap-1 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full transition-colors"
+              className="text-xs text-white/90 hover:text-brand-orange flex items-center gap-1.5 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-all border border-white/10"
             >
-              <Settings size={11} className="text-brand-orange" />
+              <Settings size={13} className="text-brand-orange" />
               開院・時間設定
             </button>
           </div>
@@ -94,16 +106,16 @@ function App() {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setIsAuthModalOpen(true)}
-              className="text-brand-orange hover:text-white underline text-[10px] font-bold"
+              className="text-brand-orange hover:text-white underline text-xs font-bold"
             >
               ログイン / 本人認証
             </button>
-            <span className="opacity-40">|</span>
+            <span className="opacity-30">|</span>
             <button
               onClick={() => setIsAdminModalOpen(true)}
-              className="text-[10px] text-white/80 hover:text-brand-orange flex items-center gap-1 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-2 py-0.5 rounded-full transition-colors"
+              className="text-xs text-white/90 hover:text-brand-orange flex items-center gap-1.5 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-all border border-white/10"
             >
-              <Settings size={11} className="text-brand-orange" />
+              <Settings size={13} className="text-brand-orange" />
               開院・時間設定
             </button>
           </div>
@@ -118,17 +130,17 @@ function App() {
       />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-gold/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={reset}>
-          <div className="w-10 h-10 bg-brand-orange rounded-lg flex items-center justify-center text-white shadow-md">
-            <Stethoscope size={24} />
+      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-gold/10 px-6 md:px-10 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3 cursor-pointer" onClick={reset}>
+          <div className="w-11 h-11 bg-gradient-to-br from-brand-orange to-[#e08500] rounded-2xl flex items-center justify-center text-white shadow-md shadow-brand-orange/20">
+            <DentalToothLogo className="w-6 h-6 text-white" />
           </div>
-          <div className="flex flex-col -gap-1">
-            <span className="text-[10px] text-brand-gold font-serif italic leading-none">
-              MAEDA DENTAL CLINIC
+          <div className="flex flex-col -gap-0.5">
+            <span className="text-[10px] text-brand-gold font-serif italic leading-none tracking-widest">
+              MATSUYAMA JOYAMA DENTAL CLINIC
             </span>
-            <span className="text-xl font-bold font-serif text-brand-brown leading-none">
-              前田歯科クリニック
+            <span className="text-xl md:text-2xl font-bold font-serif text-brand-brown leading-none mt-1">
+              まつやま城山歯科クリニック
             </span>
           </div>
         </div>
@@ -152,9 +164,13 @@ function App() {
             </span>
             <a href="#" className="hover:text-brand-orange transition-colors">アクセス</a>
           </div>
-          <button className="bg-brand-orange text-white px-8 py-3 rounded-full hover:bg-orange-600 transition-all shadow-lg shadow-brand-orange/20 font-bold">
-            お電話はこちら
-          </button>
+          <a
+            href="tel:089-000-0000"
+            className="bg-brand-orange text-white px-7 py-2.5 rounded-full hover:bg-orange-600 transition-all shadow-lg shadow-brand-orange/20 font-bold flex items-center gap-2 text-xs"
+          >
+            <Phone size={15} />
+            <span>089-000-0000</span>
+          </a>
         </div>
 
         <button className="md:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
@@ -165,59 +181,62 @@ function App() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-6 py-10">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
-          {/* Left: Clinic Info & Strengths */}
+          {/* Left: Clinic Real Introduction & Guidance */}
           <div className="space-y-6 pt-4">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-orange text-white text-[11px] font-bold rounded-full mb-4 shadow-sm">
-                <Sparkles size={14} />
-                <span>24時間 スマートAI予約システム</span>
+              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-orange/10 text-brand-orange border border-brand-orange/20 text-xs font-bold rounded-full mb-4 shadow-2xs font-serif">
+                <HeartHandshake size={15} />
+                <span>生涯に寄り添う、やさしい歯科医療</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold leading-tight text-brand-brown mb-4 font-serif">
-                お待たせしない、<br />
-                <span className="text-brand-orange">対話と即時確定の</span><br />
-                新しい歯科予約体験。
+                笑顔あふれる毎日を、<br />
+                <span className="text-brand-orange">健康なお口から。</span>
               </h1>
-              <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-md font-serif">
-                お困りごとをタップするだけで、Googleカレンダーの空き枠をリアルタイム検索。面倒な入力なしで、約1分で予約が完了します。
+              <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-serif">
+                まつやま城山歯科クリニックでは、患者様のお悩みやご希望に寄り添い、痛みの少ない丁寧な診療を心がけております。WEBより24時間いつでも簡単にご予約いただけます。
               </p>
             </motion.div>
 
-            {/* Strengths Card */}
-            <div className="bg-white p-5 rounded-3xl shadow-sm border border-brand-gold/15 space-y-3">
-              <h3 className="text-xs font-bold text-brand-gold uppercase tracking-wider font-serif">
-                システムの特長
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                <div className="p-3 bg-brand-ivory/60 rounded-2xl border border-brand-gold/10">
-                  <span className="font-bold text-brand-brown block mb-1 font-serif flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-brand-orange inline-block" />
-                    カルテ自動照合
-                  </span>
-                  <span className="text-[11px] text-slate-500 leading-relaxed block">
-                    電話番号から過去の通院歴を瞬時に判定。診察券番号を探す手間がありません。
-                  </span>
+            {/* Clinic Guidance Cards (実運用向けの案内) */}
+            <div className="space-y-3">
+              <div className="p-4 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-brand-ivory text-brand-gold flex items-center justify-center shrink-0 mt-0.5 border border-brand-gold/20">
+                  <DentalToothLogo className="w-5 h-5 text-brand-orange" />
                 </div>
-                <div className="p-3 bg-brand-ivory/60 rounded-2xl border border-brand-gold/10">
-                  <span className="font-bold text-brand-brown block mb-1 font-serif flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-brand-orange inline-block" />
-                    カレンダー直結
-                  </span>
-                  <span className="text-[11px] text-slate-500 leading-relaxed block">
-                    医院のGoogleカレンダーと完全連動。ダブルブッキングの心配が一切ありません。
-                  </span>
+                <div>
+                  <h4 className="font-bold text-sm text-brand-brown font-serif mb-1">
+                    初めてご来院される患者様へ
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    健康保険証（またはマイナンバーカード）をご持参の上、ご予約日時の5分前にお越しください。事前のWEB問診により、当日はスムーズにご案内いたします。
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-brand-ivory text-brand-gold flex items-center justify-center shrink-0 mt-0.5 border border-brand-gold/20">
+                  <Sparkles size={20} className="text-brand-gold" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-sm text-brand-brown font-serif mb-1">
+                    定期検診・予防クリーニング
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    虫歯や歯周病の早期発見とプロによる歯石除去・着色汚れ落としで、いつまでも健やかで美しい歯を守るサポートをいたします。
+                  </p>
                 </div>
               </div>
             </div>
 
             {/* Access & Contact */}
-            <div className="grid sm:grid-cols-2 gap-3">
+            <div className="grid sm:grid-cols-2 gap-3 pt-2">
               <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
                 <div className="w-10 h-10 bg-brand-ivory text-brand-gold rounded-full flex items-center justify-center shrink-0">
                   <MapPin size={20} />
                 </div>
                 <div>
                   <p className="text-[9px] text-brand-gold font-serif italic uppercase">Access</p>
-                  <p className="font-bold text-xs text-brand-brown">前田駅 徒歩1分 / 駐車場完備</p>
+                  <p className="font-bold text-xs text-brand-brown">松山市駅 徒歩1分 / 提携駐車場完備</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
@@ -226,7 +245,7 @@ function App() {
                 </div>
                 <div>
                   <p className="text-[9px] text-brand-gold font-serif italic uppercase">Contact</p>
-                  <p className="font-bold text-sm text-brand-brown">000-000-0000</p>
+                  <p className="font-bold text-sm text-brand-brown">089-000-0000</p>
                 </div>
               </div>
             </div>
@@ -265,15 +284,15 @@ function App() {
                   <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/20 text-white">
                     <CheckCircle size={40} />
                   </div>
-                  <span className="text-[10px] text-emerald-600 font-bold tracking-widest uppercase bg-emerald-50 px-3 py-1 rounded-full">
-                    Calendar &amp; Database Synced
+                  <span className="text-[10px] text-emerald-600 font-bold tracking-widest uppercase bg-emerald-50 px-3 py-1 rounded-full font-serif">
+                    Reservation Confirmed
                   </span>
                   <h2 className="text-2xl md:text-3xl font-bold text-brand-brown mt-3 mb-3 font-serif">
                     ご予約が確定いたしました！
                   </h2>
                   <p className="text-slate-600 mb-6 text-xs md:text-sm leading-relaxed font-serif">
                     {currentUser?.name} 様のご来院をスタッフ一同、心よりお待ちしております。<br />
-                    Googleカレンダーへの登録およびカルテの受付が完了しました。
+                    ご予約内容の確認とお控えをご確認ください。
                   </p>
 
                   <div className="bg-brand-ivory/80 p-5 rounded-2xl text-left border border-brand-gold/15 mb-6 space-y-2 text-xs">
@@ -317,19 +336,19 @@ function App() {
       <footer className="mt-16 py-12 bg-brand-brown text-white/80 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white">
-              <Stethoscope size={24} />
+            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white">
+              <DentalToothLogo className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
               <span className="text-[10px] text-brand-gold font-serif italic leading-none">
-                MAEDA DENTAL CLINIC
+                MATSUYAMA JOYAMA DENTAL CLINIC
               </span>
-              <span className="text-lg font-bold font-serif text-white">前田歯科クリニック</span>
+              <span className="text-lg font-bold font-serif text-white">まつやま城山歯科クリニック</span>
             </div>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-xs">〒000-0000 〇〇県〇〇市〇〇 1-2-3</p>
-            <p className="text-xs mt-1 opacity-60">© 2026 Maeda Dental Clinic. All rights reserved.</p>
+            <p className="text-xs">〒790-0000 愛媛県松山市〇〇 1-2-3</p>
+            <p className="text-xs mt-1 opacity-60">© 2026 Matsuyama Joyama Dental Clinic. All rights reserved.</p>
           </div>
         </div>
       </footer>

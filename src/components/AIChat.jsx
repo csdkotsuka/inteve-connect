@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, Bot, Sparkles, Clock, CheckCircle, Database, CalendarCheck, ArrowRight } from 'lucide-react';
+import { Send, User, Sparkles, Clock, CheckCircle, Database, CalendarCheck, HeartHandshake, ShieldCheck } from 'lucide-react';
 import { fetchAvailableSlots, createReservation } from '../utils/calendarService';
 
 const SERVICE_OPTIONS = [
@@ -42,6 +42,15 @@ const SERVICE_OPTIONS = [
   },
 ];
 
+// 上品な歯のアイコン
+function DentalIcon({ className = "w-5 h-5 text-brand-orange" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M7 3C4.23858 3 2 5.23858 2 8C2 12 4 16 7 21C7.8 19 8.5 15.5 9 13C9.5 10.5 10 9 12 9C14 9 14.5 10.5 15 13C15.5 15.5 16.2 19 17 21C20 16 22 12 22 8C22 5.23858 19.7614 3 17 3C15 3 13.5 4 12 5C10.5 4 9 3 7 3Z" />
+    </svg>
+  );
+}
+
 export default function AIChat({ patient, onReservationComplete }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
@@ -57,8 +66,8 @@ export default function AIChat({ patient, onReservationComplete }) {
     if (!patient) return;
 
     const greeting = patient.isReturning
-      ? `${patient.name}様、こんにちは！いつも当院をご利用いただきありがとうございます。\n本日はどうされましたか？`
-      : `${patient.name}様、初めまして！〇〇歯科クリニックです。\n当院への受診をご検討いただきありがとうございます。\n本日はどのようなご相談でしょうか？`;
+      ? `${patient.name}様、こんにちは！まつやま城山歯科クリニックです。\nいつもご来院いただきありがとうございます。\n本日はどのようなご相談でしょうか？`
+      : `${patient.name}様、初めまして！まつやま城山歯科クリニックです。\n当院への受診をご検討いただきありがとうございます。\n本日はどのようなご症状・ご希望でしょうか？`;
 
     setMessages([
       {
@@ -91,9 +100,9 @@ export default function AIChat({ patient, onReservationComplete }) {
     setTimeout(() => {
       let botReply = '';
       if (option.id === 'treatment') {
-        botReply = `お辛いですね。痛みや不調を最優先で解消できるよう、担当医の「治療枠（約${duration}分）」を確保いたします。\n症状の時期や様子を教えていただけますか？`;
+        botReply = `お辛いですね。痛みや不調を最優先で解消できるよう、担当医の「治療枠（約${duration}分）」を確保いたします。\n症状の時期や詳しい様子を教えていただけますか？`;
       } else if (option.id === 'checkup') {
-        botReply = `お口のメンテナンスですね！素晴らしい心がけです。\n歯科衛生士による丁寧な「クリーニング・定期検診枠（約${duration}分）」をご案内いたします。\n前回の検診からどのくらい経ちましたでしょうか？`;
+        botReply = `お口の定期ケアですね！素晴らしい心がけです。\n歯科衛生士による丁寧な「クリーニング・定期検診枠（約${duration}分）」をご案内いたします。\n前回の受診からどのくらい経ちましたでしょうか？`;
       } else if (option.id === 'consultation') {
         botReply = `ご相談ですね。当院では丁寧なカウンセリングを大切にしております。\n専任スタッフによる「ご相談枠（約${duration}分）」をご用意いたします。`;
       } else {
@@ -135,7 +144,7 @@ export default function AIChat({ patient, onReservationComplete }) {
     setAvailableSlots(slots);
     setIsLoadingSlots(false);
 
-    const botReply = `状況を詳しく教えていただきありがとうございます！\n【${selectedService.shortLabel}（所要約${duration}分）】として受付けました。\n\nGoogleカレンダーの空き枠を確認いたしました。\n直近ですと以下の日時に余裕がございます。ご希望の枠をタップしてください。`;
+    const botReply = `状況を詳しく教えていただきありがとうございます！\n【${selectedService.shortLabel}（所要約${duration}分）】として受け付けました。\n\n空き枠を確認いたしました。\n直近ですと以下の日時に余裕がございます。ご希望の枠をタップしてください。`;
 
     setMessages((prev) => [
       ...prev,
@@ -178,7 +187,7 @@ export default function AIChat({ patient, onReservationComplete }) {
       slot,
     });
 
-    const botReply = `ありがとうございます！\n【${slot.label}】にてご予約を確定いたしました。\n\n📅 Googleカレンダーへの予定登録完了\n💾 Supabaseカルテデータベースへの保存完了\n\n当日のご来院をスタッフ一同、心よりお待ちしております！`;
+    const botReply = `ありがとうございます！\n【${slot.label}】にてご予約を確定いたしました。\n\n📅 カレンダーへの予定登録完了\n💾 カルテデータベースへの保存完了\n\n当日のご来院をスタッフ一同、心よりお待ちしております！`;
 
     setMessages((prev) => [
       ...prev,
@@ -213,13 +222,13 @@ export default function AIChat({ patient, onReservationComplete }) {
       {/* Header */}
       <div className="bg-gradient-to-r from-brand-brown to-[#563e26] p-4 px-6 flex items-center justify-between text-white">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-brand-orange text-white flex items-center justify-center shadow-md">
-            <Bot size={22} />
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-orange to-[#e08500] text-white flex items-center justify-center shadow-md shadow-brand-orange/20">
+            <DentalIcon className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="text-sm font-bold font-serif">スマートAI予約コンシェルジュ</h2>
+            <h2 className="text-sm font-bold font-serif">オンライン予約コンシェルジュ</h2>
             <p className="text-brand-gold text-[10px] italic font-serif uppercase tracking-wider">
-              24/7 Smart Dental Reception
+              Smart Dental Reception
             </p>
           </div>
         </div>
@@ -258,10 +267,10 @@ export default function AIChat({ patient, onReservationComplete }) {
                   className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center shadow-xs text-xs ${
                     m.type === 'user'
                       ? 'bg-brand-orange text-white'
-                      : 'bg-brand-ivory border border-brand-gold/20 text-brand-gold'
+                      : 'bg-brand-ivory border border-brand-gold/20 text-brand-orange'
                   }`}
                 >
-                  {m.type === 'user' ? <User size={16} /> : <Bot size={16} />}
+                  {m.type === 'user' ? <User size={16} /> : <DentalIcon className="w-4 h-4 text-brand-orange" />}
                 </div>
 
                 <div className="space-y-3">
@@ -417,7 +426,7 @@ export default function AIChat({ patient, onReservationComplete }) {
           {isTyping && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2 items-center">
               <div className="w-8 h-8 rounded-full bg-brand-ivory border border-brand-gold/20 flex items-center justify-center">
-                <Bot size={16} className="text-brand-gold animate-pulse" />
+                <DentalIcon className="w-4 h-4 text-brand-orange animate-pulse" />
               </div>
               <div className="p-3 bg-white rounded-2xl border border-brand-gold/15 flex gap-1">
                 <span className="w-1.5 h-1.5 bg-brand-gold/50 rounded-full animate-bounce" />
