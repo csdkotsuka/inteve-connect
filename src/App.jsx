@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake } from 'lucide-react';
+import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake, Megaphone, ShieldCheck } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import AIChat from './components/AIChat';
 import AdminScheduleModal from './components/AdminScheduleModal';
+import FacilityAdminDashboard from './components/FacilityAdmin/FacilityAdminDashboard';
+import SuperAdminDashboard from './components/SuperAdmin/SuperAdminDashboard';
+import { getThemeById, getCurrentTheme, applyTheme } from './utils/themeService';
+import { getFacilityProfile } from './utils/facilityService';
 
 const STEPS = {
   CHAT: 'chat',         // 一体型問診・カレンダー空き枠提案・即確定チャット
   COMPLETE: 'complete', // 予約確定
+};
+
+const VIEW_MODES = {
+  BOOKING: 'booking',
+  ADMIN: 'admin',
+  SUPER_ADMIN: 'super_admin',
 };
 
 // 歯科医院らしい清潔でエレガントな歯のエムブレムロゴ
@@ -20,13 +30,71 @@ function DentalToothLogo({ className = "w-6 h-6 text-white" }) {
 }
 
 function App() {
+  const getViewModeFromUrl = () => {
+    if (typeof window !== 'undefined') {
+      const pathname = window.location.pathname;
+      const hash = window.location.hash;
+      const search = window.location.search;
+
+      if (pathname === '/super-admin' || hash === '#super-admin' || search.includes('mode=super-admin')) {
+        return VIEW_MODES.SUPER_ADMIN;
+      }
+      if (pathname === '/admin' || hash === '#admin' || search.includes('mode=admin')) {
+        return VIEW_MODES.ADMIN;
+      }
+    }
+    return VIEW_MODES.BOOKING;
+  };
+
+  const [viewMode, setViewModeState] = useState(getViewModeFromUrl);
+
+  const setViewMode = (mode) => {
+    setViewModeState(mode);
+    try {
+      if (mode === VIEW_MODES.SUPER_ADMIN) {
+        window.history.pushState(null, '', '/super-admin');
+      } else if (mode === VIEW_MODES.ADMIN) {
+        window.history.pushState(null, '', '/admin');
+      } else {
+        window.history.pushState(null, '', '/');
+      }
+    } catch (e) {}
+  };
+
+  // ブラウザの戻る・進むボタンやURL直接変更に対応
+  useEffect(() => {
+    const handlePopState = () => {
+      setViewModeState(getViewModeFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
+
+
   const [currentUser, setCurrentUser] = useState(null);
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(true);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
   const [scheduleVersion, setScheduleVersion] = useState(0);
   const [step, setStep] = useState(STEPS.CHAT);
   const [finalReservation, setFinalReservation] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [facilityProfile, setFacilityProfile] = useState(null);
+  const [activeTheme, setActiveTheme] = useState(getCurrentTheme());
+
+  // 初期化時にSupabase施設情報からテーマと施設情報を取得
+  useEffect(() => {
+    getFacilityProfile().then((data) => {
+      setFacilityProfile(data);
+      const themePresetId = data.theme_colors?.preset_id || data.theme_id || 'terracotta';
+      const theme = getThemeById(themePresetId);
+      setActiveTheme(theme);
+      applyTheme(theme);
+    });
+  }, [viewMode]);
 
   // 認証完了時
   const handleAuthenticated = (userData) => {
@@ -52,77 +120,114 @@ function App() {
     setIsAuthModalOpen(true);
   };
 
+  if (viewMode === VIEW_MODES.SUPER_ADMIN) {
+    return (
+      <SuperAdminDashboard
+        onSwitchView={(mode) =>
+          setViewMode(mode === 'admin' ? VIEW_MODES.ADMIN : VIEW_MODES.BOOKING)
+        }
+      />
+    );
+  }
+
+  if (viewMode === VIEW_MODES.ADMIN) {
+    return <FacilityAdminDashboard onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)} />;
+  }
+
+  const facilityName = facilityProfile?.name || 'つばき歯科クリニック';
+  const facilityPhone = facilityProfile?.phone || '089-000-0000';
+
   return (
-    <div className="min-h-screen bg-brand-ivory font-sans text-slate-700 border-t-4 border-brand-orange">
+    <div
+      className="min-h-screen font-sans text-slate-700 border-t-4"
+      style={{
+        backgroundColor: activeTheme.background || '#FAF7EF',
+        borderTopColor: activeTheme.primary,
+      }}
+    >
       {/* 認証モーダル */}
       <AuthModal
         isOpen={isAuthModalOpen || !currentUser}
         onAuthenticated={handleAuthenticated}
       />
 
-      {/* Patient Status Bar（高さを1.5倍、文字サイズを拡大） */}
-      <div className="bg-brand-brown text-white/95 text-xs md:text-sm py-3 px-6 md:px-10 flex justify-between items-center font-serif shadow-xs">
+      {/* Patient Status Bar */}
+      <div
+        className="text-white/95 text-xs md:text-sm py-2.5 px-6 md:px-10 flex justify-between items-center font-serif shadow-xs"
+        style={{ backgroundColor: activeTheme.secondary }}
+      >
         <div className="flex items-center gap-3">
-          <span className="text-brand-gold tracking-wider font-bold text-xs uppercase flex items-center gap-1.5">
-            <Sparkles size={14} className="text-brand-orange" />
+          <span
+            className="tracking-wider font-bold text-xs uppercase flex items-center gap-1.5"
+            style={{ color: activeTheme.accent }}
+          >
+            <Sparkles size={14} style={{ color: activeTheme.primary }} />
             24時間 WEB受付システム
           </span>
           <span className="hidden md:inline opacity-40">|</span>
-          <span className="hidden md:inline opacity-90 text-xs text-brand-ivory/80">
-            つばき歯科クリニック オンライン予約
+          <span className="hidden md:inline opacity-90 text-xs text-white/80">
+            {facilityName} オンライン予約
           </span>
         </div>
 
-        {currentUser ? (
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-2 text-sm font-medium">
-              <UserCheck size={16} className="text-brand-orange" />
-              <span className="font-bold text-white text-sm md:text-base">{currentUser.name} 様</span>
+        <div className="flex items-center gap-3 md:gap-4">
+          {currentUser && (
+            <div className="flex items-center gap-2">
+              <UserCheck size={16} style={{ color: activeTheme.primary }} />
+              <span className="font-bold text-white text-xs md:text-sm">{currentUser.name} 様</span>
               <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                   currentUser.isReturning ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
                 }`}
               >
                 {currentUser.isReturning ? '再診' : '新患'}
               </span>
-            </span>
-            <button
-              onClick={handleSwitchPatient}
-              className="text-xs text-brand-gold hover:text-white underline flex items-center gap-1 cursor-pointer font-medium transition-colors"
-            >
-              <RefreshCw size={13} />
-              患者切替
-            </button>
-            <span className="opacity-30">|</span>
-            <button
-              onClick={() => setIsAdminModalOpen(true)}
-              className="text-xs text-white/90 hover:text-brand-orange flex items-center gap-1.5 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-all border border-white/10"
-            >
-              <Settings size={13} className="text-brand-orange" />
-              開院・時間設定
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsAuthModalOpen(true)}
-              className="text-brand-orange hover:text-white underline text-xs font-bold"
-            >
-              ログイン / 本人認証
-            </button>
-            <span className="opacity-30">|</span>
-            <button
-              onClick={() => setIsAdminModalOpen(true)}
-              className="text-xs text-white/90 hover:text-brand-orange flex items-center gap-1.5 cursor-pointer font-bold bg-white/10 hover:bg-white/20 px-3 py-1 rounded-full transition-all border border-white/10"
-            >
-              <Settings size={13} className="text-brand-orange" />
-              開院・時間設定
-            </button>
-          </div>
-        )}
+              <button
+                onClick={handleSwitchPatient}
+                className="text-[11px] underline flex items-center gap-0.5 cursor-pointer opacity-80 hover:opacity-100 ml-1"
+                style={{ color: activeTheme.accent }}
+              >
+                <RefreshCw size={11} />
+                切替
+              </button>
+            </div>
+          )}
+
+          <span className="opacity-30 hidden sm:inline">|</span>
+
+          {/* 施設管理者画面への切り替えボタン */}
+          <button
+            onClick={() => setViewMode(VIEW_MODES.ADMIN)}
+            className="text-xs text-white font-bold flex items-center gap-1.5 cursor-pointer px-3 py-1 rounded-full transition-all border border-white/20 hover:bg-white/20 shadow-xs"
+            style={{ backgroundColor: `${activeTheme.primary}40` }}
+            title="施設管理画面（テーマカラー・お知らせ・スケジュール設定）を開く"
+          >
+            <ShieldCheck size={14} style={{ color: activeTheme.accent }} />
+            <span>施設管理画面</span>
+          </button>
+        </div>
       </div>
 
-      {/* 管理者用スケジュール設定モーダル */}
+      {/* トップお知らせ告知バナー（施設管理で設定された文面） */}
+      {facilityProfile?.top_announcement && (
+        <div
+          className="py-2.5 px-6 md:px-10 border-b text-xs flex items-center justify-between gap-3 shadow-2xs"
+          style={{
+            backgroundColor: activeTheme.primaryLight,
+            borderColor: `${activeTheme.primary}30`,
+            color: activeTheme.secondary,
+          }}
+        >
+          <div className="max-w-6xl mx-auto w-full flex items-center gap-2.5">
+            <Megaphone size={16} className="shrink-0" style={{ color: activeTheme.primary }} />
+            <p className="font-medium leading-relaxed truncate">
+              {facilityProfile.top_announcement}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* 管理者用スケジュール設定モーダル（旧モーダル） */}
       <AdminScheduleModal
         isOpen={isAdminModalOpen}
         onClose={() => setIsAdminModalOpen(false)}
@@ -130,46 +235,38 @@ function App() {
       />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-brand-gold/10 px-6 md:px-10 py-4 flex items-center justify-between">
+      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/60 px-6 md:px-10 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer" onClick={reset}>
-          <div className="w-11 h-11 bg-gradient-to-br from-brand-orange to-[#e08500] rounded-2xl flex items-center justify-center text-white shadow-md shadow-brand-orange/20">
-            <DentalToothLogo className="w-6 h-6 text-white" />
+          <div
+            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md"
+            style={{ backgroundColor: activeTheme.primary }}
+          >
+            <DentalToothLogo className="w-5 h-5 text-white" />
           </div>
           <div className="flex flex-col -gap-0.5">
-            <span className="text-[10px] text-brand-gold font-serif italic leading-none tracking-widest">
-              TSUBAKI DENTAL CLINIC
+            <span
+              className="text-[9px] font-serif italic leading-none tracking-widest uppercase font-bold"
+              style={{ color: activeTheme.accent }}
+            >
+              {facilityProfile?.slug ? facilityProfile.slug.replace('-', ' ') : 'FACILITY RESERVATION'}
             </span>
-            <span className="text-xl md:text-2xl font-bold font-serif text-brand-brown leading-none mt-1">
-              つばき歯科クリニック
+            <span
+              className="text-lg md:text-xl font-bold font-serif leading-none mt-1"
+              style={{ color: activeTheme.secondary }}
+            >
+              {facilityName}
             </span>
           </div>
         </div>
 
-        <div className="hidden md:flex items-center gap-8 text-sm font-bold text-slate-600">
-          <div className="flex flex-col items-center group cursor-pointer">
-            <span className="text-[9px] text-brand-gold font-serif italic opacity-0 group-hover:opacity-100 transition-opacity">
-              About us
-            </span>
-            <a href="#" className="hover:text-brand-orange transition-colors">当院について</a>
-          </div>
-          <div className="flex flex-col items-center group cursor-pointer">
-            <span className="text-[9px] text-brand-gold font-serif italic opacity-0 group-hover:opacity-100 transition-opacity">
-              Medical
-            </span>
-            <a href="#" className="hover:text-brand-orange transition-colors">診療案内</a>
-          </div>
-          <div className="flex flex-col items-center group cursor-pointer">
-            <span className="text-[9px] text-brand-gold font-serif italic opacity-0 group-hover:opacity-100 transition-opacity">
-              Access
-            </span>
-            <a href="#" className="hover:text-brand-orange transition-colors">アクセス</a>
-          </div>
+        <div className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
           <a
-            href="tel:089-000-0000"
-            className="bg-brand-orange text-white px-7 py-2.5 rounded-full hover:bg-orange-600 transition-all shadow-lg shadow-brand-orange/20 font-bold flex items-center gap-2 text-xs"
+            href={`tel:${facilityPhone}`}
+            className="text-white px-5 py-2 rounded-full transition-all shadow-md font-bold flex items-center gap-1.5 cursor-pointer hover:opacity-90"
+            style={{ backgroundColor: activeTheme.primary }}
           >
-            <Phone size={15} />
-            <span>089-000-0000</span>
+            <Phone size={14} />
+            <span>{facilityPhone}</span>
           </a>
         </div>
 
@@ -333,22 +430,35 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="mt-16 py-12 bg-brand-brown text-white/80 px-6 relative overflow-hidden">
+      <footer
+        className="mt-16 py-12 text-white/80 px-6 relative overflow-hidden"
+        style={{ backgroundColor: activeTheme.secondary }}
+      >
         <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 relative z-10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-white">
+            <div
+              className="w-10 h-10 rounded-xl flex items-center justify-center text-white"
+              style={{ backgroundColor: `${activeTheme.primary}40` }}
+            >
               <DentalToothLogo className="w-6 h-6 text-white" />
             </div>
             <div className="flex flex-col">
-              <span className="text-[10px] text-brand-gold font-serif italic leading-none">
-                TSUBAKI DENTAL CLINIC
+              <span
+                className="text-[10px] font-serif italic leading-none uppercase font-bold"
+                style={{ color: activeTheme.accent }}
+              >
+                {facilityProfile?.slug ? facilityProfile.slug.replace('-', ' ') : 'ONLINE RESERVATION'}
               </span>
-              <span className="text-lg font-bold font-serif text-white">つばき歯科クリニック</span>
+              <span className="text-lg font-bold font-serif text-white">{facilityName}</span>
             </div>
           </div>
           <div className="text-center md:text-right">
-            <p className="text-xs">〒790-0000 愛媛県松山市居相 1-2-3（椿神社近く）</p>
-            <p className="text-xs mt-1 opacity-60">© 2026 Tsubaki Dental Clinic. All rights reserved.</p>
+            <p className="text-xs">
+              {facilityProfile?.address_line1
+                ? `〒${facilityProfile.postal_code || ''} ${facilityProfile.prefecture || ''}${facilityProfile.address_line1} ${facilityProfile.address_line2 || ''}`
+                : '〒790-0000 愛媛県松山市居相 1-2-3'}
+            </p>
+            <p className="text-xs mt-1 opacity-60">© 2026 {facilityName}. All rights reserved.</p>
           </div>
         </div>
       </footer>

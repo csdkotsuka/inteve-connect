@@ -1,89 +1,108 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MessageCircle, CheckSquare, Square, ShieldCheck } from 'lucide-react';
+import { MessageCircle, CheckSquare, Square, ShieldCheck, QrCode, ExternalLink, ArrowRight } from 'lucide-react';
+import { getFacilityProfile } from '../utils/facilityService';
 
-export default function LineIntegration({ onComplete }) {
-    const [agreed, setAgreed] = useState(false);
-    const [isLinked, setIsLinked] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+export default function LineIntegration({ onComplete, customerName, customerPhone }) {
+  const [agreed, setAgreed] = useState(true);
+  const [isLinked, setIsLinked] = useState(false);
+  const [showQR, setShowQR] = useState(false);
+  const [lineOfficialId, setLineOfficialId] = useState('@776cdsuy');
 
-    const handleLineLogin = () => {
-        setIsLoading(true);
-        // Simulate OAuth flow
-        setTimeout(() => {
-            setIsLoading(false);
-            setIsLinked(true);
-        }, 1500);
-    };
+  useEffect(() => {
+    getFacilityProfile().then((profile) => {
+      if (profile?.line_official_id) {
+        setLineOfficialId(profile.line_official_id);
+      }
+    });
+  }, []);
 
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="max-w-md mx-auto p-10 bg-white rounded-[40px] shadow-2xl border border-brand-gold/5 text-center"
-        >
-            <div className="w-20 h-20 bg-[#06C755] rounded-full flex items-center justify-center mx-auto mb-8 shadow-lg shadow-green-100 transform hover:scale-110 transition-transform">
-                <MessageCircle size={40} className="text-white" />
-            </div>
+  const lineAddFriendUrl = `https://line.me/R/ti/p/${encodeURIComponent(lineOfficialId)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(lineAddFriendUrl)}`;
 
-            <h2 className="text-2xl font-bold text-brand-brown mb-4 font-serif">LINE連携で便利に</h2>
-            <p className="text-slate-500 text-sm mb-10 leading-relaxed font-serif">
-                予約の確認やリマインド通知をLINEでお届けします。<br />
-                当日の待ち時間情報もリアルタイムでチェック可能です。
+  const handleLineLink = () => {
+    // LINEアプリ / 友だち追加URLを開く
+    window.open(lineAddFriendUrl, '_blank');
+    setIsLinked(true);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="max-w-md mx-auto p-8 bg-white rounded-[36px] shadow-2xl border border-slate-100 text-center space-y-6"
+    >
+      {/* LINEアイコン */}
+      <div className="w-16 h-16 bg-[#06C755] rounded-3xl flex items-center justify-center mx-auto shadow-lg shadow-green-100 transform hover:scale-105 transition-transform">
+        <MessageCircle size={34} className="text-white" />
+      </div>
+
+      <div>
+        <h2 className="text-xl font-bold text-slate-800 font-serif">LINEで予約確認・リマインド</h2>
+        <p className="text-slate-500 text-xs mt-2 leading-relaxed">
+          当院のLINE公式アカウント（{lineOfficialId}）を友だち追加いただくと、予約確認通知や前日リマインドが届きます。
+        </p>
+      </div>
+
+      {/* QRコード & リンクカード */}
+      <div className="bg-slate-50 rounded-3xl p-5 border border-slate-100 space-y-4">
+        {showQR ? (
+          <div className="space-y-3">
+            <img
+              src={qrCodeUrl}
+              alt="LINE友だち追加QRコード"
+              className="w-40 h-40 mx-auto rounded-2xl border-4 border-white shadow-sm"
+            />
+            <p className="text-[11px] text-slate-500 font-mono">
+              スマホのカメラで読み取って友だち追加
             </p>
-
-            <div className="space-y-4 mb-10">
-                <button
-                    onClick={handleLineLogin}
-                    disabled={isLinked || isLoading}
-                    className={`w-full py-5 rounded-[20px] font-bold flex items-center justify-center gap-2 transition-all shadow-md ${isLinked
-                        ? 'bg-brand-ivory text-slate-400 border border-brand-gold/10'
-                        : 'bg-[#06C755] text-white hover:bg-[#05b34d] hover:shadow-xl shadow-green-200 active:scale-95'
-                        } ${isLoading ? 'opacity-70 cursor-wait' : ''}`}
-                >
-                    {isLoading ? (
-                        <div className="flex items-center gap-3">
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            <span>連携中...</span>
-                        </div>
-                    ) : isLinked ? (
-                        <>
-                            <ShieldCheck size={22} />
-                            <span>LINE連携済み</span>
-                        </>
-                    ) : (
-                        <>
-                            <MessageCircle size={22} />
-                            <span>LINEでログインする</span>
-                        </>
-                    )}
-                </button>
-
-                <label
-                    className="flex items-start gap-4 text-left p-5 bg-brand-ivory/50 rounded-[20px] cursor-pointer hover:bg-brand-ivory transition-all group border border-transparent hover:border-brand-gold/10"
-                    onClick={() => setAgreed(!agreed)}
-                >
-                    <div className="mt-1 transition-transform group-active:scale-90">
-                        {agreed ? <CheckSquare className="text-brand-orange" size={24} /> : <Square className="text-brand-gold/30" size={24} />}
-                    </div>
-                    <div>
-                        <span className="text-sm font-bold text-slate-700 block mb-1">予約完了通知を受け取る</span>
-                        <span className="text-[11px] text-slate-400 leading-normal">メールに加えてLINEでも通知が届きます。</span>
-                    </div>
-                </label>
-            </div>
-
+          </div>
+        ) : (
+          <div className="space-y-3">
             <button
-                onClick={onComplete}
-                className="w-full py-5 bg-brand-orange text-white rounded-[20px] font-bold hover:bg-brand-brown hover:scale-[1.02] transition-all shadow-xl shadow-brand-orange/20 text-lg font-serif"
+              onClick={handleLineLink}
+              className="w-full py-3.5 px-4 bg-[#06C755] hover:bg-[#05b34d] text-white rounded-2xl font-bold text-sm flex items-center justify-center gap-2 shadow-md shadow-green-200 transition-all cursor-pointer active:scale-98"
             >
-                予約を確定する
+              <MessageCircle size={18} />
+              <span>LINE友だち追加して連携</span>
+              <ExternalLink size={14} className="opacity-80" />
             </button>
+            <button
+              onClick={() => setShowQR(true)}
+              className="text-xs text-slate-500 hover:text-slate-800 font-bold flex items-center justify-center gap-1 mx-auto cursor-pointer"
+            >
+              <QrCode size={13} />
+              <span>QRコードを表示する（PCの場合）</span>
+            </button>
+          </div>
+        )}
 
-            <p className="mt-8 text-[11px] text-slate-400 font-serif leading-relaxed italic">
-                ※LINE連携を行わなくても予約は可能です。<br />
-                プライバシーポリシーに同意の上、お進みください。
-            </p>
-        </motion.div>
-    );
+        {/* 同意チェック */}
+        <label
+          className="flex items-start gap-3 text-left p-3 rounded-xl bg-white border border-slate-200/60 cursor-pointer"
+          onClick={() => setAgreed(!agreed)}
+        >
+          <div className="mt-0.5 shrink-0">
+            {agreed ? <CheckSquare className="text-emerald-600" size={18} /> : <Square className="text-slate-300" size={18} />}
+          </div>
+          <div className="text-[11px] text-slate-600 leading-snug">
+            予約リマインド通知や診療案内をLINEで受け取ることに同意します
+          </div>
+        </label>
+      </div>
+
+      {/* 予約完了へ進むボタン */}
+      <button
+        onClick={onComplete}
+        className="w-full py-4 bg-slate-800 hover:bg-slate-900 text-white rounded-2xl font-bold text-sm shadow-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+      >
+        <span>予約を確定する</span>
+        <ArrowRight size={16} />
+      </button>
+
+      <p className="text-[10px] text-slate-400">
+        ※LINE連携を行わなくてもメールでの予約完了通知が届きます。
+      </p>
+    </motion.div>
+  );
 }
