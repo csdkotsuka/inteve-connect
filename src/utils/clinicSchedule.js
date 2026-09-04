@@ -5,7 +5,7 @@
  */
 import { format } from 'date-fns';
 
-const STORAGE_KEY = 'maeda_dental_clinic_schedule_config';
+const STORAGE_KEY = 'inteve_connect_dental_clinic_schedule_config';
 
 // 日本の祝日データ（2025年〜2027年 主要祝祭日・振替休日）
 export const JAPANESE_HOLIDAYS = {

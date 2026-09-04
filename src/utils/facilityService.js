@@ -2,9 +2,9 @@ import { supabase } from './supabaseClient';
 import { getClinicScheduleConfig, saveClinicScheduleConfig } from './clinicSchedule';
 import { getCurrentTheme, getThemeById } from './themeService';
 
-const FACILITY_STORAGE_KEY = 'maeda_facility_profile_data';
-const STAFFS_STORAGE_KEY = 'maeda_facility_staffs';
-const SERVICES_STORAGE_KEY = 'maeda_facility_services';
+const FACILITY_STORAGE_KEY = 'inteve_connect_facility_profile_data';
+const STAFFS_STORAGE_KEY = 'inteve_connect_facility_staffs';
+const SERVICES_STORAGE_KEY = 'inteve_connect_facility_services';
 
 // デフォルト施設
 export const DEFAULT_FACILITY_DATA = {
