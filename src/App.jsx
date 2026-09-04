@@ -93,6 +93,15 @@ function App() {
       const theme = getThemeById(themePresetId);
       setActiveTheme(theme);
       applyTheme(theme);
+
+      // ウィンドウタイトルをSupabaseの施設名に合わせて動的更新
+      if (viewMode === VIEW_MODES.SUPER_ADMIN) {
+        document.title = `スーパー管理者 | ${data.name || 'クリニック予約システム'}`;
+      } else if (viewMode === VIEW_MODES.ADMIN) {
+        document.title = `施設管理 | ${data.name || 'クリニック予約システム'}`;
+      } else {
+        document.title = `${data.name || 'クリニック'} | WEB予約`;
+      }
     });
   }, [viewMode]);
 
@@ -342,7 +351,7 @@ function App() {
                 </div>
                 <div>
                   <p className="text-[9px] text-brand-gold font-serif italic uppercase">Contact</p>
-                  <p className="font-bold text-sm text-brand-brown">089-000-0000</p>
+                  <p className="font-bold text-sm text-brand-brown">{facilityPhone}</p>
                 </div>
               </div>
             </div>
@@ -418,9 +427,9 @@ function App() {
 
                   <button
                     onClick={reset}
-                    className="w-full py-4 bg-brand-orange text-white rounded-2xl font-bold hover:bg-brand-brown transition-all shadow-lg shadow-brand-orange/20 text-sm font-serif"
+                    className="w-full py-4 bg-brand-orange text-white rounded-2xl font-bold hover:bg-brand-brown transition-all shadow-lg shadow-brand-orange/20 text-sm font-serif cursor-pointer"
                   >
-                    トップへ戻る（テストをもう一度行う）
+                    トップへ戻る
                   </button>
                 </motion.div>
               )}

@@ -10,11 +10,11 @@ const SERVICES_STORAGE_KEY = 'maeda_facility_services';
 export const DEFAULT_FACILITY_DATA = {
   slug: 'tsubaki-dental',
   name: 'つばき歯科クリニック',
-  postal_code: '150-0001',
-  prefecture: '東京都',
-  address_line1: '渋谷区神宮前1-2-3',
-  address_line2: 'つばきビル2F',
-  phone: '03-1234-5678',
+  postal_code: '790-0934',
+  prefecture: '愛媛県',
+  address_line1: '松山市居相 1-2-3',
+  address_line2: '椿参道ビル 1F',
+  phone: '089-900-1188',
   email: 'info@tsubaki-dental.example.com',
   website_url: 'https://tsubaki-dental.example.com',
   line_official_id: '@776cdsuy',
@@ -34,8 +34,13 @@ export const DEFAULT_STAFFS = [
 
 /**
  * 施設情報を取得（Supabase同期）
+ * @param {string} [slug] - 指定したslugの施設を取得（省略時はデフォルト/単一施設）
  */
-export async function getFacilityProfile() {
+export async function getFacilityProfile(slug = null) {
+  if (slug) {
+    return getFacilityBySlug(slug);
+  }
+
   if (supabase) {
     try {
       const { data, error } = await supabase
@@ -70,6 +75,50 @@ export async function getFacilityProfile() {
   } catch (e) {}
 
   return { ...DEFAULT_FACILITY_DATA };
+}
+
+/**
+ * URLの slug から対応する施設情報（id = UUID を含む）を取得
+ * @param {string} slug - 例: 'tsubaki-dental', 'maeda'
+ * @returns {Promise<object|null>}
+ */
+export async function getFacilityBySlug(slug) {
+  if (!slug) return null;
+
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('facilities')
+        .select('*')
+        .eq('slug', slug)
+        .maybeSingle();
+
+      if (!error && data) {
+        return {
+          ...DEFAULT_FACILITY_DATA,
+          ...data,
+          theme_id: data.theme_colors?.preset_id || getCurrentTheme().id,
+        };
+      }
+    } catch (e) {
+      console.warn(`[getFacilityBySlug] 施設取得エラー (slug: ${slug}):`, e);
+    }
+  }
+
+  // フォールバック（localStorage または デフォルト）
+  try {
+    const saved = localStorage.getItem(FACILITY_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed.slug === slug) return { ...DEFAULT_FACILITY_DATA, ...parsed };
+    }
+  } catch (e) {}
+
+  if (DEFAULT_FACILITY_DATA.slug === slug) {
+    return { ...DEFAULT_FACILITY_DATA };
+  }
+
+  return null;
 }
 
 /**
