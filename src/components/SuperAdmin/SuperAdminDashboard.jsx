@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../../utils/supabaseClient';
 import { THEME_PRESETS, getThemeById, applyTheme } from '../../utils/themeService';
+import { INDUSTRY_LABELS } from '../../constants/labels';
 
 const MOCK_FACILITIES_SEED = [
   {
@@ -38,6 +39,7 @@ const MOCK_FACILITIES_SEED = [
     address_line1: '松山市居相 1-2-3',
     address_line2: '椿参道ビル 1F',
     website_url: 'https://tsubaki-dental.example.com',
+    industry_type: 'medical',
     theme_colors: { preset_id: 'terracotta' },
     subscription_plan: 'standard',
     subscription_status: 'active',
@@ -58,6 +60,7 @@ const MOCK_FACILITIES_SEED = [
     address_line1: '港区南青山3-4-5',
     address_line2: '青山スクエア4F',
     website_url: 'https://aoyama-beauty.example.com',
+    industry_type: 'beauty',
     theme_colors: { preset_id: 'rose' },
     subscription_plan: 'pro',
     subscription_status: 'active',
@@ -79,6 +82,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
     slug: '',
     phone: '',
     email: '',
+    industry_type: 'medical',
     subscription_plan: 'standard',
     monthly_fee: 35000,
     theme_id: 'terracotta',
@@ -125,6 +129,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
       slug: newFacilityData.slug.toLowerCase().replace(/\s+/g, '-'),
       phone: newFacilityData.phone,
       email: newFacilityData.email,
+      industry_type: newFacilityData.industry_type || 'medical',
       subscription_plan: newFacilityData.subscription_plan,
       monthly_fee: Number(newFacilityData.monthly_fee) || 0,
       subscription_status: 'active',
@@ -172,6 +177,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
             address_line1: selectedFacility.address_line1,
             address_line2: selectedFacility.address_line2,
             website_url: selectedFacility.website_url,
+            industry_type: selectedFacility.industry_type || 'medical',
             theme_colors: selectedFacility.theme_colors,
             subscription_plan: selectedFacility.subscription_plan,
             subscription_status: selectedFacility.subscription_status,
@@ -332,6 +338,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   <thead className="bg-slate-800/80 text-slate-400 font-bold border-b border-slate-700">
                     <tr>
                       <th className="p-4">施設名 / URL識別子</th>
+                      <th className="p-4">業種タイプ</th>
                       <th className="p-4">テーマカラー</th>
                       <th className="p-4">契約プラン</th>
                       <th className="p-4">月額請求</th>
@@ -343,11 +350,17 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   <tbody className="divide-y divide-slate-800 text-slate-300">
                     {filteredFacilities.map((facility) => {
                       const theme = getThemeById(facility.theme_colors?.preset_id || 'terracotta');
+                      const indInfo = INDUSTRY_LABELS[facility.industry_type || 'medical'] || INDUSTRY_LABELS.medical;
                       return (
                         <tr key={facility.id} className="hover:bg-slate-800/40 transition-colors">
                           <td className="p-4">
                             <div className="font-bold text-white text-sm">{facility.name}</div>
                             <div className="text-[11px] font-mono text-indigo-400">/{facility.slug}</div>
+                          </td>
+                          <td className="p-4">
+                            <span className="px-2.5 py-1 rounded-md bg-slate-800 font-bold text-[11px] text-slate-300 border border-slate-700">
+                              {indInfo.name}
+                            </span>
                           </td>
                           <td className="p-4">
                             <div className="flex items-center gap-2">
@@ -438,11 +451,11 @@ export default function SuperAdminDashboard({ onSwitchView }) {
               <div className="bg-slate-800/60 p-6 rounded-3xl border border-slate-700/80 space-y-4">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <Building2 size={16} className="text-indigo-400" />
-                  施設基本情報
+                  施設基本情報 & 業種設定
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs md:text-sm">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">施設名称</label>
                     <input
                       type="text"
@@ -450,12 +463,12 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, name: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">URL識別スラッグ</label>
                     <input
                       type="text"
@@ -463,12 +476,29 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, slug: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-indigo-300 font-mono"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-indigo-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
+                    <label className="font-bold text-slate-400">業種タイプ（UI文言切り替え）</label>
+                    <select
+                      value={selectedFacility.industry_type || 'medical'}
+                      onChange={(e) =>
+                        setSelectedFacility({ ...selectedFacility, industry_type: e.target.value })
+                      }
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    >
+                      <option value="medical">医療・歯科・クリニック（患者様/診療）</option>
+                      <option value="beauty">サロン・エステ・美容（お客様/施術）</option>
+                      <option value="general">一般店舗・サービス（お客様/ご予約）</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs md:text-sm">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">代表電話番号</label>
                     <input
                       type="text"
@@ -476,14 +506,12 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, phone: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       required
                     />
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">連絡先メールアドレス</label>
                     <input
                       type="email"
@@ -491,11 +519,11 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, email: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">住所</label>
                     <input
                       type="text"
@@ -504,7 +532,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                         setSelectedFacility({ ...selectedFacility, address_line1: e.target.value })
                       }
                       placeholder="例: 東京都渋谷区神宮前1-2-3"
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
                 </div>
@@ -573,15 +601,15 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   契約・月額課金・システム連携
                 </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                  <div className="space-y-1">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs md:text-sm">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">契約プラン</label>
                     <select
                       value={selectedFacility.subscription_plan || 'standard'}
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, subscription_plan: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="free">Free（トライアル）</option>
                       <option value="standard">Standard（標準プラン）</option>
@@ -590,7 +618,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                     </select>
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">月額利用料 (円)</label>
                     <input
                       type="number"
@@ -598,18 +626,18 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, monthly_fee: Number(e.target.value) })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-emerald-400 font-mono font-bold"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-emerald-400 font-mono font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
 
-                  <div className="space-y-1">
+                  <div className="space-y-1.5">
                     <label className="font-bold text-slate-400">契約ステータス</label>
                     <select
                       value={selectedFacility.subscription_status || 'active'}
                       onChange={(e) =>
                         setSelectedFacility({ ...selectedFacility, subscription_status: e.target.value })
                       }
-                      className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white"
+                      className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
                       <option value="active">Active（正常稼働）</option>
                       <option value="suspended">Suspended（一時停止）</option>
@@ -619,7 +647,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   </div>
                 </div>
 
-                <div className="space-y-1 text-xs">
+                <div className="space-y-1.5 text-xs md:text-sm">
                   <label className="font-bold text-slate-400">マスターGoogleカレンダーID</label>
                   <input
                     type="text"
@@ -628,11 +656,14 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       setSelectedFacility({ ...selectedFacility, google_calendar_id: e.target.value })
                     }
                     placeholder="例: clinic-master@group.calendar.google.com"
-                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono"
+                    className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
+                  <p className="text-[11px] text-slate-400">
+                    ※施設全体の全体同期・バックアップ用カレンダー、または担当スタッフが未割り当ての場合のフォールバック連携先として使用されます。
+                  </p>
                 </div>
 
-                <div className="space-y-1 text-xs">
+                <div className="space-y-1.5 text-xs md:text-sm">
                   <label className="font-bold text-slate-400">最高管理者専用 社内メモ（非公開）</label>
                   <textarea
                     rows={3}
@@ -641,7 +672,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       setSelectedFacility({ ...selectedFacility, admin_system_memo: e.target.value })
                     }
                     placeholder="契約時の特記事項、追加要望、請求先情報などを記録..."
-                    className="w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-200"
+                    className="w-full p-3.5 bg-slate-900 border border-slate-700 rounded-xl text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />
                 </div>
               </div>
@@ -684,7 +715,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
               </button>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-3.5">
               <div className="space-y-1">
                 <label className="font-bold text-slate-300">施設名</label>
                 <input
@@ -693,7 +724,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   placeholder="例: 新宿サクラ歯科クリニック"
                   value={newFacilityData.name}
                   onChange={(e) => setNewFacilityData({ ...newFacilityData, name: e.target.value })}
-                  className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"
+                  className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -705,7 +736,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   placeholder="例: shinjuku-sakura-dental"
                   value={newFacilityData.slug}
                   onChange={(e) => setNewFacilityData({ ...newFacilityData, slug: e.target.value })}
-                  className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-indigo-300 font-mono"
+                  className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-indigo-300 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
 
@@ -717,8 +748,23 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   placeholder="03-0000-0000"
                   value={newFacilityData.phone}
                   onChange={(e) => setNewFacilityData({ ...newFacilityData, phone: e.target.value })}
-                  className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono"
+                  className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-mono text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="font-bold text-slate-300">業種タイプ（UI文言切り替え）</label>
+                <select
+                  value={newFacilityData.industry_type || 'medical'}
+                  onChange={(e) =>
+                    setNewFacilityData({ ...newFacilityData, industry_type: e.target.value })
+                  }
+                  className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                >
+                  <option value="medical">医療・歯科・クリニック（患者様/診療）</option>
+                  <option value="beauty">サロン・エステ・美容（お客様/施術）</option>
+                  <option value="general">一般店舗・サービス（お客様/ご予約）</option>
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -729,7 +775,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                     onChange={(e) =>
                       setNewFacilityData({ ...newFacilityData, subscription_plan: e.target.value })
                     }
-                    className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"
+                    className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="standard">Standard (¥35,000)</option>
                     <option value="pro">Pro (¥50,000)</option>
@@ -744,7 +790,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                     onChange={(e) =>
                       setNewFacilityData({ ...newFacilityData, theme_id: e.target.value })
                     }
-                    className="w-full p-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white"
+                    className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   >
                     <option value="terracotta">つばきテラコッタ</option>
                     <option value="ocean">メディカルオーシャン</option>

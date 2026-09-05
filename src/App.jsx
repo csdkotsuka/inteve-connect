@@ -8,6 +8,7 @@ import FacilityAdminDashboard from './components/FacilityAdmin/FacilityAdminDash
 import SuperAdminDashboard from './components/SuperAdmin/SuperAdminDashboard';
 import { getThemeById, getCurrentTheme, applyTheme } from './utils/themeService';
 import { getFacilityProfile } from './utils/facilityService';
+import { getLabels } from './constants/labels';
 
 const STEPS = {
   CHAT: 'chat',         // 一体型問診・カレンダー空き枠提案・即確定チャット
@@ -145,6 +146,7 @@ function App() {
 
   const facilityName = facilityProfile?.name || 'つばき歯科クリニック';
   const facilityPhone = facilityProfile?.phone || '089-000-0000';
+  const labels = getLabels(facilityProfile?.industry_type);
 
   return (
     <div
@@ -157,7 +159,9 @@ function App() {
       {/* 認証モーダル */}
       <AuthModal
         isOpen={isAuthModalOpen || !currentUser}
+        patientType={currentUser?.isReturning ? 'returning' : 'new'}
         onAuthenticated={handleAuthenticated}
+        industryType={facilityProfile?.industry_type}
       />
 
       {/* Patient Status Bar */}
@@ -189,7 +193,7 @@ function App() {
                   currentUser.isReturning ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
                 }`}
               >
-                {currentUser.isReturning ? '再診' : '新患'}
+                {currentUser.isReturning ? labels.returningVisitShort : labels.firstVisitShort}
               </span>
               <button
                 onClick={handleSwitchPatient}
@@ -292,14 +296,14 @@ function App() {
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
               <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-orange/10 text-brand-orange border border-brand-orange/20 text-xs font-bold rounded-full mb-4 shadow-2xs font-serif">
                 <HeartHandshake size={15} />
-                <span>生涯に寄り添う、やさしい歯科医療</span>
+                <span>お一人おひとりに寄り添う、丁寧な{labels.service}</span>
               </div>
               <h1 className="text-3xl md:text-5xl font-bold leading-tight text-brand-brown mb-4 font-serif">
                 笑顔あふれる毎日を、<br />
-                <span className="text-brand-orange">健康なお口から。</span>
+                <span className="text-brand-orange">快適な空間から。</span>
               </h1>
               <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-serif">
-                つばき歯科クリニックでは、患者様のお悩みやご希望に寄り添い、痛みの少ない丁寧な診療を心がけております。WEBより24時間いつでも簡単にご予約いただけます。
+                {labels.topIntroDefault}
               </p>
             </motion.div>
 
@@ -311,10 +315,10 @@ function App() {
                 </div>
                 <div>
                   <h4 className="font-bold text-sm text-brand-brown font-serif mb-1">
-                    初めてご来院される患者様へ
+                    {labels.bookingIntro}
                   </h4>
                   <p className="text-xs text-slate-500 leading-relaxed">
-                    健康保険証（またはマイナンバーカード）をご持参の上、ご予約日時の5分前にお越しください。事前のWEB問診により、当日はスムーズにご案内いたします。
+                    ご予約日時の5分前にお越しください。事前のWEB事前ヒアリングにより、当日はスムーズにご案内いたします。
                   </p>
                 </div>
               </div>
@@ -375,6 +379,7 @@ function App() {
                     key={scheduleVersion}
                     patient={currentUser}
                     onReservationComplete={handleReservationComplete}
+                    industryType={facilityProfile?.industry_type}
                   />
                 </motion.div>
               )}
@@ -397,7 +402,7 @@ function App() {
                     ご予約が確定いたしました！
                   </h2>
                   <p className="text-slate-600 mb-6 text-xs md:text-sm leading-relaxed font-serif">
-                    {currentUser?.name} 様のご来院をスタッフ一同、心よりお待ちしております。<br />
+                    {currentUser?.name} 様の{labels.visit}をスタッフ一同、心よりお待ちしております。<br />
                     ご予約内容の確認とお控えをご確認ください。
                   </p>
 
@@ -409,13 +414,13 @@ function App() {
                         <span className="font-bold text-brand-orange text-sm">{finalReservation?.scheduled_at}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">診療メニュー</span>
+                        <span className="text-[10px] text-slate-400 block">{labels.serviceMenu}</span>
                         <span className="font-bold text-slate-800">{finalReservation?.menu_type}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">患者種別</span>
+                        <span className="text-[10px] text-slate-400 block">{labels.patientType}</span>
                         <span className="font-bold text-slate-800">
-                          {finalReservation?.patient_type === 'returning' ? '再診（通院歴あり）' : '新患（初診）'}
+                          {finalReservation?.patient_type === 'returning' ? `${labels.returningVisit}` : `${labels.firstVisit}`}
                         </span>
                       </div>
                       <div>

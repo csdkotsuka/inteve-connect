@@ -19,6 +19,8 @@ import {
   MessageCircle,
   UserRound,
   ArrowRight,
+  ArrowUp,
+  ArrowDown,
 } from 'lucide-react';
 
 import { getThemeById, getCurrentTheme, applyTheme } from '../../utils/themeService';
@@ -29,10 +31,12 @@ import {
   saveFacilityServices,
   getFacilityStaffs,
   saveFacilityStaffs,
+  reorderFacilityStaffs,
   saveSingleStaff,
   deleteSingleStaff,
 } from '../../utils/facilityService';
 import { getClinicScheduleConfig, saveClinicScheduleConfig } from '../../utils/clinicSchedule';
+import { getLabels } from '../../constants/labels';
 import ReservationLedger from './ReservationLedger';
 import PatientList from './PatientList';
 import MessagingPanel from './MessagingPanel';
@@ -167,6 +171,19 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
     }
   };
 
+  const handleMoveStaff = async (index, direction) => {
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= staffs.length) return;
+
+    const newStaffs = [...staffs];
+    const [moved] = newStaffs.splice(index, 1);
+    newStaffs.splice(targetIndex, 0, moved);
+
+    setStaffs(newStaffs);
+    await reorderFacilityStaffs(newStaffs);
+    showToast('スタッフ・カレンダーの表示順を更新しました');
+  };
+
   if (!facilityProfile) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -174,6 +191,8 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
       </div>
     );
   }
+
+  const labels = getLabels(facilityProfile?.industry_type);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800 font-sans flex flex-col md:flex-row">
@@ -216,11 +235,11 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
         <nav className="p-4 space-y-2 flex-1 overflow-y-auto">
           {[
             { id: 'reservations', label: '予約台帳・カレンダー', icon: CalendarDays },
-            { id: 'patients', label: '患者情報一覧', icon: UserRound },
-            { id: 'messages', label: 'メッセージ・連絡', icon: MessageCircle },
+            { id: 'patients', label: `${labels.customerShort}情報一覧`, icon: UserRound },
+            { id: 'messages', label: `${labels.customerShort}連絡・メッセージ`, icon: MessageCircle },
             { id: 'announcement', label: 'トップお知らせ告知', icon: Megaphone },
-            { id: 'schedule', label: '診療時間・休診日設定', icon: Clock },
-            { id: 'services', label: 'メニュー・診療科目', icon: ListOrdered },
+            { id: 'schedule', label: `${labels.schedule}設定`, icon: Clock },
+            { id: 'services', label: `${labels.serviceMenu}管理`, icon: ListOrdered },
             { id: 'staffs', label: 'スタッフ・カレンダー設定', icon: Users },
           ].map((item) => {
             const Icon = item.icon;
@@ -249,7 +268,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
             onClick={onBackToBooking}
             className="w-full py-3 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm flex items-center justify-center gap-2 transition-all cursor-pointer"
           >
-            <span>患者用予約画面へ</span>
+            <span>{labels.customer}用予約画面へ</span>
             <ArrowRight size={16} />
           </button>
         </div>
@@ -279,12 +298,13 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 staffs={staffs}
                 scheduleConfig={scheduleConfig}
                 theme={selectedTheme}
+                industryType={facilityProfile?.industry_type}
               />
             </div>
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 2: 患者情報一覧 */}
+          {/* TAB 2: 顧客/患者情報一覧 */}
           {/* ========================================================================= */}
           {activeTab === 'patients' && (
             <div className="space-y-6">
@@ -292,18 +312,20 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 facilityId={facilityProfile?.id}
                 staffs={staffs}
                 theme={selectedTheme}
+                industryType={facilityProfile?.industry_type}
               />
             </div>
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 3: メッセージ・患者連絡 */}
+          {/* TAB 3: メッセージ・連絡 */}
           {/* ========================================================================= */}
           {activeTab === 'messages' && (
             <div className="space-y-6">
               <MessagingPanel
                 facilityId={facilityProfile?.id}
                 theme={selectedTheme}
+                industryType={facilityProfile?.industry_type}
               />
             </div>
           )}
@@ -381,10 +403,10 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
             <div className="space-y-6 max-w-3xl">
               <div>
                 <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">
-                  診療時間・休診日・予約枠間隔
+                  {labels.schedule}・予約枠間隔
                 </h2>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  定期休診曜日、祝祭日設定、医院独自の特別休診日（夏季・年末年始等）、受付時間帯、予約スロット間隔を設定します。
+                  定期{labels.businessClosed}曜日、祝祭日設定、{labels.facilityTypeShort}独自の特別{labels.businessClosed}日（夏季・年末年始等）、受付時間帯、予約スロット間隔を設定します。
                 </p>
               </div>
 
@@ -393,7 +415,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 <div className="space-y-3">
                   <label className="text-xs font-bold text-slate-700 flex items-center gap-2">
                     <Calendar size={16} className="text-slate-500" />
-                    休診曜日の設定（赤色が休診）
+                    {labels.businessClosed}曜日の設定（赤色が{labels.businessClosed}）
                   </label>
                   <div className="grid grid-cols-7 gap-2">
                     {DAYS_OF_WEEK.map((d) => {
@@ -410,7 +432,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                           }`}
                         >
                           <span className="text-sm font-bold">{d.label}</span>
-                          <span className="text-[10px] mt-0.5">{isClosed ? '休診' : '診療'}</span>
+                          <span className="text-[10px] mt-0.5">{isClosed ? labels.businessClosed : labels.businessOpen}</span>
                         </button>
                       );
                     })}
@@ -420,8 +442,8 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 {/* 2. 祝祭日休診設定 */}
                 <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200/80 flex items-center justify-between gap-4">
                   <div className="space-y-0.5">
-                    <span className="text-xs font-bold text-slate-800 block">日本の祝祭日を休診にする</span>
-                    <span className="text-[11px] text-slate-500">祝祭日・振替休日を自動検知し、カレンダー上で薄赤色で休診表示します</span>
+                    <span className="text-xs font-bold text-slate-800 block">日本の祝祭日を{labels.businessClosed}にする</span>
+                    <span className="text-[11px] text-slate-500">祝祭日・振替休日を自動検知し、カレンダー上で薄赤色で{labels.businessClosed}表示します</span>
                   </div>
                   <label className="relative inline-flex items-center cursor-pointer">
                     <input
@@ -436,12 +458,12 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                   </label>
                 </div>
 
-                {/* 3. 医院独自の休診日（夏季休暇・年末年始・研修日など） */}
+                {/* 3. 医院・店舗独自の休診日（夏季休暇・年末年始・研修日など） */}
                 <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200 space-y-3.5">
                   <div>
-                    <label className="text-xs font-bold text-slate-800 block">医院独自の休診日（夏季休暇・年末年始・院内研修日など）</label>
+                    <label className="text-xs font-bold text-slate-800 block">{labels.facilityTypeShort}独自の{labels.businessClosed}日（夏季休暇・年末年始・研修日など）</label>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      指定した日付をカレンダー上で薄赤色で強調し、休診理由を表示します。
+                      指定した日付をカレンダー上で薄赤色で強調し、{labels.businessClosed}理由を表示します。
                     </p>
                   </div>
 
@@ -455,7 +477,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                     />
                     <input
                       type="text"
-                      placeholder="休診名（例: 夏季休暇・年末年始休診・院内研修）"
+                      placeholder={`理由（例: 夏季休暇・年末年始${labels.businessClosed}・研修）`}
                       value={newSpecialName}
                       onChange={(e) => setNewSpecialName(e.target.value)}
                       className="flex-1 px-3.5 py-2.5 h-11 bg-white border border-slate-300 rounded-xl text-xs font-medium focus:outline-none focus:ring-2 focus:ring-slate-400"
@@ -466,7 +488,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                         if (!newSpecialDate) return;
                         const newSpecial = {
                           date: newSpecialDate,
-                          name: newSpecialName.trim() || '特別休診日',
+                          name: newSpecialName.trim() || `特別${labels.businessClosed}日`,
                         };
                         const updated = [
                           ...(scheduleConfig.specialClosedDays || []).filter((s) => s.date !== newSpecialDate),
@@ -480,14 +502,14 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                       className="px-4 py-2.5 h-11 bg-slate-800 hover:bg-slate-900 disabled:opacity-40 text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer shrink-0 flex items-center justify-center gap-1.5"
                     >
                       <Plus size={15} />
-                      <span>休診日を追加</span>
+                      <span>{labels.businessClosed}日を追加</span>
                     </button>
                   </div>
 
                   {/* 登録済み特別休診日一覧 */}
                   <div className="space-y-1.5 pt-1">
                     {(scheduleConfig.specialClosedDays || []).length === 0 ? (
-                      <p className="text-[11px] text-slate-400 py-2">※現在登録されている特別休診日はありません</p>
+                      <p className="text-[11px] text-slate-400 py-2">※現在登録されている特別{labels.businessClosed}日はありません</p>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-1">
                         {(scheduleConfig.specialClosedDays || []).map((sp) => (
@@ -522,7 +544,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 {/* 4. 診療時間帯（10分刻みプルダウン選択） */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <span className="text-xs font-bold text-slate-700 block">午前診療 時間帯</span>
+                    <span className="text-xs font-bold text-slate-700 block">{labels.morningSession} 時間帯</span>
                     <div className="flex items-center gap-2 text-xs">
                       <select
                         value={scheduleConfig.morningStart || '09:30'}
@@ -551,7 +573,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                   </div>
 
                   <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-                    <span className="text-xs font-bold text-slate-700 block">午後診療（平日）時間帯</span>
+                    <span className="text-xs font-bold text-slate-700 block">{labels.afternoonSession}（平日）時間帯</span>
                     <div className="flex items-center gap-2 text-xs">
                       <select
                         value={scheduleConfig.afternoonStart || '14:30'}
@@ -632,17 +654,17 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
           )}
 
           {/* ========================================================================= */}
-          {/* TAB 4: メニュー・診療科目管理 (Services & Menus) */}
+          {/* TAB 4: メニュー管理 (Services & Menus) */}
           {/* ========================================================================= */}
           {activeTab === 'services' && (
             <div className="space-y-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">
-                    診療・施術メニュー管理
+                    {labels.serviceMenu}管理
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    WEB予約時に顧客が選択できるメニュー、所要時間、料金を設定します。
+                    WEB予約時に{labels.customer}が選択できるメニュー、所要時間、料金を設定します。
                   </p>
                 </div>
                 <button
@@ -650,7 +672,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                   onClick={() => {
                     setEditingService({
                       name: '',
-                      category: '保険診療',
+                      category: labels.serviceCategory || '一般メニュー',
                       duration_minutes: 30,
                       price: 0,
                       is_online_bookable: true,
@@ -737,10 +759,10 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div>
                   <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">
-                    スタッフ管理 & Googleカレンダー連携
+                    {labels.staff}管理 & カレンダー連携
                   </h2>
-                  <p className="text-xs text-slate-500 mt-0.5">
-                    1施設あたり最大10名（10個のGoogleカレンダー）まで対応。スタッフごとに対応するカレンダーIDを割り当ててタイムラインで同期できます。
+                  <p className="text-sm text-slate-500 mt-1">
+                    1施設あたり最大10名（10個のGoogleカレンダー）まで対応。スタッフごとに対応するカレンダーIDを割り当て、表示順の並び替えも行えます。
                   </p>
                 </div>
                 <button
@@ -759,10 +781,10 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                     });
                     setIsStaffModalOpen(true);
                   }}
-                  className="px-4 py-2 rounded-xl text-white font-bold text-xs shadow-md flex items-center gap-1.5 cursor-pointer shrink-0"
+                  className="px-4 py-2.5 rounded-xl text-white font-bold text-sm shadow-md flex items-center gap-2 cursor-pointer shrink-0 transition-transform active:scale-95"
                   style={{ backgroundColor: selectedTheme.primary }}
                 >
-                  <Plus size={16} />
+                  <Plus size={18} />
                   スタッフを追加
                 </button>
               </div>
@@ -771,15 +793,15 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
               <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-slate-800 text-sm">担当制（スタッフ指名制）の運用</span>
-                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${facilityProfile.is_staff_assignment_enabled !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
-                      {facilityProfile.is_staff_assignment_enabled !== false ? '担当制: 有効' : '担当制: 無効（一括受付）'}
+                    <span className="font-bold text-slate-800 text-sm md:text-base">{labels.staffAssignment}の運用</span>
+                    <span className={`text-xs px-2.5 py-0.5 rounded-full font-bold ${facilityProfile.is_staff_assignment_enabled !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+                      {facilityProfile.is_staff_assignment_enabled !== false ? `${labels.staffAssignment}: 有効` : `${labels.staffAssignment}: 無効（一括受付）`}
                     </span>
                   </div>
-                  <p className="text-xs text-slate-500 leading-relaxed">
+                  <p className="text-xs md:text-sm text-slate-500 leading-relaxed">
                     {facilityProfile.is_staff_assignment_enabled !== false
-                      ? '【有効中】患者一覧で割り当てた担当スタッフが存在する場合、再診予約はその担当者のGoogleカレンダーに自動追加されます。新患や担当未設定の場合は「新患受付カレンダー」へ登録されます。'
-                      : '【無効中】すべての予約（新患・再診）を、指定された「新患受付カレンダー」へ一括登録します。'}
+                      ? `【有効中】${labels.customerShort}一覧で割り当てた担当スタッフが存在する場合、${labels.returningVisitShort}予約はその担当者のGoogleカレンダーに自動追加されます。${labels.firstVisitShort}や担当未設定の場合は「${labels.firstVisitShort}受付カレンダー」へ登録されます。`
+                      : `【無効中】すべての予約（${labels.firstVisitShort}・${labels.returningVisitShort}）を、指定された「${labels.firstVisitShort}受付カレンダー」へ一括登録します。`}
                   </p>
                 </div>
                 <button
@@ -789,80 +811,126 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                     const updated = { ...facilityProfile, is_staff_assignment_enabled: nextVal };
                     setFacilityProfile(updated);
                     await saveFacilityProfile(updated);
-                    showToast(nextVal ? '担当制運用を【有効】に設定しました' : '担当制運用を【無効】に設定しました');
+                    showToast(nextVal ? `${labels.staffAssignment}運用を【有効】に設定しました` : `${labels.staffAssignment}運用を【無効】に設定しました`);
                   }}
-                  className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 border flex items-center gap-2 ${
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs md:text-sm transition-all cursor-pointer shrink-0 border flex items-center gap-2 ${
                     facilityProfile.is_staff_assignment_enabled !== false
                       ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
                       : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
                   }`}
                 >
-                  <CheckCircle2 size={14} />
-                  <span>{facilityProfile.is_staff_assignment_enabled !== false ? '担当制を無効にする' : '担当制を有効にする'}</span>
+                  <CheckCircle2 size={16} />
+                  <span>{facilityProfile.is_staff_assignment_enabled !== false ? `${labels.staffAssignment}を無効にする` : `${labels.staffAssignment}を有効にする`}</span>
                 </button>
               </div>
 
-              {/* スタッフカード一覧 */}
+              {/* スタッフカード一覧（並び替えボタン付き） */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {staffs.map((staff) => (
+                {staffs.map((staff, index) => (
                   <div
-                    key={staff.id}
-                    className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-3"
+                    key={staff.id || index}
+                    className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4 hover:border-slate-300 transition-colors"
                   >
-                    <div className="flex items-start justify-between">
+                    <div className="flex items-start justify-between gap-3">
                       <div className="flex items-start gap-3.5">
-                        <div
-                          className="w-10 h-10 rounded-2xl text-white flex items-center justify-center font-bold text-sm shadow-xs shrink-0"
-                          style={{ backgroundColor: staff.badge_color || '#3B82F6' }}
-                        >
-                          {staff.name.slice(0, 1)}
+                        {/* 順序バッジ & アバター */}
+                        <div className="relative">
+                          <div
+                            className="w-11 h-11 rounded-2xl text-white flex items-center justify-center font-bold text-base shadow-xs shrink-0"
+                            style={{ backgroundColor: staff.badge_color || '#3B82F6' }}
+                          >
+                            {staff.name.slice(0, 1)}
+                          </div>
+                          <span className="absolute -bottom-1 -right-1 bg-slate-800 text-white text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-md shadow-xs">
+                            #{index + 1}
+                          </span>
                         </div>
-                        <div className="space-y-0.5">
+
+                        <div className="space-y-1">
                           <div className="flex items-center gap-2 flex-wrap">
-                            <h3 className="text-sm font-bold text-slate-800">{staff.name}</h3>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
+                            <h3 className="text-base font-bold text-slate-800">{staff.name}</h3>
+                            <span className="text-xs px-2.5 py-0.5 rounded-lg bg-slate-100 text-slate-600 font-medium">
                               {staff.title}
                             </span>
                             {staff.accepts_new_patients && (
-                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-0.5">
-                                ★ 新患受付カレンダー
+                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-1 border border-emerald-300">
+                                ★ {labels.firstVisitShort}受付カレンダー
                               </span>
                             )}
                           </div>
-                          <div className="text-[11px] text-slate-400 space-y-0.5">
-                            {staff.email && <p>連絡先: {staff.email}</p>}
+                          <div className="text-xs text-slate-500 space-y-0.5">
+                            {staff.email ? (
+                              <p>連絡先: {staff.email}</p>
+                            ) : (
+                              <p className="text-slate-400">連絡先未登録</p>
+                            )}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-1">
+                      {/* アクションボタン（並び替え ＆ 編集 ＆ 削除） */}
+                      <div className="flex items-center gap-1 shrink-0 bg-slate-50 p-1 rounded-xl border border-slate-100">
+                        {/* 上へ移動 */}
+                        <button
+                          type="button"
+                          disabled={index === 0}
+                          onClick={() => handleMoveStaff(index, -1)}
+                          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                            index === 0
+                              ? 'text-slate-300 cursor-not-allowed'
+                              : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                          }`}
+                          title="表示順を1つ上へ"
+                        >
+                          <ArrowUp size={15} />
+                        </button>
+
+                        {/* 下へ移動 */}
+                        <button
+                          type="button"
+                          disabled={index === staffs.length - 1}
+                          onClick={() => handleMoveStaff(index, 1)}
+                          className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+                            index === staffs.length - 1
+                              ? 'text-slate-300 cursor-not-allowed'
+                              : 'text-slate-600 hover:bg-slate-200 hover:text-slate-900'
+                          }`}
+                          title="表示順を1つ下へ"
+                        >
+                          <ArrowDown size={15} />
+                        </button>
+
+                        <div className="w-[1px] h-4 bg-slate-200 mx-0.5" />
+
                         <button
                           type="button"
                           onClick={() => {
                             setEditingStaff(staff);
                             setIsStaffModalOpen(true);
                           }}
-                          className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg cursor-pointer"
+                          className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-200 rounded-lg cursor-pointer"
+                          title="編集"
                         >
-                          <Edit2 size={14} />
+                          <Edit2 size={15} />
                         </button>
                         <button
                           type="button"
                           onClick={() => handleDeleteStaff(staff.id)}
                           className="p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg cursor-pointer"
+                          title="削除"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={15} />
                         </button>
                       </div>
                     </div>
 
                     {/* Google Calendar ID表示枠 */}
-                    <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 font-medium flex items-center gap-1.5">
-                        <Calendar size={13} className="text-blue-500" />
+                    <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs sm:text-sm">
+                      <span className="text-slate-500 font-medium flex items-center gap-1.5 shrink-0">
+                        <Calendar size={15} className="text-blue-500" />
                         GoogleカレンダーID:
                       </span>
-                      <span className="font-mono text-slate-700 font-bold text-[11px] truncate max-w-[200px]">
+                      <span className="font-mono text-slate-800 font-bold text-xs truncate max-w-[220px] ml-2">
                         {staff.google_calendar_id || <span className="text-slate-400 font-normal">未設定（個別入力可能）</span>}
                       </span>
                     </div>
@@ -1055,7 +1123,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 </p>
               </div>
 
-              {/* 新規患者（新患）受け入れカレンダーフラグ */}
+              {/* 新規顧客/患者受け入れカレンダーフラグ */}
               <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80 space-y-1">
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -1067,11 +1135,11 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                     className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer"
                   />
                   <span className="font-bold text-slate-800 text-xs">
-                    新規患者（新患）を受け入れるカレンダーとして設定
+                    {labels.firstVisit}を受け入れるカレンダーとして設定
                   </span>
                 </label>
                 <p className="text-[10px] text-slate-500 pl-6 leading-relaxed">
-                  ※初診の患者様や担当未定の予約は、このカレンダーに自動登録されます（後から患者一覧で担当者を変更できます）。
+                  ※{labels.firstVisitShort}の{labels.customer}や担当未定の予約は、このカレンダーに自動登録されます（後から{labels.customerShort}一覧で担当者を変更できます）。
                 </p>
               </div>
 

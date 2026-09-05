@@ -51,7 +51,10 @@ function DentalIcon({ className = "w-5 h-5 text-brand-orange" }) {
   );
 }
 
-export default function AIChat({ patient, onReservationComplete }) {
+import { getLabels } from '../constants/labels';
+
+export default function AIChat({ patient, onReservationComplete, industryType = 'medical' }) {
+  const labels = getLabels(industryType);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -66,8 +69,8 @@ export default function AIChat({ patient, onReservationComplete }) {
     if (!patient) return;
 
     const greeting = patient.isReturning
-      ? `${patient.name}様、こんにちは！つばき歯科クリニックです。\nいつもご来院いただきありがとうございます。\n本日はどのようなご相談でしょうか？`
-      : `${patient.name}様、初めまして！つばき歯科クリニックです。\n当院への受診をご検討いただきありがとうございます。\n本日はどのようなご症状・ご希望でしょうか？`;
+      ? `${patient.name}様、こんにちは！\nいつも${labels.visit}いただきありがとうございます。\n本日はどのようなご相談・ご希望でしょうか？`
+      : `${patient.name}様、初めまして！\n当${labels.facilityTypeShort}への${labels.visit}をご検討いただきありがとうございます。\n本日はどのようなご希望・メニューでしょうか？`;
 
     setMessages([
       {
@@ -77,7 +80,7 @@ export default function AIChat({ patient, onReservationComplete }) {
         showMenuOptions: true,
       },
     ]);
-  }, [patient]);
+  }, [patient, industryType]);
 
   // 自動スクロール
   useEffect(() => {
@@ -188,7 +191,7 @@ export default function AIChat({ patient, onReservationComplete }) {
       slot,
     });
 
-    const botReply = `ありがとうございます！\n【${slot.label}】にてご予約を確定いたしました。\n\n📅 カレンダーへの予定登録完了\n💾 カルテデータベースへの保存完了\n\n当日のご来院をスタッフ一同、心よりお待ちしております！`;
+    const botReply = `ありがとうございます！\n【${slot.label}】にてご予約を確定いたしました。\n\n📅 カレンダーへの予定登録完了\n💾 ${labels.chart}への保存完了\n\n当日の${labels.visit}をスタッフ一同、心よりお待ちしております！`;
 
     setMessages((prev) => [
       ...prev,

@@ -21,6 +21,7 @@ export const DEFAULT_FACILITY_DATA = {
   top_announcement: '【お知らせ】土曜日の診療時間を16:30までに変更いたしました。初診・再診ともに24時間WEB予約を受け付けております。',
   is_announcement_active: true,
   is_staff_assignment_enabled: true,
+  industry_type: 'medical',
   theme_id: 'terracotta',
 };
 
@@ -142,6 +143,7 @@ export async function saveFacilityProfile(profileData) {
         line_official_id: profileData.line_official_id || '@776cdsuy',
         top_announcement: profileData.top_announcement,
         is_staff_assignment_enabled: profileData.is_staff_assignment_enabled !== false,
+        industry_type: profileData.industry_type || 'medical',
       };
 
       if (profileData.id) {
@@ -264,6 +266,34 @@ export async function saveSingleStaff(staffData) {
  */
 export async function saveFacilityStaffs(staffs) {
   localStorage.setItem(STAFFS_STORAGE_KEY, JSON.stringify(staffs));
+}
+
+/**
+ * スタッフの表示順（display_order）を一括並び替え保存（Supabase & LocalStorage）
+ */
+export async function reorderFacilityStaffs(reorderedStaffs) {
+  const updated = reorderedStaffs.map((s, index) => ({
+    ...s,
+    display_order: index + 1,
+  }));
+  localStorage.setItem(STAFFS_STORAGE_KEY, JSON.stringify(updated));
+
+  if (supabase) {
+    try {
+      for (let i = 0; i < updated.length; i++) {
+        const item = updated[i];
+        if (item.id && item.id.includes('-') && !item.id.startsWith('stf-')) {
+          await supabase
+            .from('staffs')
+            .update({ display_order: item.display_order })
+            .eq('id', item.id);
+        }
+      }
+    } catch (e) {
+      console.error('スタッフ並び替え保存エラー:', e);
+    }
+  }
+  return updated;
 }
 
 /**

@@ -18,6 +18,7 @@ import {
 import { supabase } from '../../utils/supabaseClient';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { getLabels } from '../../constants/labels';
 
 const RANK_CONFIG = {
   vip: { label: 'VIP', bg: 'bg-amber-100', text: 'text-amber-800', icon: Crown },
@@ -25,7 +26,8 @@ const RANK_CONFIG = {
   new: { label: '新規', bg: 'bg-emerald-100', text: 'text-emerald-800', icon: Star },
 };
 
-export default function PatientList({ facilityId, staffs, theme }) {
+export default function PatientList({ facilityId, staffs, theme, industryType = 'medical' }) {
+  const labels = getLabels(industryType);
   const [customers, setCustomers] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,9 +114,9 @@ export default function PatientList({ facilityId, staffs, theme }) {
     <div className="space-y-5">
       {/* ヘッダー */}
       <div>
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">患者情報一覧</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">{labels.customerShort}情報一覧</h2>
         <p className="text-xs text-slate-500 mt-0.5">
-          登録されている患者様の基本情報・予約履歴を確認できます
+          登録されている{labels.customer}の基本情報・予約履歴を確認できます
         </p>
       </div>
 
@@ -126,7 +128,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="氏名・カナ・電話番号・患者コードで検索..."
+            placeholder={`氏名・カナ・電話番号・${labels.customerCode}で検索...`}
             className="w-full pl-10 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2"
           />
         </div>
@@ -164,10 +166,10 @@ export default function PatientList({ facilityId, staffs, theme }) {
         </div>
       </div>
 
-      {/* 患者数サマリー（クリックでランク絞り込み） */}
+      {/* 顧客数サマリー（クリックでランク絞り込み） */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[
-          { rankKey: 'all', label: '総登録患者', count: customers.length, color: 'bg-slate-800', border: 'border-slate-800' },
+          { rankKey: 'all', label: `総登録${labels.customerShort}`, count: customers.length, color: 'bg-slate-800', border: 'border-slate-800' },
           { rankKey: 'vip', label: 'VIP', count: customers.filter((c) => c.customer_rank === 'vip').length, color: 'bg-amber-600', border: 'border-amber-500' },
           { rankKey: 'regular', label: '一般', count: customers.filter((c) => c.customer_rank === 'regular').length, color: 'bg-slate-500', border: 'border-slate-400' },
           { rankKey: 'new', label: '新規', count: customers.filter((c) => c.customer_rank === 'new').length, color: 'bg-emerald-600', border: 'border-emerald-500' },
@@ -198,9 +200,9 @@ export default function PatientList({ facilityId, staffs, theme }) {
         })}
       </div>
 
-      {/* 患者リスト & 詳細パネル（2カラム） */}
+      {/* 顧客リスト & 詳細パネル（2カラム） */}
       <div className="flex gap-4 items-start">
-        {/* 患者リスト */}
+        {/* 顧客リスト */}
         <div className={`${selectedCustomer ? 'hidden md:block md:w-80 shrink-0' : 'w-full'}`}>
           <div className="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
             {isLoading ? (
@@ -211,7 +213,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
             ) : filteredCustomers.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-48 text-slate-400 text-sm space-y-2">
                 <User size={28} className="opacity-40" />
-                <p className="text-xs">該当する患者が見つかりません</p>
+                <p className="text-xs">該当する{labels.customerShort}が見つかりません</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-100 max-h-[600px] overflow-y-auto">
@@ -234,7 +236,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
                     >
                       <div
                         className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black text-base shrink-0 shadow-xs"
-                        style={{ backgroundColor: assignedStaff?.badge_color || rank.bg.includes('amber') ? '#D97706' : rank.bg.includes('emerald') ? '#059669' : (usualStaff?.badge_color || theme.primary) }}
+                        style={{ backgroundColor: assignedStaff?.badge_color || (rank.bg.includes('amber') ? '#D97706' : rank.bg.includes('emerald') ? '#059669' : (usualStaff?.badge_color || theme.primary)) }}
                       >
                         {customer.name.slice(0, 1)}
                       </div>
@@ -257,11 +259,11 @@ export default function PatientList({ facilityId, staffs, theme }) {
                         <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                           <span className="font-mono">{customer.phone}</span>
                           <span>・</span>
-                          <span>受診{custRes.length}回</span>
+                          <span>{labels.visitCount} {custRes.length}回</span>
                           {lastVisit && (
                             <>
                               <span>・</span>
-                              <span>最終: {format(new Date(lastVisit), 'M/d', { locale: ja })}</span>
+                              <span>{labels.lastVisit}: {format(new Date(lastVisit), 'M/d', { locale: ja })}</span>
                             </>
                           )}
                         </div>
@@ -370,7 +372,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
 
                 {/* ランク設定・変更 */}
                 <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-between gap-2">
-                  <span className="text-xs font-bold text-slate-700">患者ランク変更:</span>
+                  <span className="text-xs font-bold text-slate-700">{labels.customerShort}ランク変更:</span>
                   <div className="flex items-center gap-1.5">
                     {[
                       { key: 'vip', label: 'VIP', icon: Crown, color: 'bg-amber-100 text-amber-900 border-amber-300' },

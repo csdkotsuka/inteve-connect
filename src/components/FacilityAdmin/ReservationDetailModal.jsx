@@ -22,13 +22,22 @@ import {
 import { supabase } from '../../utils/supabaseClient';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
+import { getLabels } from '../../constants/labels';
 
-const STATUS_LABELS = {
+const getStatusLabels = (industryType) => ({
   confirmed: { label: '予約確定', bg: 'bg-blue-100', text: 'text-blue-800' },
-  checked_in: { label: '来院受付', bg: 'bg-emerald-100', text: 'text-emerald-800' },
-  completed: { label: '診察完了', bg: 'bg-slate-100', text: 'text-slate-600' },
+  checked_in: {
+    label: industryType === 'beauty' || industryType === 'general' ? '来店受付' : '来院受付',
+    bg: 'bg-emerald-100',
+    text: 'text-emerald-800',
+  },
+  completed: {
+    label: industryType === 'beauty' ? '施術完了' : industryType === 'general' ? '利用完了' : '診察完了',
+    bg: 'bg-slate-100',
+    text: 'text-slate-600',
+  },
   cancelled: { label: 'キャンセル', bg: 'bg-rose-100', text: 'text-rose-700' },
-};
+});
 
 const CHANNEL_ICONS = {
   email: { icon: Mail, label: 'メール', color: 'text-blue-600', bg: 'bg-blue-50' },
@@ -36,15 +45,18 @@ const CHANNEL_ICONS = {
 };
 
 /**
- * 予約詳細モーダル ＋ 患者への連絡ツール（LINE/メール 送受信一覧）
+ * 予約詳細モーダル ＋ 顧客への連絡ツール（LINE/メール 送受信一覧）
  */
 export default function ReservationDetailModal({
   reservation,
   staffs,
   theme,
+  industryType,
   onClose,
   onUpdateStatus,
 }) {
+  const labels = getLabels(industryType);
+  const STATUS_LABELS = getStatusLabels(industryType);
   const [messageTab, setMessageTab] = useState('email'); // 'email' | 'line'
   const [messages, setMessages] = useState([]);
   const [draftBody, setDraftBody] = useState('');
@@ -72,7 +84,7 @@ export default function ReservationDetailModal({
   }, [onClose]);
 
   const customer = {
-    name: reservation?.customer_name || '患者様',
+    name: reservation?.customer_name || labels.customer,
     phone: reservation?.customer_phone || '',
     email: reservation?.customer_email || '',
     id: reservation?.customer_id || null,
@@ -302,7 +314,7 @@ export default function ReservationDetailModal({
 
             {/* 連絡先 */}
             <section className="space-y-2 text-xs">
-              <h3 className="font-bold text-slate-700 text-[11px] uppercase tracking-wider">患者連絡先</h3>
+              <h3 className="font-bold text-slate-700 text-[11px] uppercase tracking-wider">{labels.customer}連絡先</h3>
               {customer.phone && (
                 <a
                   href={`tel:${customer.phone}`}
@@ -338,10 +350,10 @@ export default function ReservationDetailModal({
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 {[
-                  { key: 'confirmed', label: '予約確定', color: 'bg-blue-600' },
-                  { key: 'checked_in', label: '来院受付', color: 'bg-emerald-600' },
-                  { key: 'completed', label: '診察完了', color: 'bg-slate-700' },
-                  { key: 'cancelled', label: 'キャンセル', color: 'bg-rose-600' },
+                  { key: 'confirmed', label: STATUS_LABELS.confirmed.label, color: 'bg-blue-600' },
+                  { key: 'checked_in', label: STATUS_LABELS.checked_in.label, color: 'bg-emerald-600' },
+                  { key: 'completed', label: STATUS_LABELS.completed.label, color: 'bg-slate-700' },
+                  { key: 'cancelled', label: STATUS_LABELS.cancelled.label, color: 'bg-rose-600' },
                 ].map((s) => (
                   <button
                     key={s.key}

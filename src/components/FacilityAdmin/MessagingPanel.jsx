@@ -21,6 +21,7 @@ import { supabase } from '../../utils/supabaseClient';
 import { format } from 'date-fns';
 import { ja } from 'date-fns/locale';
 import { getFacilityProfile } from '../../utils/facilityService';
+import { getLabels } from '../../constants/labels';
 
 const RANK_CONFIG = {
   vip: { label: 'VIP', bg: 'bg-amber-100', text: 'text-amber-800', color: '#D97706', icon: Crown },
@@ -52,7 +53,8 @@ async function sendViaGas(action, payload) {
   return res.json();
 }
 
-export default function MessagingPanel({ facilityId, theme }) {
+export default function MessagingPanel({ facilityId, theme, industryType }) {
+  const labels = getLabels(industryType);
   const [customers, setCustomers]           = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [messages, setMessages]             = useState([]);
@@ -251,8 +253,8 @@ export default function MessagingPanel({ facilityId, theme }) {
   return (
     <div className="space-y-5">
       <div>
-        <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">患者連絡・メッセージ管理</h2>
-        <p className="text-xs text-slate-500 mt-0.5">患者様へのメール・LINEの送受信履歴を一画面で管理できます</p>
+        <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">{labels.customerShort}連絡・メッセージ管理</h2>
+        <p className="text-xs text-slate-500 mt-0.5">{labels.customer}へのメール・LINEの送受信履歴を一画面で管理できます</p>
       </div>
 
       {/* LINE情報バナー */}
@@ -263,7 +265,7 @@ export default function MessagingPanel({ facilityId, theme }) {
             LINEボット: {lineOfficialId}
             <span className="px-2 py-0.5 rounded-full bg-emerald-200 text-emerald-900 font-bold text-[10px]">接続中</span>
           </div>
-          <p>LINE送信には患者様の <strong>LINEユーザーID</strong> が必要です。患者情報に line_user_id が登録された方のみ個別送信できます。未登録の場合はメールで対応してください。</p>
+          <p>LINE送信には{labels.customer}の <strong>LINEユーザーID</strong> が必要です。{labels.customerShort}情報に line_user_id が登録された方のみ個別送信できます。未登録の場合はメールで対応してください。</p>
         </div>
       </div>
 
@@ -286,7 +288,7 @@ export default function MessagingPanel({ facilityId, theme }) {
 
       {/* 2カラムレイアウト */}
       <div className="flex gap-4 h-[620px]">
-        {/* 左: 患者リスト */}
+        {/* 左: 顧客リスト */}
         <div className="w-72 shrink-0 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col overflow-hidden">
           <div className="p-3 border-b border-slate-100">
             <div className="relative">
@@ -295,7 +297,7 @@ export default function MessagingPanel({ facilityId, theme }) {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="患者を検索..."
+                placeholder={`${labels.customerShort}を検索...`}
                 className="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
               />
             </div>
@@ -305,7 +307,7 @@ export default function MessagingPanel({ facilityId, theme }) {
             {filteredCustomers.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-32 text-slate-400 text-xs gap-2">
                 <User size={22} className="opacity-40" />
-                <span>患者が見つかりません</span>
+                <span>{labels.customerShort}が見つかりません</span>
               </div>
             ) : (
               filteredCustomers.map((c) => {
@@ -363,7 +365,7 @@ export default function MessagingPanel({ facilityId, theme }) {
           {!selectedCustomer ? (
             <div className="flex-1 flex flex-col items-center justify-center text-slate-400 gap-3">
               <Inbox size={32} className="opacity-30" />
-              <p className="text-sm">左のリストから患者を選択してください</p>
+              <p className="text-sm">左のリストから{labels.customerShort}を選択してください</p>
             </div>
           ) : (
             <>
@@ -496,7 +498,7 @@ export default function MessagingPanel({ facilityId, theme }) {
               <div className="shrink-0 border-t border-slate-200 bg-white p-4 space-y-2">
                 {channel === 'line' && !selectedCustomer.line_user_id && (
                   <div className="bg-amber-50 border border-amber-200 rounded-xl p-2.5 text-[11px] text-amber-800 font-bold">
-                    ⚠️ LINEユーザーIDが未登録です。患者情報に line_user_id を追加すると送信できます。
+                    ⚠️ LINEユーザーIDが未登録です。{labels.customerShort}情報に line_user_id を追加すると送信できます。
                   </div>
                 )}
                 {channel === 'email' && (

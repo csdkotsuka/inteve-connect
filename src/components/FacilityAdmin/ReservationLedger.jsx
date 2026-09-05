@@ -39,16 +39,27 @@ import {
   batchSyncGoogleCalendar,
 } from '../../utils/googleCalendarSyncService';
 import { getClosureInfo } from '../../utils/clinicSchedule';
+import { getLabels } from '../../constants/labels';
 import ReservationDetailModal from './ReservationDetailModal';
 
-const STATUS_LABELS = {
+const getStatusLabels = (industryType) => ({
   confirmed: { label: '予約確定', bg: 'bg-blue-50', text: 'text-blue-700' },
-  checked_in: { label: '来院受付', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  completed: { label: '診察完了', bg: 'bg-slate-100', text: 'text-slate-600' },
+  checked_in: {
+    label: industryType === 'beauty' || industryType === 'general' ? '来店受付' : '来院受付',
+    bg: 'bg-emerald-50',
+    text: 'text-emerald-700',
+  },
+  completed: {
+    label: industryType === 'beauty' ? '施術完了' : industryType === 'general' ? '利用完了' : '診察完了',
+    bg: 'bg-slate-100',
+    text: 'text-slate-600',
+  },
   cancelled: { label: 'キャンセル', bg: 'bg-rose-50', text: 'text-rose-700' },
-};
+});
 
-export default function ReservationLedger({ facilityId, staffs, scheduleConfig, theme }) {
+export default function ReservationLedger({ facilityId, staffs, scheduleConfig, theme, industryType }) {
+  const labels = getLabels(industryType);
+  const STATUS_LABELS = getStatusLabels(industryType);
   const [viewType, setViewType] = useState('day');
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [reservations, setReservations] = useState([]);
@@ -79,7 +90,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
 
   const handleBatchSync = async () => {
     setIsSyncing(true);
-    setSyncMessage('Googleカレンダーを取り込み中...');
+    setSyncMessage('カレンダーを取り込み中...');
     const res = await batchSyncGoogleCalendar(facilityId, activeStaffs);
     await loadReservations();
 
@@ -341,10 +352,10 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
             onClick={handleBatchSync}
             disabled={isSyncing}
             className="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 cursor-pointer border border-slate-200"
-            title="Googleカレンダーと同期"
+            title="カレンダーと同期"
           >
             <RefreshCw size={13} className={isSyncing ? 'animate-spin text-blue-600' : ''} />
-            <span className="hidden sm:inline">Google同期</span>
+            <span className="hidden sm:inline">カレンダー同期</span>
           </button>
           <button
             onClick={() => {
@@ -391,26 +402,40 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
                 {/* ヘッダー */}
                 <div
                   className={`grid border-b border-slate-200 ${dayClosure.isClosed ? 'bg-rose-50/70' : 'bg-slate-50/90'} sticky top-0 z-10 min-w-[840px]`}
-                  style={{ gridTemplateColumns: `80px repeat(${activeStaffs.length}, minmax(160px, 1fr))` }}
+                  style={{ gridTemplateColumns: `80px repeat(${activeStaffs.length}, minmax(170px, 1fr))` }}
                 >
                   <div className="p-3 text-center text-xs font-bold text-slate-400 border-r border-slate-200 font-mono">時間</div>
                   {activeStaffs.map((staff, idx) => (
-                    <div key={staff.id || idx} className="p-3 border-r border-slate-200 last:border-r-0 flex items-center justify-between">
+                    <div
+                      key={staff.id || idx}
+                      className={`p-3 border-r border-slate-200 last:border-r-0 flex items-center justify-between transition-colors ${
+                        staff.accepts_new_patients ? 'bg-emerald-50/60 border-b-2 border-b-emerald-500' : ''
+                      }`}
+                    >
                       <div className="flex items-center gap-2 truncate">
                         <div
-                          className="w-7 h-7 rounded-xl text-white text-xs font-bold flex items-center justify-center shrink-0"
+                          className="w-8 h-8 rounded-xl text-white text-xs font-bold flex items-center justify-center shrink-0 shadow-xs"
                           style={{ backgroundColor: staff.badge_color || theme.primary }}
                         >
                           {staff.name.slice(0, 1)}
                         </div>
                         <div className="truncate">
-                          <div className="text-xs font-bold text-slate-800 truncate">{staff.name}</div>
-                          <div className="text-[10px] text-slate-400 truncate">{staff.title || 'スタッフ'}</div>
+                          <div className="text-xs font-bold text-slate-800 truncate flex items-center gap-1">
+                            {staff.name}
+                          </div>
+                          <div className="text-[11px] text-slate-500 truncate">{staff.title || 'スタッフ'}</div>
                         </div>
                       </div>
-                      {staff.google_calendar_id && (
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-blue-50 text-blue-600 font-bold shrink-0">Cal</span>
-                      )}
+                      <div className="flex flex-col items-end gap-1 shrink-0 ml-1">
+                        {staff.accepts_new_patients && (
+                          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold border border-emerald-300">
+                            ★ {labels.firstVisitShort}受付
+                          </span>
+                        )}
+                        {staff.google_calendar_id && (
+                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-blue-50 text-blue-600 font-bold">Cal</span>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -418,7 +443,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
                 {/* タイムテーブル（ドラッグ＆ドロップ対応） */}
                 <div
                   className="grid min-w-[840px] divide-y divide-slate-100"
-                  style={{ gridTemplateColumns: `80px repeat(${activeStaffs.length}, minmax(160px, 1fr))` }}
+                  style={{ gridTemplateColumns: `80px repeat(${activeStaffs.length}, minmax(170px, 1fr))` }}
                 >
                   {timeSlots.map((time) => (
                     <React.Fragment key={time}>
@@ -435,7 +460,11 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
                           <div
                             key={`${staff.id || sIdx}-${time}`}
                             className={`p-1 min-h-[56px] border-r border-slate-100 last:border-r-0 relative transition-colors space-y-1.5 ${
-                              isTarget ? 'bg-blue-50 ring-2 ring-inset ring-blue-400' : 'hover:bg-slate-50/50'
+                              isTarget
+                                ? 'bg-blue-50 ring-2 ring-inset ring-blue-400'
+                                : staff.accepts_new_patients
+                                ? 'bg-emerald-50/20 hover:bg-emerald-50/40'
+                                : 'hover:bg-slate-50/50'
                             }`}
                             onDragOver={(e) => handleDragOver(e, staff.id, time)}
                             onDrop={(e) => handleDrop(e, staff.id, time)}
@@ -653,6 +682,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
             reservation={selectedReservation}
             staffs={activeStaffs}
             theme={theme}
+            industryType={industryType}
             onClose={() => setSelectedReservation(null)}
             onUpdateStatus={handleUpdateStatus}
           />
@@ -667,58 +697,57 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-5"
+              className="w-full max-w-sm bg-white rounded-3xl p-6 shadow-2xl space-y-4"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center">
-                  <AlertTriangle size={20} className="text-amber-600" />
+                <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                  <AlertTriangle size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-base text-slate-800">予約の移動を確認</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Googleカレンダーと同期して変更を保存します</p>
+                  <h3 className="font-bold text-sm text-slate-800 font-serif">予約の変更確認</h3>
+                  <p className="text-[11px] text-slate-500">GoogleカレンダーおよびDBを同期更新します</p>
                 </div>
               </div>
 
-              <div className="bg-slate-50 rounded-2xl p-4 space-y-3 text-xs">
-                <div className="flex items-center gap-2 text-slate-600">
-                  <span className="font-bold text-slate-800">{syncDialogData.reservation.customer_name} 様</span>
-                  <span className="text-slate-400">の予約を移動します</span>
+              <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+                <div className="font-bold text-slate-800">{syncDialogData.reservation.customer_name} 様</div>
+                <div className="flex items-center justify-between text-slate-500">
+                  <span>変更前:</span>
+                  <span className="font-mono">{syncDialogData.prevStaffName} / {syncDialogData.reservation.start_time}〜</span>
                 </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="bg-white rounded-xl p-3 border border-slate-200">
-                    <div className="text-[10px] text-slate-400 mb-1">移動前</div>
-                    <div className="font-bold text-slate-700">{syncDialogData.reservation.staff_name}</div>
-                    <div className="font-mono text-slate-600">{syncDialogData.reservation.start_time}〜</div>
-                  </div>
-                  <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                    <div className="text-[10px] text-blue-600 mb-1">移動後</div>
-                    <div className="font-bold text-blue-800">{syncDialogData.newStaffName}</div>
-                    <div className="font-mono text-blue-700">{syncDialogData.newTime}〜</div>
-                  </div>
+                <div className="flex items-center justify-between font-bold text-indigo-600">
+                  <span>変更後:</span>
+                  <span className="font-mono">{syncDialogData.newStaffName} / {syncDialogData.targetTime}〜</span>
                 </div>
-                {syncDialogData.newCalendarId && (
-                  <div className="flex items-center gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 p-2 rounded-xl">
-                    <Check size={12} />
-                    <span>Googleカレンダー（{syncDialogData.newStaffName}）と自動同期します</span>
-                  </div>
-                )}
               </div>
 
-              <div className="flex gap-2 justify-end">
+              <div className="flex justify-end gap-2 pt-1">
                 <button
+                  type="button"
                   onClick={() => setSyncDialogData(null)}
-                  className="px-4 py-2 text-slate-600 font-bold text-sm cursor-pointer hover:bg-slate-100 rounded-xl"
+                  disabled={isSavingMove}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-slate-500 hover:bg-slate-100 cursor-pointer"
                 >
                   キャンセル
                 </button>
                 <button
+                  type="button"
                   onClick={handleConfirmMove}
                   disabled={isSavingMove}
-                  className="px-5 py-2 rounded-xl text-white font-bold text-sm shadow-md cursor-pointer flex items-center gap-2 disabled:opacity-70"
+                  className="px-5 py-2 rounded-xl text-xs font-bold text-white shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   style={{ backgroundColor: theme.primary }}
                 >
-                  {isSavingMove ? <RefreshCw size={15} className="animate-spin" /> : <Check size={15} />}
-                  移動して同期
+                  {isSavingMove ? (
+                    <>
+                      <RefreshCw size={13} className="animate-spin" />
+                      <span>同期更新中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Check size={14} />
+                      <span>変更を確定</span>
+                    </>
+                  )}
                 </button>
               </div>
             </motion.div>
@@ -726,7 +755,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
         )}
       </AnimatePresence>
 
-      {/* ── 新規予約モーダル ── */}
+      {/* ── 新規予約追加モーダル ── */}
       {isAddModalOpen && newReservationData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
           <motion.form
@@ -741,7 +770,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
             </div>
             <div className="space-y-3">
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">患者氏名</label>
+                <label className="font-bold text-slate-700">{labels.customer}氏名</label>
                 <input type="text" required value={newReservationData.customer_name}
                   onChange={(e) => setNewReservationData({ ...newReservationData, customer_name: e.target.value })}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
@@ -754,17 +783,17 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
                 </div>
                 <div className="space-y-1">
-                  <label className="font-bold text-slate-700">区分</label>
+                  <label className="font-bold text-slate-700">{labels.patientType}</label>
                   <select value={newReservationData.customer_type}
                     onChange={(e) => setNewReservationData({ ...newReservationData, customer_type: e.target.value })}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-                    <option value="returning">再診</option>
-                    <option value="new">新患</option>
+                    <option value="returning">{labels.returningVisitShort}</option>
+                    <option value="new">{labels.firstVisitShort}</option>
                   </select>
                 </div>
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">担当スタッフ</label>
+                <label className="font-bold text-slate-700">担当{labels.staffRole ? labels.staffRole.split('・')[0] : 'スタッフ'}</label>
                 <select value={newReservationData.staff_id}
                   onChange={(e) => setNewReservationData({ ...newReservationData, staff_id: e.target.value })}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl">
@@ -774,7 +803,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
                 </select>
               </div>
               <div className="space-y-1">
-                <label className="font-bold text-slate-700">メニュー</label>
+                <label className="font-bold text-slate-700">{labels.serviceMenu}</label>
                 <input type="text" value={newReservationData.menu_name}
                   onChange={(e) => setNewReservationData({ ...newReservationData, menu_name: e.target.value })}
                   className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl" />
