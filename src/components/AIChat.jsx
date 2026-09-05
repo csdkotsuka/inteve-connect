@@ -140,7 +140,7 @@ export default function AIChat({ patient, onReservationComplete }) {
 
     // Googleカレンダーから空き枠を取得
     setIsLoadingSlots(true);
-    const slots = await fetchAvailableSlots(duration);
+    const slots = await fetchAvailableSlots(duration, patient);
     setAvailableSlots(slots);
     setIsLoadingSlots(false);
 
@@ -173,10 +173,11 @@ export default function AIChat({ patient, onReservationComplete }) {
     // Googleカレンダー（GAS）＋ Supabase（appointments）への保存を実行
     const saveResult = await createReservation({
       patient: {
-        name: patient.name,
-        phone: patient.phone,
-        patient_type: patient.patientType,
-        patient_type_label: patient.patientTypeLabel,
+        ...patient,
+        name: patient?.name,
+        phone: patient?.phone,
+        patient_type: patient?.patientType,
+        patient_type_label: patient?.patientTypeLabel,
       },
       service: {
         service_id: selectedService.id,

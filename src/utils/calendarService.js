@@ -8,9 +8,10 @@ import { callGasApi, createGoogleCalendarEvent, STAFF_CALENDARS } from './google
 /**
  * Googleカレンダー & Supabaseから予約済み時間を取得し、空きスロットを動的に算出する
  * @param {number} durationMinutes
+ * @param {object} [patient] - 予約患者情報（担当スタッフ情報を含む場合あり）
  * @returns {Promise<Array<{label: string, value: string, datetime: string}>>}
  */
-export async function fetchAvailableSlots(durationMinutes = 30) {
+export async function fetchAvailableSlots(durationMinutes = 30, patient = null) {
   let bookedTimes = [];
 
   const now = new Date();
@@ -18,15 +19,43 @@ export async function fetchAvailableSlots(durationMinutes = 30) {
   const maxDate = addDays(now, 8);
   const toIso = maxDate.toISOString();
 
+  const facility = await getFacilityProfile();
+  const isStaffAssignmentEnabled = facility?.is_staff_assignment_enabled !== false;
+  const staffs = await getFacilityStaffs();
+
+  // 対象カレンダーの選定（担当制ONかつ再診で担当者がいる場合、または新規受付カレンダー）
+  const newPatientStaff = staffs.find((s) => s.is_active !== false && s.accepts_new_patients)
+    || staffs.find((s) => s.is_active !== false)
+    || staffs[0];
+
+  let targetStaff = null;
+  const isRet = patient?.isReturning || patient?.patient_type === 'returning';
+  const assignedStaffId = patient?.assigned_staff_id || patient?.record?.assigned_staff_id;
+
+  if (isRet && isStaffAssignmentEnabled && assignedStaffId) {
+    targetStaff = staffs.find((s) => s.id === assignedStaffId && s.is_active !== false) || newPatientStaff;
+  } else {
+    targetStaff = newPatientStaff;
+  }
+
+  const targetCalendarId = targetStaff?.google_calendar_id || STAFF_CALENDARS[0]?.google_calendar_id || '';
+
   // 1. Supabaseの有効な予約を取得（高速）
   if (supabase) {
     try {
-      const { data: dbRes } = await supabase
+      let query = supabase
         .from('reservations')
-        .select('start_at, end_at')
+        .select('start_at, end_at, staff_id')
         .neq('status', 'cancelled')
         .gte('start_at', fromIso)
         .lte('start_at', toIso);
+
+      // 特定スタッフの空き枠を算出する場合はそのスタッフの予約を対象に
+      if (targetStaff?.id) {
+        query = query.or(`staff_id.eq.${targetStaff.id},staff_id.is.null`);
+      }
+
+      const { data: dbRes } = await query;
 
       if (dbRes && dbRes.length > 0) {
         dbRes.forEach((r) => {
@@ -38,12 +67,11 @@ export async function fetchAvailableSlots(durationMinutes = 30) {
     }
   }
 
-  // 2. Googleカレンダーからも直接取得（念のための補完）
+  // 2. Googleカレンダーからも直接取得（対象カレンダーIDを使用）
   try {
-    const primaryCalId = STAFF_CALENDARS[0]?.google_calendar_id;
-    if (primaryCalId) {
+    if (targetCalendarId) {
       const json = await callGasApi('get_events', {
-        calendarId: primaryCalId,
+        calendarId: targetCalendarId,
         from: fromIso,
         to: toIso,
       });
@@ -94,7 +122,7 @@ export async function fetchAvailableSlots(durationMinutes = 30) {
 }
 
 /**
- * WEBチャット予約確定時：Googleカレンダー（GAS）とSupabase（reservationsテーブル）へ同時保存
+ * WEBチャット予約確定時：担当制・新患カレンダーフラグに基づいて適切なGoogleカレンダーとSupabaseへ保存
  * @param {object} param0
  * @returns {Promise<object>}
  */
@@ -107,8 +135,28 @@ export async function createReservation({ patient, service, slot }) {
 
   const facility = await getFacilityProfile();
   const facilityId = facility?.id || null;
+  const isStaffAssignmentEnabled = facility?.is_staff_assignment_enabled !== false;
   const staffs = await getFacilityStaffs();
-  const assignedStaff = staffs.find((s) => s.is_active !== false) || staffs[0];
+
+  // 1. 新規患者（新患）受け入れカレンダー（accepts_new_patients: true）
+  const newPatientStaff = staffs.find((s) => s.is_active !== false && s.accepts_new_patients)
+    || staffs.find((s) => s.is_active !== false)
+    || staffs[0];
+
+  let assignedStaff = null;
+  const isRet = patient.isReturning || patient.patient_type === 'returning';
+  const targetStaffId = patient.assigned_staff_id || patient.record?.assigned_staff_id;
+
+  // 2. 再診で担当制が有効な場合：患者の担当スタッフを割り当て
+  if (isRet && isStaffAssignmentEnabled && targetStaffId) {
+    assignedStaff = staffs.find((s) => s.id === targetStaffId && s.is_active !== false);
+  }
+
+  // 3. 担当スタッフが見つからない場合（新患、または担当制OFF、または担当未設定）：新患用受付カレンダー
+  if (!assignedStaff) {
+    assignedStaff = newPatientStaff;
+  }
+
   const calendarId = assignedStaff?.google_calendar_id || STAFF_CALENDARS[0]?.google_calendar_id || '';
 
   const startDate = new Date(slot.datetime);
@@ -117,7 +165,7 @@ export async function createReservation({ patient, service, slot }) {
   const startAtIso = startDate.toISOString();
   const endAtIso = endDate.toISOString();
 
-  // 1. Googleカレンダー（GAS）に予定を直接書き込む
+  // 4. Googleカレンダー（GAS）に対象スタッフのカレンダーIDで予定を書き込む
   try {
     const eventId = await createGoogleCalendarEvent({
       calendarId,
@@ -126,7 +174,7 @@ export async function createReservation({ patient, service, slot }) {
       menuName: service.service_label || service.service_id || '一般診療',
       startAt: startAtIso,
       endAt: endAtIso,
-      memo: service.symptom_detail || 'WEB問診回答あり',
+      memo: `${service.symptom_detail || 'WEB問診回答あり'} (担当: ${assignedStaff?.name || '新患受付'})`,
     });
 
     if (eventId) {

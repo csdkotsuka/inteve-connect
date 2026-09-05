@@ -754,6 +754,7 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                       phone: '',
                       email: '',
                       google_calendar_id: '',
+                      accepts_new_patients: false,
                       is_active: true,
                     });
                     setIsStaffModalOpen(true);
@@ -763,6 +764,41 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 >
                   <Plus size={16} />
                   スタッフを追加
+                </button>
+              </div>
+
+              {/* 担当制（指名・担当スタッフ制）の運用切り替え設定 */}
+              <div className="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-slate-800 text-sm">担当制（スタッフ指名制）の運用</span>
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${facilityProfile.is_staff_assignment_enabled !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-600'}`}>
+                      {facilityProfile.is_staff_assignment_enabled !== false ? '担当制: 有効' : '担当制: 無効（一括受付）'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    {facilityProfile.is_staff_assignment_enabled !== false
+                      ? '【有効中】患者一覧で割り当てた担当スタッフが存在する場合、再診予約はその担当者のGoogleカレンダーに自動追加されます。新患や担当未設定の場合は「新患受付カレンダー」へ登録されます。'
+                      : '【無効中】すべての予約（新患・再診）を、指定された「新患受付カレンダー」へ一括登録します。'}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const nextVal = facilityProfile.is_staff_assignment_enabled === false ? true : false;
+                    const updated = { ...facilityProfile, is_staff_assignment_enabled: nextVal };
+                    setFacilityProfile(updated);
+                    await saveFacilityProfile(updated);
+                    showToast(nextVal ? '担当制運用を【有効】に設定しました' : '担当制運用を【無効】に設定しました');
+                  }}
+                  className={`px-4 py-2.5 rounded-xl font-bold text-xs transition-all cursor-pointer shrink-0 border flex items-center gap-2 ${
+                    facilityProfile.is_staff_assignment_enabled !== false
+                      ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm'
+                      : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                  }`}
+                >
+                  <CheckCircle2 size={14} />
+                  <span>{facilityProfile.is_staff_assignment_enabled !== false ? '担当制を無効にする' : '担当制を有効にする'}</span>
                 </button>
               </div>
 
@@ -782,11 +818,16 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                           {staff.name.slice(0, 1)}
                         </div>
                         <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <h3 className="text-sm font-bold text-slate-800">{staff.name}</h3>
                             <span className="text-[10px] px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">
                               {staff.title}
                             </span>
+                            {staff.accepts_new_patients && (
+                              <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center gap-0.5">
+                                ★ 新患受付カレンダー
+                              </span>
+                            )}
                           </div>
                           <div className="text-[11px] text-slate-400 space-y-0.5">
                             {staff.email && <p>連絡先: {staff.email}</p>}
@@ -1011,6 +1052,26 @@ export default function FacilityAdminDashboard({ onBackToBooking }) {
                 />
                 <p className="text-[10px] text-slate-500 leading-relaxed mt-1">
                   ※このスタッフの予約枠と同期するGoogleカレンダーのIDを入力します（1施設あたり最大10カレンダーまで設定可能）。
+                </p>
+              </div>
+
+              {/* 新規患者（新患）受け入れカレンダーフラグ */}
+              <div className="p-3 bg-emerald-50/60 rounded-xl border border-emerald-200/80 space-y-1">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingStaff.accepts_new_patients || false}
+                    onChange={(e) =>
+                      setEditingStaff({ ...editingStaff, accepts_new_patients: e.target.checked })
+                    }
+                    className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-slate-300 cursor-pointer"
+                  />
+                  <span className="font-bold text-slate-800 text-xs">
+                    新規患者（新患）を受け入れるカレンダーとして設定
+                  </span>
+                </label>
+                <p className="text-[10px] text-slate-500 pl-6 leading-relaxed">
+                  ※初診の患者様や担当未定の予約は、このカレンダーに自動登録されます（後から患者一覧で担当者を変更できます）。
                 </p>
               </div>
 

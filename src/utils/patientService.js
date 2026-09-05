@@ -50,11 +50,13 @@ export async function matchPatient(name, phone) {
           patientTypeLabel: '再診（通院歴あり）',
           customerCode,
           customerRank: customer.customer_rank || 'regular',
+          assigned_staff_id: customer.assigned_staff_id || null,
           record: {
             id: customer.id,
             name: customer.name || cleanName,
             phone: customer.phone || phone,
             customer_code: customerCode,
+            assigned_staff_id: customer.assigned_staff_id || null,
             last_visit: lastVisit,
             notes: notes,
           },
@@ -72,6 +74,7 @@ export async function matchPatient(name, phone) {
     patientTypeLabel: '新患（初診）',
     customerCode: null,
     customerRank: 'new',
+    assigned_staff_id: null,
     record: null,
   };
 }

@@ -20,16 +20,17 @@ export const DEFAULT_FACILITY_DATA = {
   line_official_id: '@776cdsuy',
   top_announcement: '【お知らせ】土曜日の診療時間を16:30までに変更いたしました。初診・再診ともに24時間WEB予約を受け付けております。',
   is_announcement_active: true,
+  is_staff_assignment_enabled: true,
   theme_id: 'terracotta',
 };
 
 // デフォルトスタッフ（1スタッフ1カレンダー対応）
 export const DEFAULT_STAFFS = [
-  { name: '前田 院長', role: 'facility_admin', title: '院長・歯科医師', badge_color: '#E06A3B', phone: '090-1111-2222', email: 'director@tsubaki.example.com', google_calendar_id: 'c_2b3dafc739d82dcefc4c2f7ce87e1a7d3ea50e9527daa531652bc6a3864a826c@group.calendar.google.com', is_active: true, display_order: 1 },
-  { name: '佐藤 医師', role: 'staff', title: '歯科医師', badge_color: '#0284C7', phone: '090-3333-4444', email: 'sato@tsubaki.example.com', google_calendar_id: 'c_36188ef578d225630a927fbd832617c43efe8e98893c4f4bab35b9b448ebdf93@group.calendar.google.com', is_active: true, display_order: 2 },
-  { name: '高橋 衛生士', role: 'staff', title: '主任歯科衛生士', badge_color: '#059669', phone: '090-5555-6666', email: 'takahashi@tsubaki.example.com', google_calendar_id: 'c_f60e73e582f959e85eb56c51d25d35b9519136ac8d5276bc4f1c59a384b8f119@group.calendar.google.com', is_active: true, display_order: 3 },
-  { name: '伊藤 受付', role: 'staff', title: '受付・コーディネーター', badge_color: '#E11D48', phone: '090-7777-8888', email: 'ito@tsubaki.example.com', google_calendar_id: 'c_7f247bb4fa8f015cb4f6c9b86ffbff65439c0d963643ca4f6538939bc0ebefc7@group.calendar.google.com', is_active: true, display_order: 4 },
-  { name: '渡辺 衛生士', role: 'staff', title: '歯科衛生士', badge_color: '#6366F1', phone: '090-9999-0000', email: 'watanabe@tsubaki.example.com', google_calendar_id: 'c_d6d616b9d3817ab19538507784881e1413146bc70452bcca4df670ec6af576c5@group.calendar.google.com', is_active: true, display_order: 5 },
+  { name: '前田 院長', role: 'facility_admin', title: '院長・歯科医師', badge_color: '#E06A3B', phone: '090-1111-2222', email: 'director@tsubaki.example.com', google_calendar_id: 'c_2b3dafc739d82dcefc4c2f7ce87e1a7d3ea50e9527daa531652bc6a3864a826c@group.calendar.google.com', accepts_new_patients: true, is_active: true, display_order: 1 },
+  { name: '佐藤 医師', role: 'staff', title: '歯科医師', badge_color: '#0284C7', phone: '090-3333-4444', email: 'sato@tsubaki.example.com', google_calendar_id: 'c_36188ef578d225630a927fbd832617c43efe8e98893c4f4bab35b9b448ebdf93@group.calendar.google.com', accepts_new_patients: false, is_active: true, display_order: 2 },
+  { name: '高橋 衛生士', role: 'staff', title: '主任歯科衛生士', badge_color: '#059669', phone: '090-5555-6666', email: 'takahashi@tsubaki.example.com', google_calendar_id: 'c_f60e73e582f959e85eb56c51d25d35b9519136ac8d5276bc4f1c59a384b8f119@group.calendar.google.com', accepts_new_patients: false, is_active: true, display_order: 3 },
+  { name: '伊藤 受付', role: 'staff', title: '受付・コーディネーター', badge_color: '#E11D48', phone: '090-7777-8888', email: 'ito@tsubaki.example.com', google_calendar_id: 'c_7f247bb4fa8f015cb4f6c9b86ffbff65439c0d963643ca4f6538939bc0ebefc7@group.calendar.google.com', accepts_new_patients: false, is_active: true, display_order: 4 },
+  { name: '渡辺 衛生士', role: 'staff', title: '歯科衛生士', badge_color: '#6366F1', phone: '090-9999-0000', email: 'watanabe@tsubaki.example.com', google_calendar_id: 'c_d6d616b9d3817ab19538507784881e1413146bc70452bcca4df670ec6af576c5@group.calendar.google.com', accepts_new_patients: false, is_active: true, display_order: 5 },
 ];
 
 /**
@@ -140,6 +141,7 @@ export async function saveFacilityProfile(profileData) {
         website_url: profileData.website_url,
         line_official_id: profileData.line_official_id || '@776cdsuy',
         top_announcement: profileData.top_announcement,
+        is_staff_assignment_enabled: profileData.is_staff_assignment_enabled !== false,
       };
 
       if (profileData.id) {
@@ -225,6 +227,7 @@ export async function saveSingleStaff(staffData) {
         phone: staffData.phone || '',
         email: staffData.email || '',
         google_calendar_id: staffData.google_calendar_id || '',
+        accepts_new_patients: staffData.accepts_new_patients === true,
         is_active: staffData.is_active !== false,
         facility_id: facilityId,
       };

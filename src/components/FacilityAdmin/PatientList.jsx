@@ -67,10 +67,11 @@ export default function PatientList({ facilityId, staffs, theme }) {
       if (!matchSearch || !matchRank) return false;
 
       if (filterStaffId !== 'all') {
+        const isAssigned = c.assigned_staff_id === filterStaffId;
         const hasStaffRes = reservations.some(
           (r) => r.customer_id === c.id && r.staff_id === filterStaffId
         );
-        if (!hasStaffRes) return false;
+        if (!isAssigned && !hasStaffRes) return false;
       }
       return true;
     });
@@ -86,7 +87,18 @@ export default function PatientList({ facilityId, staffs, theme }) {
     return past[0]?.start_at;
   };
 
+  const getAssignedStaff = (staffId) => {
+    if (!staffId) return null;
+    return staffs?.find((s) => s.id === staffId);
+  };
+
   const getUsualStaff = (customerId) => {
+    const customer = customers.find((c) => c.id === customerId);
+    if (customer?.assigned_staff_id) {
+      const assigned = staffs?.find((s) => s.id === customer.assigned_staff_id);
+      if (assigned) return assigned;
+    }
+
     const resForCust = reservations.filter((r) => r.customer_id === customerId);
     const staffCounts = {};
     resForCust.forEach((r) => {
@@ -208,6 +220,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
                   const RankIcon = rank.icon;
                   const custRes = getCustomerReservations(customer.id);
                   const lastVisit = getLastVisit(customer.id);
+                  const assignedStaff = getAssignedStaff(customer.assigned_staff_id);
                   const usualStaff = getUsualStaff(customer.id);
                   const isSelected = selectedCustomer?.id === customer.id;
 
@@ -221,17 +234,25 @@ export default function PatientList({ facilityId, staffs, theme }) {
                     >
                       <div
                         className="w-10 h-10 rounded-2xl flex items-center justify-center text-white font-black text-base shrink-0 shadow-xs"
-                        style={{ backgroundColor: rank.bg.includes('amber') ? '#D97706' : rank.bg.includes('emerald') ? '#059669' : (usualStaff?.badge_color || theme.primary) }}
+                        style={{ backgroundColor: assignedStaff?.badge_color || rank.bg.includes('amber') ? '#D97706' : rank.bg.includes('emerald') ? '#059669' : (usualStaff?.badge_color || theme.primary) }}
                       >
                         {customer.name.slice(0, 1)}
                       </div>
                       <div className="flex-1 truncate">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <span className="font-bold text-slate-800 text-sm truncate">{customer.name}</span>
                           <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold shrink-0 ${rank.bg} ${rank.text} flex items-center gap-0.5`}>
                             <RankIcon size={9} />
                             {rank.label}
                           </span>
+                          {assignedStaff && (
+                            <span
+                              className="text-[9px] px-1.5 py-0.5 rounded-full text-white font-bold shrink-0 shadow-2xs"
+                              style={{ backgroundColor: assignedStaff.badge_color || theme.primary }}
+                            >
+                              担当: {assignedStaff.name}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
                           <span className="font-mono">{customer.phone}</span>
@@ -285,6 +306,68 @@ export default function PatientList({ facilityId, staffs, theme }) {
               </div>
 
               <div className="p-5 space-y-4 max-h-[560px] overflow-y-auto">
+                {/* 担当スタッフ設定・変更 */}
+                <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-700">担当スタッフ指定:</span>
+                    {selectedCustomer.assigned_staff_id && (
+                      <span className="text-[10px] text-slate-400">
+                        次回以降の再診予約はこのスタッフのカレンダーに登録されます
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        const updated = { ...selectedCustomer, assigned_staff_id: null };
+                        setSelectedCustomer(updated);
+                        setCustomers((prev) => prev.map((c) => c.id === updated.id ? updated : c));
+                        if (supabase) {
+                          await supabase.from('customers').update({ assigned_staff_id: null }).eq('id', updated.id);
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all cursor-pointer ${
+                        !selectedCustomer.assigned_staff_id
+                          ? 'bg-slate-800 text-white border-slate-800 shadow-xs'
+                          : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      担当未設定（新患受付扱い）
+                    </button>
+
+                    {(staffs || []).map((stf) => {
+                      const isAssigned = selectedCustomer.assigned_staff_id === stf.id;
+                      return (
+                        <button
+                          key={stf.id}
+                          type="button"
+                          onClick={async () => {
+                            const updated = { ...selectedCustomer, assigned_staff_id: stf.id };
+                            setSelectedCustomer(updated);
+                            setCustomers((prev) => prev.map((c) => c.id === updated.id ? updated : c));
+                            if (supabase) {
+                              await supabase.from('customers').update({ assigned_staff_id: stf.id }).eq('id', updated.id);
+                            }
+                          }}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all flex items-center gap-1.5 cursor-pointer ${
+                            isAssigned
+                              ? 'text-white border-transparent shadow-xs ring-2 ring-offset-1 ring-slate-800/20'
+                              : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                          }`}
+                          style={isAssigned ? { backgroundColor: stf.badge_color || theme.primary } : {}}
+                        >
+                          <span
+                            className="w-2 h-2 rounded-full"
+                            style={{ backgroundColor: isAssigned ? '#fff' : (stf.badge_color || theme.primary) }}
+                          />
+                          <span>{stf.name}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 {/* ランク設定・変更 */}
                 <div className="bg-slate-50 rounded-2xl p-3.5 border border-slate-200/80 flex items-center justify-between gap-2">
                   <span className="text-xs font-bold text-slate-700">患者ランク変更:</span>
@@ -329,6 +412,7 @@ export default function PatientList({ facilityId, staffs, theme }) {
                     { label: 'ふりがな', value: selectedCustomer.kana },
                     { label: '電話番号', value: selectedCustomer.phone },
                     { label: 'メール', value: selectedCustomer.email },
+                    { label: '担当スタッフ', value: getAssignedStaff(selectedCustomer.assigned_staff_id)?.name || '未設定（新患受付カレンダー）' },
                     { label: '郵便番号', value: selectedCustomer.postal_code },
                     { label: '住所', value: [selectedCustomer.prefecture, selectedCustomer.address_line1, selectedCustomer.address_line2].filter(Boolean).join(' ') },
                     { label: '生年月日', value: selectedCustomer.birthday },
