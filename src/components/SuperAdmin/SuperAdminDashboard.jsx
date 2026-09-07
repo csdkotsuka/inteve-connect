@@ -189,31 +189,44 @@ export default function SuperAdminDashboard({ onSwitchView }) {
 
     if (supabase && selectedFacility.id) {
       try {
-        await supabase
+        const nextThemeColors = {
+          ...(selectedFacility.theme_colors || {}),
+          preset_id: selectedFacility.theme_id || selectedFacility.theme_colors?.preset_id || 'ocean',
+          is_patient_auth_enabled: Boolean(selectedFacility.is_patient_auth_enabled),
+        };
+
+        const payload = {
+          name: selectedFacility.name,
+          slug: selectedFacility.slug,
+          phone: selectedFacility.phone,
+          email: selectedFacility.email,
+          postal_code: selectedFacility.postal_code,
+          prefecture: selectedFacility.prefecture,
+          address_line1: selectedFacility.address_line1,
+          address_line2: selectedFacility.address_line2,
+          website_url: selectedFacility.website_url,
+          industry_type: selectedFacility.industry_type || 'medical',
+          theme_colors: nextThemeColors,
+          subscription_plan: selectedFacility.subscription_plan,
+          subscription_status: selectedFacility.subscription_status,
+          monthly_fee: selectedFacility.monthly_fee,
+          contract_started_at: selectedFacility.contract_started_at,
+          contract_ended_at: selectedFacility.contract_ended_at,
+          google_calendar_id: selectedFacility.google_calendar_id,
+          admin_system_memo: selectedFacility.admin_system_memo,
+          is_patient_auth_enabled: Boolean(selectedFacility.is_patient_auth_enabled),
+          is_active: selectedFacility.is_active,
+        };
+
+        const { error } = await supabase
           .from('facilities')
-          .update({
-            name: selectedFacility.name,
-            slug: selectedFacility.slug,
-            phone: selectedFacility.phone,
-            email: selectedFacility.email,
-            postal_code: selectedFacility.postal_code,
-            prefecture: selectedFacility.prefecture,
-            address_line1: selectedFacility.address_line1,
-            address_line2: selectedFacility.address_line2,
-            website_url: selectedFacility.website_url,
-            industry_type: selectedFacility.industry_type || 'medical',
-            theme_colors: selectedFacility.theme_colors,
-            subscription_plan: selectedFacility.subscription_plan,
-            subscription_status: selectedFacility.subscription_status,
-            monthly_fee: selectedFacility.monthly_fee,
-            contract_started_at: selectedFacility.contract_started_at,
-            contract_ended_at: selectedFacility.contract_ended_at,
-            google_calendar_id: selectedFacility.google_calendar_id,
-            admin_system_memo: selectedFacility.admin_system_memo,
-            is_patient_auth_enabled: selectedFacility.is_patient_auth_enabled,
-            is_active: selectedFacility.is_active,
-          })
+          .update(payload)
           .eq('id', selectedFacility.id);
+
+        if (error) {
+          delete payload.is_patient_auth_enabled;
+          await supabase.from('facilities').update(payload).eq('id', selectedFacility.id);
+        }
       } catch (err) {
         console.error('施設詳細更新エラー:', err);
       }
@@ -412,15 +425,28 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                               type="button"
                               onClick={async () => {
                                 const nextVal = !isAuthOn;
-                                const updatedFacility = { ...facility, is_patient_auth_enabled: nextVal };
+                                const nextThemeColors = {
+                                  ...(facility.theme_colors || {}),
+                                  preset_id: facility.theme_id || facility.theme_colors?.preset_id || 'ocean',
+                                  is_patient_auth_enabled: nextVal,
+                                };
+                                const updatedFacility = {
+                                  ...facility,
+                                  is_patient_auth_enabled: nextVal,
+                                  theme_colors: nextThemeColors,
+                                };
                                 await saveFacilityProfile(updatedFacility);
                                 if (supabase && facility.id) {
-                                  try {
+                                  const { error } = await supabase
+                                    .from('facilities')
+                                    .update({ is_patient_auth_enabled: nextVal, theme_colors: nextThemeColors })
+                                    .eq('id', facility.id);
+                                  if (error) {
                                     await supabase
                                       .from('facilities')
-                                      .update({ is_patient_auth_enabled: nextVal })
+                                      .update({ theme_colors: nextThemeColors })
                                       .eq('id', facility.id);
-                                  } catch (e) {}
+                                  }
                                 }
                                 setFacilities(facilities.map((f) => (f.id === facility.id ? updatedFacility : f)));
                                 showToast(`患者認証を「${nextVal ? 'ON (本番認証)' : 'OFF (ダミー/スルー)'}」に更新しました`);

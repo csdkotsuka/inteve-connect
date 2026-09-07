@@ -239,17 +239,15 @@ export async function saveFacilityProfile(profileData) {
       };
 
       if (profileData.id) {
-        try {
-          await supabase.from('facilities').update(payload).eq('id', profileData.id);
-        } catch (err) {
-          // もしカラムが存在しない場合は theme_colors のみに退避して保存
+        const { error } = await supabase.from('facilities').update(payload).eq('id', profileData.id);
+        if (error) {
+          // もしカラムが存在しない場合は theme_colors に退避して保存
           delete payload.is_patient_auth_enabled;
           await supabase.from('facilities').update(payload).eq('id', profileData.id);
         }
       } else {
-        try {
-          await supabase.from('facilities').insert([payload]);
-        } catch (err) {
+        const { error } = await supabase.from('facilities').insert([payload]);
+        if (error) {
           delete payload.is_patient_auth_enabled;
           await supabase.from('facilities').insert([payload]);
         }
