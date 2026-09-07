@@ -115,15 +115,20 @@ export default function SuperAdminDashboard({ onSwitchView }) {
         const { data, error } = await supabase.from('facilities').select('*').order('created_at', { ascending: true });
         if (!error && data && data.length > 0) {
           const formatted = data.map((item) => {
-            const localAuth = localStorage.getItem(`inteve_facility_patient_auth_${item.slug}`);
             let isAuth = false;
-            if (localAuth !== null) {
-              isAuth = localAuth === 'true';
-            } else if (item.is_patient_auth_enabled !== undefined && item.is_patient_auth_enabled !== null) {
+            if (item.is_patient_auth_enabled !== undefined && item.is_patient_auth_enabled !== null) {
               isAuth = Boolean(item.is_patient_auth_enabled);
             } else if (item.theme_colors?.is_patient_auth_enabled !== undefined) {
               isAuth = Boolean(item.theme_colors.is_patient_auth_enabled);
+            } else {
+              const localAuth = localStorage.getItem(`inteve_facility_patient_auth_${item.slug}`);
+              if (localAuth !== null) {
+                isAuth = localAuth === 'true';
+              }
             }
+            try {
+              localStorage.setItem(`inteve_facility_patient_auth_${item.slug}`, String(isAuth));
+            } catch (e) {}
             return {
               ...item,
               is_patient_auth_enabled: isAuth,

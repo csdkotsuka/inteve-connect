@@ -110,6 +110,7 @@ export default function AuthModal({
   const verifyLineUser = async (lineUserId, profile) => {
     setIsVerifying(true);
     setLineMatchStatus('checking');
+    setAuthMethod('line');
 
     try {
       const lookup = await findPatientByLineUserId(lineUserId, facilityId);
@@ -118,7 +119,7 @@ export default function AuthModal({
         setMatchResult(lookup);
         setFormData((prev) => ({
           ...prev,
-          name: lookup.record.name || profile.displayName || '',
+          name: lookup.record.name || profile?.displayName || '',
           phone: lookup.record.phone || '',
           email: lookup.record.email || '',
         }));
@@ -128,7 +129,7 @@ export default function AuthModal({
         setMatchResult(null);
         setFormData((prev) => ({
           ...prev,
-          name: prev.name || profile.displayName || '',
+          name: prev.name || profile?.displayName || '',
         }));
       }
     } catch (err) {
@@ -181,6 +182,7 @@ export default function AuthModal({
   const handleSelectDevLineAccount = (profile) => {
     setSimulatedLineProfile(profile);
     setCurrentLineProfile(profile);
+    setAuthMethod('line');
     setShowLineDevSelector(false);
     verifyLineUser(profile.userId, profile);
   };
@@ -669,14 +671,27 @@ export default function AuthModal({
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={handleProceedWithVerifiedLineUser}
-                className="w-full sm:w-auto px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer shrink-0 transition-all hover:scale-105"
-              >
-                <span>予約画面へ進む</span>
-                <ArrowRight size={14} />
-              </button>
+              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLineMatchStatus('not_found');
+                    setMatchResult(null);
+                  }}
+                  className="text-[11px] text-slate-500 hover:text-blue-700 underline px-2 py-1 cursor-pointer"
+                  title="お名前や電話番号を再入力して登録する"
+                >
+                  再登録
+                </button>
+                <button
+                  type="button"
+                  onClick={handleProceedWithVerifiedLineUser}
+                  className="flex-1 sm:flex-initial px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer shrink-0 transition-all hover:scale-105"
+                >
+                  <span>予約画面へ進む</span>
+                  <ArrowRight size={14} />
+                </button>
+              </div>
             </div>
           )}
 

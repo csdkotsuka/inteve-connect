@@ -111,23 +111,22 @@ export async function getFacilityProfile(slug = null) {
     }
   }
 
-  // ローカルキャッシュの優先チェック
+  // ローカルキャッシュの同期・フォールバック
   try {
-    const localAuthOverride = localStorage.getItem(`inteve_facility_patient_auth_${targetSlug || 'default'}`);
-    const saved = localStorage.getItem(FACILITY_STORAGE_KEY);
-    if (saved) {
-      const parsed = { ...DEFAULT_FACILITY_DATA, ...JSON.parse(saved) };
-      if (!resolvedFacility) {
-        resolvedFacility = parsed;
-      } else {
-        // ローカルストレージに最新設定があればマージ
-        if (parsed.is_patient_auth_enabled !== undefined) {
-          resolvedFacility.is_patient_auth_enabled = Boolean(parsed.is_patient_auth_enabled);
-        }
+    if (resolvedFacility) {
+      // Supabaseから正常取得できた場合は実DBを真実の唯一のソースとし、ローカルストレージも最新値に更新同期
+      localStorage.setItem(`inteve_facility_patient_auth_${targetSlug || 'default'}`, String(resolvedFacility.is_patient_auth_enabled));
+      localStorage.setItem(FACILITY_STORAGE_KEY, JSON.stringify(resolvedFacility));
+    } else {
+      // Supabase未接続・オフライン時のみローカルキャッシュから復元
+      const localAuthOverride = localStorage.getItem(`inteve_facility_patient_auth_${targetSlug || 'default'}`);
+      const saved = localStorage.getItem(FACILITY_STORAGE_KEY);
+      if (saved) {
+        resolvedFacility = { ...DEFAULT_FACILITY_DATA, ...JSON.parse(saved) };
       }
-    }
-    if (localAuthOverride !== null && resolvedFacility) {
-      resolvedFacility.is_patient_auth_enabled = localAuthOverride === 'true';
+      if (localAuthOverride !== null && resolvedFacility) {
+        resolvedFacility.is_patient_auth_enabled = localAuthOverride === 'true';
+      }
     }
   } catch (e) {}
 
@@ -175,22 +174,25 @@ export async function getFacilityBySlug(slug) {
     }
   }
 
-  // フォールバック（localStorage または デフォルト）
+  // ローカルキャッシュの同期・フォールバック
   try {
-    const localAuthOverride = localStorage.getItem(`inteve_facility_patient_auth_${slug}`);
-    const saved = localStorage.getItem(FACILITY_STORAGE_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.slug === slug) {
-        if (!resolved) {
+    if (resolved) {
+      // Supabaseから正常取得できた場合は実DBを真実の唯一のソースとし、ローカルストレージも最新値に更新同期
+      localStorage.setItem(`inteve_facility_patient_auth_${slug}`, String(resolved.is_patient_auth_enabled));
+      localStorage.setItem(FACILITY_STORAGE_KEY, JSON.stringify(resolved));
+    } else {
+      // Supabase未接続・オフライン時のみローカルキャッシュから復元
+      const localAuthOverride = localStorage.getItem(`inteve_facility_patient_auth_${slug}`);
+      const saved = localStorage.getItem(FACILITY_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.slug === slug) {
           resolved = { ...DEFAULT_FACILITY_DATA, ...parsed };
-        } else if (parsed.is_patient_auth_enabled !== undefined) {
-          resolved.is_patient_auth_enabled = Boolean(parsed.is_patient_auth_enabled);
         }
       }
-    }
-    if (localAuthOverride !== null && resolved) {
-      resolved.is_patient_auth_enabled = localAuthOverride === 'true';
+      if (localAuthOverride !== null && resolved) {
+        resolved.is_patient_auth_enabled = localAuthOverride === 'true';
+      }
     }
   } catch (e) {}
 

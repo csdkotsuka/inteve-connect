@@ -23,55 +23,79 @@ export async function findPatientByLineUserId(lineUserId, facilityId = null) {
 
       const { data, error } = await query.limit(1);
 
-      if (!error && data && data.length > 0) {
-        const customer = data[0];
+      if (!error && data) {
+        if (data.length > 0) {
+          const customer = data[0];
 
-        // 過去の予約履歴を1件取得
-        let lastVisit = '受診歴あり';
-        let notes = 'LINE連携済み患者';
-        const { data: resData } = await supabase
-          .from('reservations')
-          .select('start_at, ai_summary, status')
-          .eq('customer_id', customer.id)
-          .order('start_at', { ascending: false })
-          .limit(1);
+          // 過去の予約履歴を1件取得
+          let lastVisit = '受診歴あり';
+          let notes = 'LINE連携済み患者';
+          const { data: resData } = await supabase
+            .from('reservations')
+            .select('start_at, ai_summary, status')
+            .eq('customer_id', customer.id)
+            .order('start_at', { ascending: false })
+            .limit(1);
 
-        if (resData && resData.length > 0) {
-          lastVisit = resData[0].start_at ? resData[0].start_at.substring(0, 10) : '受診歴あり';
-          notes = resData[0].ai_summary || '受診歴あり';
-        }
+          if (resData && resData.length > 0) {
+            lastVisit = resData[0].start_at ? resData[0].start_at.substring(0, 10) : '受診歴あり';
+            notes = resData[0].ai_summary || '受診歴あり';
+          }
 
-        const customerCode = customer.customer_code || `No.${customer.id.substring(0, 5)}`;
+          const customerCode = customer.customer_code || `No.${customer.id.substring(0, 5)}`;
 
-        return {
-          isFound: true,
-          isReturning: true,
-          patientType: 'returning',
-          patientTypeLabel: 'LINE連携済み（再診）',
-          customerCode,
-          customerRank: customer.customer_rank || 'regular',
-          assigned_staff_id: customer.assigned_staff_id || null,
-          record: {
-            id: customer.id,
-            name: customer.name || customer.line_display_name,
-            phone: customer.phone || '',
-            email: customer.email || '',
-            line_user_id: customer.line_user_id,
-            line_display_name: customer.line_display_name,
-            line_picture_url: customer.line_picture_url,
-            customer_code: customerCode,
+          return {
+            isFound: true,
+            isReturning: true,
+            patientType: 'returning',
+            patientTypeLabel: 'LINE連携済み（再診）',
+            customerCode,
+            customerRank: customer.customer_rank || 'regular',
             assigned_staff_id: customer.assigned_staff_id || null,
-            last_visit: lastVisit,
-            notes: notes,
-          },
-        };
+            record: {
+              id: customer.id,
+              name: customer.name || customer.line_display_name,
+              phone: customer.phone || '',
+              email: customer.email || '',
+              line_user_id: customer.line_user_id,
+              line_display_name: customer.line_display_name,
+              line_picture_url: customer.line_picture_url,
+              customer_code: customerCode,
+              assigned_staff_id: customer.assigned_staff_id || null,
+              last_visit: lastVisit,
+              notes: notes,
+            },
+          };
+        } else {
+          // Supabase実DBに該当LINE患者が存在しない場合（レコード削除直後、または未登録の場合）
+          // ローカルキャッシュとの不整合を防ぐため、該当line_user_idをローカルストレージからも削除
+          try {
+            const saved = localStorage.getItem(LOCAL_CUSTOMERS_KEY);
+            if (saved) {
+              const customers = JSON.parse(saved);
+              const filtered = customers.filter((c) => c.line_user_id !== lineUserId);
+              localStorage.setItem(LOCAL_CUSTOMERS_KEY, JSON.stringify(filtered));
+            }
+            localStorage.removeItem('last_patient_info');
+          } catch (e) {}
+
+          return {
+            isFound: false,
+            isReturning: false,
+            patientType: 'new',
+            patientTypeLabel: 'LINE未連携（初診）',
+            customerCode: null,
+            customerRank: 'new',
+            record: null,
+          };
+        }
       }
     } catch (err) {
       console.warn('Supabase LINE患者照合エラー:', err);
     }
   }
 
-  // 2. ローカルキャッシュからのフォールバック検索
+  // 2. Supabaseオフライン時のみ、ローカルキャッシュからのフォールバック検索
   try {
     const saved = localStorage.getItem(LOCAL_CUSTOMERS_KEY);
     if (saved) {
@@ -139,6 +163,7 @@ export async function registerOrLinkLinePatient({
               name: cleanName || existingLine.name,
               phone: rawPhone || existingLine.phone,
               email: email || existingLine.email,
+              is_line_linked: true,
               line_display_name: lineDisplayName || existingLine.line_display_name,
               line_picture_url: linePictureUrl || existingLine.line_picture_url,
             })
@@ -168,6 +193,7 @@ export async function registerOrLinkLinePatient({
             .from('customers')
             .update({
               line_user_id: lineUserId || matched.line_user_id,
+              is_line_linked: Boolean(lineUserId || matched.line_user_id),
               line_display_name: lineDisplayName || matched.line_display_name,
               line_picture_url: linePictureUrl || matched.line_picture_url,
               name: cleanName || matched.name,
@@ -189,6 +215,7 @@ export async function registerOrLinkLinePatient({
           phone: rawPhone || '090-0000-0000',
           email: email || '',
           line_user_id: lineUserId || null,
+          is_line_linked: Boolean(lineUserId),
           line_display_name: lineDisplayName,
           line_picture_url: linePictureUrl,
           facility_id: facilityId || null,
