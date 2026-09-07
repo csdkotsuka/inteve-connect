@@ -347,4 +347,254 @@ export async function updateReservationStatusInDb(reservationId, newStatus) {
   return { success: false };
 }
 
+/**
+ * QRコードのテキストから患者・予約を照合し、当日予約を「受付完了（checked_in）」に更新
+ * @param {string} qrText - QRコードから読み取った文字列
+ * @param {string} [facilityId] - 施設UUID
+ */
+export async function checkInByQrCode(qrText, facilityId = null) {
+  if (!qrText || typeof qrText !== 'string') {
+    return { success: false, error: 'invalid_data', message: 'QRコードの内容が正しく読み取れませんでした。' };
+  }
+
+  const raw = qrText.trim();
+  let extractedReservationId = null;
+  let extractedCustomerId = null;
+  let extractedPhone = null;
+  let extractedCustomerCode = null;
+
+  // 1. JSONパース試行
+  if (raw.startsWith('{') && raw.endsWith('}')) {
+    try {
+      const parsed = JSON.parse(raw);
+      extractedReservationId = parsed.reservation_id || parsed.resId || parsed.id || null;
+      extractedCustomerId = parsed.customer_id || parsed.customerId || parsed.patient_id || null;
+      extractedPhone = parsed.phone || parsed.tel || null;
+      extractedCustomerCode = parsed.customer_code || parsed.code || null;
+    } catch (e) {}
+  }
+
+  // 2. URLクエリパース試行
+  if (!extractedReservationId && (raw.includes('?') || raw.startsWith('http'))) {
+    try {
+      const url = new URL(raw.startsWith('http') ? raw : `https://dummy.example.com/${raw}`);
+      extractedReservationId = url.searchParams.get('res_id') || url.searchParams.get('reservation_id');
+      extractedCustomerId = url.searchParams.get('patient_id') || url.searchParams.get('customer_id');
+      extractedPhone = url.searchParams.get('phone') || url.searchParams.get('tel');
+      extractedCustomerCode = url.searchParams.get('code') || url.searchParams.get('customer_code');
+    } catch (e) {}
+  }
+
+  // 3. プレーンテキスト判定
+  if (!extractedReservationId && !extractedCustomerId && !extractedPhone && !extractedCustomerCode) {
+    if (raw.startsWith('PT-') || raw.startsWith('pt-')) {
+      extractedCustomerCode = raw;
+    } else if (/^0\d{9,10}$/.test(raw.replace(/[\s-]/g, ''))) {
+      extractedPhone = raw.replace(/[\s-]/g, '');
+    } else if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(raw)) {
+      // UUID形式の場合はまず予約IDとして試す
+      extractedReservationId = raw;
+    } else {
+      extractedCustomerCode = raw;
+    }
+  }
+
+  if (!supabase) {
+    return {
+      success: true,
+      alreadyCheckedIn: false,
+      reservation: {
+        id: 'mock-res-001',
+        customer_name: '大塚 一樹',
+        customer_phone: '090-7549-8513',
+        customer_code: 'PT-1000',
+        staff_name: '前田 院長',
+        start_time: '10:30',
+        end_time: '11:00',
+        menu_name: '初診・一般診療（虫歯・検診）',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        status: 'checked_in',
+      },
+      message: '大塚 一樹 様の受付が完了しました（デモモード）',
+    };
+  }
+
+  try {
+    const today = new Date();
+    const todayStr = format(today, 'yyyy-MM-dd');
+    const startOfDay = `${todayStr}T00:00:00+09:00`;
+    const endOfDay = `${todayStr}T23:59:59+09:00`;
+
+    // 予約IDが特定できている場合
+    if (extractedReservationId) {
+      const { data: resById } = await supabase
+        .from('reservations')
+        .select(`
+          id, start_at, end_at, status, ai_summary, staff_memo,
+          staffs ( name, title, badge_color ),
+          customers ( id, name, phone, customer_code )
+        `)
+        .eq('id', extractedReservationId)
+        .maybeSingle();
+
+      if (resById) {
+        return await executeCheckInOnReservation(resById);
+      }
+    }
+
+    // 顧客ID/電話番号/診察券コードから当日予約を検索
+    let matchedCustomerId = extractedCustomerId;
+
+    if (!matchedCustomerId && (extractedPhone || extractedCustomerCode)) {
+      let custQuery = supabase.from('customers').select('id, name, phone, customer_code');
+      if (extractedPhone) {
+        const clean = extractedPhone.replace(/[\s-]/g, '');
+        custQuery = custQuery.or(`phone.eq.${extractedPhone},phone.eq.${clean}`);
+      } else if (extractedCustomerCode) {
+        custQuery = custQuery.eq('customer_code', extractedCustomerCode);
+      }
+      if (facilityId) {
+        custQuery = custQuery.or(`facility_id.eq.${facilityId},facility_id.is.null`);
+      }
+
+      const { data: custRows } = await custQuery.limit(1);
+      if (custRows && custRows.length > 0) {
+        matchedCustomerId = custRows[0].id;
+      }
+    }
+
+    // 当日予約をクエリ
+    let resQuery = supabase
+      .from('reservations')
+      .select(`
+        id, start_at, end_at, status, ai_summary, staff_memo,
+        staffs ( name, title, badge_color ),
+        customers ( id, name, phone, customer_code )
+      `)
+      .gte('start_at', startOfDay)
+      .lte('start_at', endOfDay)
+      .order('start_at', { ascending: true });
+
+    if (matchedCustomerId) {
+      resQuery = resQuery.eq('customer_id', matchedCustomerId);
+    } else if (extractedReservationId) {
+      resQuery = resQuery.eq('id', extractedReservationId);
+    } else {
+      // 識別子に合致する顧客が見つからない
+      return {
+        success: false,
+        error: 'customer_not_found',
+        message: '該当する患者情報が見つかりませんでした。診察券番号をご確認ください。',
+      };
+    }
+
+    if (facilityId) {
+      resQuery = resQuery.or(`facility_id.eq.${facilityId},facility_id.is.null`);
+    }
+
+    const { data: matchedReservations, error } = await resQuery;
+
+    if (!error && matchedReservations && matchedReservations.length > 0) {
+      // 当日予約が見つかった（未受付のものを優先）
+      const targetRes =
+        matchedReservations.find((r) => r.status === 'confirmed') ||
+        matchedReservations[0];
+      return await executeCheckInOnReservation(targetRes);
+    }
+
+    // 当日になければ、直近の直近予約（直近3日以内）も確認
+    const recentResQuery = supabase
+      .from('reservations')
+      .select(`
+        id, start_at, end_at, status, ai_summary, staff_memo,
+        staffs ( name, title, badge_color ),
+        customers ( id, name, phone, customer_code )
+      `)
+      .eq('customer_id', matchedCustomerId)
+      .order('start_at', { ascending: false })
+      .limit(1);
+
+    const { data: recentReservations } = await recentResQuery;
+    if (recentReservations && recentReservations.length > 0) {
+      const recent = recentReservations[0];
+      const recentDate = format(new Date(recent.start_at), 'yyyy-MM-dd');
+      return {
+        success: false,
+        error: 'no_today_reservation',
+        message: `本日のご予約はありません。（直近のご予約: ${recentDate} ${format(new Date(recent.start_at), 'HH:mm')}）`,
+        recentReservation: {
+          customer_name: recent.customers?.name || '予約患者',
+          date: recentDate,
+          time: format(new Date(recent.start_at), 'HH:mm'),
+        },
+      };
+    }
+
+    return {
+      success: false,
+      error: 'no_reservation',
+      message: '本日のご予約が見つかりませんでした。受付スタッフにお声がけください。',
+    };
+  } catch (e) {
+    console.error('QRチェックイン処理エラー:', e);
+    return { success: false, error: 'server_error', message: '受付照合中にエラーが発生しました。' };
+  }
+}
+
+/**
+ * 内部ヘルパー: 予約レコードに対してステータスを checked_in に更新しフォーマット済み結果を返す
+ */
+async function executeCheckInOnReservation(resRecord) {
+  const isAlreadyCheckedIn = resRecord.status === 'checked_in';
+  const isCompleted = resRecord.status === 'completed';
+
+  const start = new Date(resRecord.start_at);
+  const end = new Date(resRecord.end_at);
+
+  const formattedInfo = {
+    id: resRecord.id,
+    customer_name: resRecord.customers?.name || '予約患者',
+    customer_phone: resRecord.customers?.phone || '',
+    customer_code: resRecord.customers?.customer_code || '',
+    staff_name: resRecord.staffs?.name || '担当スタッフ',
+    staff_title: resRecord.staffs?.title || '',
+    badge_color: resRecord.staffs?.badge_color || '#3B82F6',
+    start_time: format(start, 'HH:mm'),
+    end_time: format(end, 'HH:mm'),
+    date: format(start, 'yyyy-MM-dd'),
+    menu_name: resRecord.ai_summary || '一般診療・検診',
+    memo: resRecord.staff_memo || '',
+    status: isAlreadyCheckedIn ? 'checked_in' : isCompleted ? 'completed' : 'checked_in',
+  };
+
+  if (isAlreadyCheckedIn) {
+    return {
+      success: true,
+      alreadyCheckedIn: true,
+      reservation: formattedInfo,
+      message: `${formattedInfo.customer_name} 様は既に本日受付済みです。`,
+    };
+  }
+
+  if (isCompleted) {
+    return {
+      success: true,
+      alreadyCheckedIn: true,
+      reservation: formattedInfo,
+      message: `${formattedInfo.customer_name} 様の本日の診療は完了しています。`,
+    };
+  }
+
+  // ステータスを checked_in に更新
+  await updateReservationStatusInDb(resRecord.id, 'checked_in');
+
+  return {
+    success: true,
+    alreadyCheckedIn: false,
+    reservation: formattedInfo,
+    message: `${formattedInfo.customer_name} 様の来院受付が完了しました！`,
+  };
+}
+
+
 

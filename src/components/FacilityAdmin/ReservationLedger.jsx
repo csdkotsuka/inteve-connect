@@ -13,6 +13,7 @@ import {
   GripVertical,
   AlertTriangle,
   Check,
+  QrCode,
 } from 'lucide-react';
 import {
   format,
@@ -28,6 +29,7 @@ import {
 } from 'date-fns';
 import { ja } from 'date-fns/locale';
 
+import { supabase } from '../../utils/supabaseClient';
 import {
   fetchFacilityReservations,
   createReservationInDb,
@@ -41,6 +43,7 @@ import {
 import { getClosureInfo } from '../../utils/clinicSchedule';
 import { getLabels } from '../../constants/labels';
 import ReservationDetailModal from './ReservationDetailModal';
+import QrCheckInScanner from './QrCheckInScanner';
 
 const getStatusLabels = (industryType) => ({
   confirmed: { label: '予約確定', bg: 'bg-blue-50', text: 'text-blue-700' },
@@ -68,6 +71,7 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
   const [newReservationData, setNewReservationData] = useState(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState('');
+  const [isScannerModalOpen, setIsScannerModalOpen] = useState(false);
 
   // ドラッグ＆ドロップ state
   const [draggedRes, setDraggedRes] = useState(null);
@@ -79,6 +83,26 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
 
   useEffect(() => {
     loadReservations();
+
+    // Supabase Realtime で予約変更（チェックイン等）を検知して自動反映
+    if (supabase) {
+      const channel = supabase
+        .channel('reservations-realtime-ledger')
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: 'reservations' },
+          (payload) => {
+            if (!facilityId || payload.new?.facility_id === facilityId || payload.old?.facility_id === facilityId) {
+              loadReservations();
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
   }, [facilityId, activeStaffs]);
 
   const loadReservations = async () => {
@@ -348,6 +372,17 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
               </button>
             ))}
           </div>
+
+          {/* QRコード受付ボタン */}
+          <button
+            onClick={() => setIsScannerModalOpen(true)}
+            className="px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center gap-1.5 cursor-pointer border border-emerald-200 shadow-2xs"
+            title="患者様の持参QRコードをスキャンして受付完了にします"
+          >
+            <QrCode size={14} className="text-emerald-600" />
+            <span>QR受付</span>
+          </button>
+
           <button
             onClick={handleBatchSync}
             disabled={isSyncing}
@@ -378,6 +413,36 @@ export default function ReservationLedger({ facilityId, staffs, scheduleConfig, 
           </button>
         </div>
       </div>
+
+      {/* QR受付スキャナーモーダル */}
+      <AnimatePresence>
+        {isScannerModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 sm:p-6"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-4xl"
+            >
+              <QrCheckInScanner
+                facilityId={facilityId}
+                theme={theme}
+                industryType={industryType}
+                isModal={true}
+                onClose={() => setIsScannerModalOpen(false)}
+                onCheckInSuccess={() => {
+                  loadReservations();
+                }}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── 日表示 ── */}
       {viewType === 'day' && (() => {

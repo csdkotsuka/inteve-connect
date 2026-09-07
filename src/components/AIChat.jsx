@@ -1,60 +1,30 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, User, Sparkles, Clock, CheckCircle, Database, CalendarCheck, HeartHandshake, ShieldCheck } from 'lucide-react';
+import { Send, User, Sparkles, Clock, CheckCircle, Database, CalendarCheck, HeartHandshake, ShieldCheck, Dumbbell, Flower2, Stethoscope, Store } from 'lucide-react';
 import { fetchAvailableSlots, createReservation } from '../utils/calendarService';
-
-const SERVICE_OPTIONS = [
-  {
-    id: 'treatment',
-    label: '歯が痛い・詰め物が取れた',
-    shortLabel: '歯科治療（急患・治療）',
-    category: '治療',
-    icon: '🦷',
-    description: '痛みや腫れ、詰め物の脱離など急なトラブルの処置',
-    defaultDuration: 30,
-  },
-  {
-    id: 'checkup',
-    label: '定期検診・クリーニング',
-    shortLabel: '定期検診・予防ケア',
-    category: '予防・検診',
-    icon: '🪥',
-    description: '虫歯・歯周病チェック、歯石除去、着色落とし',
-    defaultDuration: 45,
-  },
-  {
-    id: 'consultation',
-    label: '相談したい（矯正・審美・インプラント）',
-    shortLabel: 'カウンセリング・相談',
-    category: '相談',
-    icon: '✨',
-    description: '歯並び、ホワイトニング、自費診療の事前相談',
-    defaultDuration: 30,
-  },
-  {
-    id: 'other',
-    label: 'その他・気になることがある',
-    shortLabel: '一般診療・相談',
-    category: '一般相談',
-    icon: '📝',
-    description: '顎の違和感、口臭、その他お困りごと',
-    defaultDuration: 30,
-  },
-];
-
-// 上品な歯のアイコン
-function DentalIcon({ className = "w-5 h-5 text-brand-orange" }) {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      <path d="M7 3C4.23858 3 2 5.23858 2 8C2 12 4 16 7 21C7.8 19 8.5 15.5 9 13C9.5 10.5 10 9 12 9C14 9 14.5 10.5 15 13C15.5 15.5 16.2 19 17 21C20 16 22 12 22 8C22 5.23858 19.7614 3 17 3C15 3 13.5 4 12 5C10.5 4 9 3 7 3Z" />
-    </svg>
-  );
-}
-
+import { getFacilityServices } from '../utils/facilityService';
 import { getLabels } from '../constants/labels';
+
+// 業種アイコンコンポーネント
+function IndustryIcon({ industryType, className = "w-5 h-5 text-white" }) {
+  if (industryType === 'beauty') {
+    return <Flower2 className={className} />;
+  }
+  if (industryType === 'fitness') {
+    return <Dumbbell className={className} />;
+  }
+  if (industryType === 'relax') {
+    return <HeartHandshake className={className} />;
+  }
+  if (industryType === 'general') {
+    return <Store className={className} />;
+  }
+  return <Stethoscope className={className} />;
+}
 
 export default function AIChat({ patient, onReservationComplete, industryType = 'medical' }) {
   const labels = getLabels(industryType);
+  const [services, setServices] = useState([]);
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
@@ -64,22 +34,30 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
   const scrollRef = useRef(null);
 
-  // 初回マウント時：パーソナライズされた声かけ
+  // メニュー読み込み & 初期メッセージ
   useEffect(() => {
-    if (!patient) return;
+    async function initChat() {
+      const fetchedServices = await getFacilityServices(industryType);
+      const onlineServices = fetchedServices.filter((s) => s.is_online_bookable !== false);
+      setServices(onlineServices);
 
-    const greeting = patient.isReturning
-      ? `${patient.name}様、こんにちは！\nいつも${labels.visit}いただきありがとうございます。\n本日はどのようなご相談・ご希望でしょうか？`
-      : `${patient.name}様、初めまして！\n当${labels.facilityTypeShort}への${labels.visit}をご検討いただきありがとうございます。\n本日はどのようなご希望・メニューでしょうか？`;
+      if (!patient) return;
 
-    setMessages([
-      {
-        id: 1,
-        type: 'bot',
-        text: greeting,
-        showMenuOptions: true,
-      },
-    ]);
+      const greeting = patient.isReturning
+        ? `${patient.name}様、こんにちは！\nいつも当${labels.facilityTypeShort}を${labels.visit}いただきありがとうございます。\n本日はどのようなご相談・ご希望でしょうか？下記メニューよりお選びください。`
+        : `${patient.name}様、初めまして！\n当${labels.facilityTypeShort}への${labels.visit}をご検討いただき誠にありがとうございます。\n本日のご希望・${labels.serviceMenu}をお選びください。`;
+
+      setMessages([
+        {
+          id: 1,
+          type: 'bot',
+          text: greeting,
+          showMenuOptions: true,
+        },
+      ]);
+    }
+
+    initChat();
   }, [patient, industryType]);
 
   // 自動スクロール
@@ -89,27 +67,42 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
     }
   }, [messages, isTyping, availableSlots]);
 
-  // ステップ1: 4大メニュー選択
-  const handleSelectMenu = (option) => {
-    setSelectedService(option);
-    const userMsg = { id: Date.now(), type: 'user', text: option.label };
+  // ステップ1: メニュー選択
+  const handleSelectMenu = (serviceItem) => {
+    setSelectedService(serviceItem);
+    const displayLabel = serviceItem.chat_label || serviceItem.name;
+    const userMsg = { id: Date.now(), type: 'user', text: displayLabel };
     setMessages((prev) => [...prev, userMsg]);
     setIsTyping(true);
 
-    const duration = patient?.isReturning
-      ? option.defaultDuration
-      : option.defaultDuration + (option.id === 'treatment' ? 15 : 0);
+    const duration = serviceItem.duration_minutes || 30;
 
     setTimeout(() => {
       let botReply = '';
-      if (option.id === 'treatment') {
-        botReply = `お辛いですね。痛みや不調を最優先で解消できるよう、担当医の「治療枠（約${duration}分）」を確保いたします。\n症状の時期や詳しい様子を教えていただけますか？`;
-      } else if (option.id === 'checkup') {
-        botReply = `お口の定期ケアですね！素晴らしい心がけです。\n歯科衛生士による丁寧な「クリーニング・定期検診枠（約${duration}分）」をご案内いたします。\n前回の受診からどのくらい経ちましたでしょうか？`;
-      } else if (option.id === 'consultation') {
-        botReply = `ご相談ですね。当院では丁寧なカウンセリングを大切にしております。\n専任スタッフによる「ご相談枠（約${duration}分）」をご用意いたします。`;
+      if (industryType === 'medical') {
+        if (serviceItem.category?.includes('予防') || displayLabel.includes('検診') || displayLabel.includes('クリーニング')) {
+          botReply = `定期的なケアですね！素晴らしい心がけです。\n丁寧な「${serviceItem.name}（所要約${duration}分）」をご案内いたします。\n前回の受診からどのくらい経ちましたでしょうか？気になっている点があればお聞かせください。`;
+        } else if (displayLabel.includes('相談') || serviceItem.category?.includes('相談')) {
+          botReply = `ご相談ですね。当院では丁寧なカウンセリングを大切にしております。\n専門スタッフによる「${serviceItem.name}（所要約${duration}分）」をご用意いたします。\n具体的なご相談内容をお聞かせください。`;
+        } else {
+          botReply = `承知いたしました。お辛い症状や不調をしっかり拝見できるよう、「${serviceItem.name}（所要約${duration}分）」の予約枠を確保いたします。\n症状の時期や詳しい様子を教えていただけますか？`;
+        }
+      } else if (industryType === 'beauty') {
+        if (displayLabel.includes('相談') || serviceItem.category?.includes('相談')) {
+          botReply = `ご相談ですね！お客様のお悩みや理想のスタイルを丁寧に伺い、最適なプランをご提案いたします（所要約${duration}分）。\n気になっていることやご質問があれば教えてください。`;
+        } else {
+          botReply = `【${displayLabel}】ですね！\nご要望に寄り添い、丁寧な${labels.treatment}をご提供いたします（所要約${duration}分）。\n特に重点的にお手入れしたい点や、ご希望の仕上がりなどはございますか？`;
+        }
+      } else if (industryType === 'fitness') {
+        if (displayLabel.includes('体験') || serviceItem.category?.includes('体験')) {
+          botReply = `体験セッションへのご参加ありがとうございます！\n現在の身体の状態や目標に合わせたマンツーマン指導を行います（所要約${duration}分）。\n現在のお悩みや目標（引き締め、体力づくり、姿勢改善など）を教えていただけますか？`;
+        } else {
+          botReply = `【${displayLabel}】ですね！\n目標達成に向けて全力でサポートいたします（所要約${duration}分）。\n今回のセッションで特に強化したい部位や気になるコンディションはございますか？`;
+        }
+      } else if (industryType === 'relax') {
+        botReply = `【${displayLabel}】ですね。お身体の疲れやお悩みをしっかり解消できるよう、「${serviceItem.name}（所要約${duration}分）」でご案内いたします。\n特に気になっている部位やお辛い症状を教えていただけますか？`;
       } else {
-        botReply = `承知いたしました。お口全体のチェックを行う「一般診療枠（約${duration}分）」をご用意いたします。\n気になっている点をお聞かせください。`;
+        botReply = `【${displayLabel}】にて受け付けました。\nお客様に合わせた最適な${labels.service}を提供いたします（所要約${duration}分）。\nご要望や気になる点がございましたらお聞かせください。`;
       }
 
       setMessages((prev) => [
@@ -137,9 +130,8 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
     setIsTyping(true);
     setStage('slot_selection');
 
-    const duration = patient?.isReturning
-      ? selectedService.defaultDuration
-      : selectedService.defaultDuration + (selectedService.id === 'treatment' ? 15 : 0);
+    const duration = selectedService?.duration_minutes || 30;
+    const menuDisplayName = selectedService?.chat_label || selectedService?.name || '予約メニュー';
 
     // Googleカレンダーから空き枠を取得
     setIsLoadingSlots(true);
@@ -147,7 +139,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
     setAvailableSlots(slots);
     setIsLoadingSlots(false);
 
-    const botReply = `状況を詳しく教えていただきありがとうございます！\n【${selectedService.shortLabel}（所要約${duration}分）】として受け付けました。\n\n空き枠を確認いたしました。\n直近ですと以下の日時に余裕がございます。ご希望の枠をタップしてください。`;
+    const botReply = `状況を詳しく教えていただきありがとうございます！\n【${menuDisplayName}（所要約${duration}分）】として受け付けました。\n\n最新の予約空き枠を確認いたしました。\n直近ですと以下の日時に余裕がございます。ご希望の枠をタップしてください。`;
 
     setMessages((prev) => [
       ...prev,
@@ -169,9 +161,8 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
     setIsTyping(true);
     setStage('confirmed');
 
-    const duration = patient?.isReturning
-      ? selectedService.defaultDuration
-      : selectedService.defaultDuration + (selectedService.id === 'treatment' ? 15 : 0);
+    const duration = selectedService?.duration_minutes || 30;
+    const menuDisplayName = selectedService?.chat_label || selectedService?.name;
 
     // Googleカレンダー（GAS）＋ Supabase（appointments）への保存を実行
     const saveResult = await createReservation({
@@ -183,10 +174,11 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
         patient_type_label: patient?.patientTypeLabel,
       },
       service: {
-        service_id: selectedService.id,
-        service_label: selectedService.shortLabel,
+        service_id: selectedService?.id,
+        service_label: selectedService?.name || menuDisplayName,
+        chat_label: menuDisplayName,
         estimated_duration: duration,
-        symptom_detail: messages.find((m) => m.type === 'user' && m.text !== selectedService.label)?.text || '',
+        symptom_detail: messages.find((m) => m.type === 'user' && m.text !== menuDisplayName)?.text || '',
       },
       slot,
     });
@@ -211,7 +203,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
           patient_name: patient.name,
           phone: patient.phone,
           patient_type: patient.patientType,
-          menu_type: selectedService.shortLabel,
+          menu_type: menuDisplayName,
           duration,
           scheduled_at: slot.label,
           status: 'confirmed',
@@ -227,12 +219,12 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
       <div className="bg-gradient-to-r from-brand-brown to-[#563e26] p-4 px-6 flex items-center justify-between text-white">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-brand-orange to-[#e08500] text-white flex items-center justify-center shadow-md shadow-brand-orange/20">
-            <DentalIcon className="w-5 h-5 text-white" />
+            <IndustryIcon industryType={industryType} className="w-5 h-5 text-white" />
           </div>
           <div>
             <h2 className="text-sm font-bold font-serif">オンライン予約コンシェルジュ</h2>
             <p className="text-brand-gold text-[10px] italic font-serif uppercase tracking-wider">
-              Smart Dental Reception
+              Smart {labels.facilityTypeShort} Reception
             </p>
           </div>
         </div>
@@ -246,7 +238,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
             />
             <span className="font-bold">{patient.name} 様</span>
             <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded font-mono">
-              {patient.isReturning ? '再診' : '新患'}
+              {patient.isReturning ? labels.returningVisitShort : labels.firstVisitShort}
             </span>
           </div>
         )}
@@ -274,7 +266,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
                       : 'bg-brand-ivory border border-brand-gold/20 text-brand-orange'
                   }`}
                 >
-                  {m.type === 'user' ? <User size={16} /> : <DentalIcon className="w-4 h-4 text-brand-orange" />}
+                  {m.type === 'user' ? <User size={16} /> : <IndustryIcon industryType={industryType} className="w-4 h-4 text-brand-orange" />}
                 </div>
 
                 <div className="space-y-3">
@@ -288,104 +280,62 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
                     {m.text}
                   </div>
 
-                  {/* Stage 1: 4大選択肢 */}
+                  {/* Stage 1: 管理画面メニューから動的に生成された選択肢 */}
                   {m.showMenuOptions && stage === 'menu' && (
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1"
                     >
-                      {SERVICE_OPTIONS.map((opt) => (
+                      {services.map((srv) => (
                         <button
-                          key={opt.id}
-                          onClick={() => handleSelectMenu(opt)}
-                          className="p-3.5 bg-white border border-brand-gold/20 rounded-2xl text-left hover:border-brand-orange hover:bg-brand-orange/5 hover:shadow-md transition-all group flex items-start gap-3"
+                          key={srv.id}
+                          onClick={() => handleSelectMenu(srv)}
+                          className="p-3.5 bg-white border border-brand-gold/20 rounded-2xl text-left hover:border-brand-orange hover:bg-brand-orange/5 hover:shadow-md transition-all group flex items-start gap-3 cursor-pointer"
                         >
                           <span className="text-2xl shrink-0 group-hover:scale-110 transition-transform">
-                            {opt.icon}
+                            {srv.icon || '✨'}
                           </span>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <span className="text-xs font-bold text-slate-800 group-hover:text-brand-orange block leading-tight mb-1 font-serif">
-                              {opt.label}
+                              {srv.chat_label || srv.name}
                             </span>
-                            <span className="text-[10px] text-slate-400 block leading-tight">
-                              {opt.description}
-                            </span>
+                            {srv.chat_label && srv.chat_label !== srv.name && (
+                              <span className="text-[10px] text-slate-500 font-medium block leading-tight mb-0.5">
+                                【{srv.name}】
+                              </span>
+                            )}
+                            {srv.chat_description ? (
+                              <span className="text-[10px] text-slate-400 block leading-tight line-clamp-2">
+                                {srv.chat_description}
+                              </span>
+                            ) : (
+                              <span className="text-[10px] text-slate-400 block leading-tight">
+                                所要約{srv.duration_minutes || 30}分 {srv.price > 0 ? `• ¥${Number(srv.price).toLocaleString()}` : ''}
+                              </span>
+                            )}
                           </div>
                         </button>
                       ))}
                     </motion.div>
                   )}
 
-                  {/* Stage 2: フォローアップ用チップ */}
+                  {/* Stage 2: フォローアップ用チップ（業種別プリセット） */}
                   {m.showFollowupChips && stage === 'followup' && (
                     <motion.div
                       initial={{ opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       className="flex flex-wrap gap-2 pt-1"
                     >
-                      {selectedService?.id === 'treatment' && (
-                        <>
-                          <button
-                            onClick={() => handleSendFollowup('今日から急に痛み出しました')}
-                            className="px-3 py-1.5 bg-white border border-brand-orange/30 text-brand-orange hover:bg-brand-orange hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            今日から痛む
-                          </button>
-                          <button
-                            onClick={() => handleSendFollowup('数日前からじんじん痛みます')}
-                            className="px-3 py-1.5 bg-white border border-brand-orange/30 text-brand-orange hover:bg-brand-orange hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            数日前から痛む
-                          </button>
-                          <button
-                            onClick={() => handleSendFollowup('銀歯・詰め物が取れてしまいました')}
-                            className="px-3 py-1.5 bg-white border border-brand-orange/30 text-brand-orange hover:bg-brand-orange hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            詰め物が取れた
-                          </button>
-                        </>
-                      )}
-
-                      {selectedService?.id === 'checkup' && (
-                        <>
-                          <button
-                            onClick={() => handleSendFollowup('半年ぶりの定期検診です')}
-                            className="px-3 py-1.5 bg-white border border-brand-gold/30 text-brand-brown hover:bg-brand-brown hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            半年ぶり
-                          </button>
-                          <button
-                            onClick={() => handleSendFollowup('1年以上検診を受けていません')}
-                            className="px-3 py-1.5 bg-white border border-brand-gold/30 text-brand-brown hover:bg-brand-brown hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            1年以上ぶり
-                          </button>
-                          <button
-                            onClick={() => handleSendFollowup('着色汚れ（ステイン）を落としたいです')}
-                            className="px-3 py-1.5 bg-white border border-brand-gold/30 text-brand-brown hover:bg-brand-brown hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            着色汚れを落としたい
-                          </button>
-                        </>
-                      )}
-
-                      {selectedService?.id === 'consultation' && (
-                        <>
-                          <button
-                            onClick={() => handleSendFollowup('マウスピース矯正の相談がしたいです')}
-                            className="px-3 py-1.5 bg-white border border-brand-gold/30 text-brand-brown hover:bg-brand-brown hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            マウスピース矯正相談
-                          </button>
-                          <button
-                            onClick={() => handleSendFollowup('ホワイトニングの費用や期間を聞きたいです')}
-                            className="px-3 py-1.5 bg-white border border-brand-gold/30 text-brand-brown hover:bg-brand-brown hover:text-white rounded-full text-xs font-bold transition-all shadow-xs"
-                          >
-                            ホワイトニング相談
-                          </button>
-                        </>
-                      )}
+                      {(labels.chatFollowupChips || ['早めの枠を希望', 'じっくり相談したい', '初めてで不安がある', '定期的なメンテナンス']).map((chipText, cIdx) => (
+                        <button
+                          key={cIdx}
+                          onClick={() => handleSendFollowup(chipText)}
+                          className="px-3 py-1.5 bg-white border border-brand-orange/30 text-brand-orange hover:bg-brand-orange hover:text-white rounded-full text-xs font-bold transition-all shadow-xs cursor-pointer"
+                        >
+                          {chipText}
+                        </button>
+                      ))}
                     </motion.div>
                   )}
 
@@ -408,7 +358,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
                           <button
                             key={idx}
                             onClick={() => handleSelectSlot(slot)}
-                            className="p-3 bg-white border border-brand-orange/30 rounded-xl text-left hover:bg-brand-orange hover:text-white transition-all shadow-xs group"
+                            className="p-3 bg-white border border-brand-orange/30 rounded-xl text-left hover:bg-brand-orange hover:text-white transition-all shadow-xs group cursor-pointer"
                           >
                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 group-hover:text-white font-serif">
                               <Clock size={13} className="text-brand-orange group-hover:text-white" />
@@ -430,7 +380,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
           {isTyping && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2 items-center">
               <div className="w-8 h-8 rounded-full bg-brand-ivory border border-brand-gold/20 flex items-center justify-center">
-                <DentalIcon className="w-4 h-4 text-brand-orange animate-pulse" />
+                <IndustryIcon industryType={industryType} className="w-4 h-4 text-brand-orange animate-pulse" />
               </div>
               <div className="p-3 bg-white rounded-2xl border border-brand-gold/15 flex gap-1">
                 <span className="w-1.5 h-1.5 bg-brand-gold/50 rounded-full animate-bounce" />
@@ -453,7 +403,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
             stage === 'menu'
               ? '上の選択肢からお選びください'
               : stage === 'followup'
-              ? '症状や気になることを入力できます...'
+              ? 'ご希望やお困りごとを入力できます...'
               : stage === 'slot_selection'
               ? '上の空き枠から希望日時をタップしてください'
               : 'ご予約完了いたしました'
@@ -464,7 +414,7 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
         <button
           onClick={() => (stage === 'followup' ? handleSendFollowup() : null)}
           disabled={!input.trim() || stage !== 'followup'}
-          className="w-10 h-10 rounded-full bg-brand-orange text-white flex items-center justify-center hover:bg-brand-brown disabled:opacity-40 transition-all shadow-md shadow-brand-orange/20 shrink-0"
+          className="w-10 h-10 rounded-full bg-brand-orange text-white flex items-center justify-center hover:bg-brand-brown disabled:opacity-40 transition-all shadow-md shadow-brand-orange/20 shrink-0 cursor-pointer"
         >
           <Send size={16} />
         </button>
@@ -472,3 +422,4 @@ export default function AIChat({ patient, onReservationComplete, industryType = 
     </div>
   );
 }
+

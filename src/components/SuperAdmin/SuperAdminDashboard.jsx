@@ -21,11 +21,14 @@ import {
   Sparkles,
   RefreshCw,
   X,
-  AlertCircle
+  AlertCircle,
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 import { supabase } from '../../utils/supabaseClient';
 import { THEME_PRESETS, getThemeById, applyTheme } from '../../utils/themeService';
 import { INDUSTRY_LABELS } from '../../constants/labels';
+import { saveFacilityProfile } from '../../utils/facilityService';
 
 const MOCK_FACILITIES_SEED = [
   {
@@ -47,6 +50,7 @@ const MOCK_FACILITIES_SEED = [
     contract_started_at: '2026-01-01',
     google_calendar_id: 'primary-clinic@group.calendar.google.com',
     admin_system_memo: '初回導入クリニック。5名のスタッフ全員に個別カレンダーIDを割り当て中。',
+    is_patient_auth_enabled: false,
     is_active: true,
   },
   {
@@ -68,6 +72,7 @@ const MOCK_FACILITIES_SEED = [
     contract_started_at: '2026-03-01',
     google_calendar_id: 'aoyama-beauty@group.calendar.google.com',
     admin_system_memo: '美容皮膚科・審美歯科併設。エレガントローズ配色を適用。',
+    is_patient_auth_enabled: false,
     is_active: true,
   },
 ];
@@ -86,6 +91,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
     subscription_plan: 'standard',
     monthly_fee: 35000,
     theme_id: 'terracotta',
+    is_patient_auth_enabled: false,
   });
   const [saveToast, setSaveToast] = useState({ show: false, message: '' });
   const [isLoading, setIsLoading] = useState(true);
@@ -108,7 +114,22 @@ export default function SuperAdminDashboard({ onSwitchView }) {
       try {
         const { data, error } = await supabase.from('facilities').select('*').order('created_at', { ascending: true });
         if (!error && data && data.length > 0) {
-          setFacilities(data);
+          const formatted = data.map((item) => {
+            const localAuth = localStorage.getItem(`inteve_facility_patient_auth_${item.slug}`);
+            let isAuth = false;
+            if (localAuth !== null) {
+              isAuth = localAuth === 'true';
+            } else if (item.is_patient_auth_enabled !== undefined && item.is_patient_auth_enabled !== null) {
+              isAuth = Boolean(item.is_patient_auth_enabled);
+            } else if (item.theme_colors?.is_patient_auth_enabled !== undefined) {
+              isAuth = Boolean(item.theme_colors.is_patient_auth_enabled);
+            }
+            return {
+              ...item,
+              is_patient_auth_enabled: isAuth,
+            };
+          });
+          setFacilities(formatted);
           setIsLoading(false);
           return;
         }
@@ -134,6 +155,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
       monthly_fee: Number(newFacilityData.monthly_fee) || 0,
       subscription_status: 'active',
       theme_colors: { preset_id: newFacilityData.theme_id },
+      is_patient_auth_enabled: Boolean(newFacilityData.is_patient_auth_enabled),
       is_active: true,
     };
 
@@ -163,6 +185,8 @@ export default function SuperAdminDashboard({ onSwitchView }) {
     e.preventDefault();
     if (!selectedFacility) return;
 
+    await saveFacilityProfile(selectedFacility);
+
     if (supabase && selectedFacility.id) {
       try {
         await supabase
@@ -186,6 +210,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
             contract_ended_at: selectedFacility.contract_ended_at,
             google_calendar_id: selectedFacility.google_calendar_id,
             admin_system_memo: selectedFacility.admin_system_memo,
+            is_patient_auth_enabled: selectedFacility.is_patient_auth_enabled,
             is_active: selectedFacility.is_active,
           })
           .eq('id', selectedFacility.id);
@@ -260,7 +285,6 @@ export default function SuperAdminDashboard({ onSwitchView }) {
 
       {/* メインコンテナ */}
       <main className="max-w-7xl mx-auto p-6 md:p-10 space-y-8">
-
         {/* 1. 施設一覧画面 (List View) */}
         {!selectedFacility ? (
           <div className="space-y-6">
@@ -342,6 +366,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       <th className="p-4">テーマカラー</th>
                       <th className="p-4">契約プラン</th>
                       <th className="p-4">月額請求</th>
+                      <th className="p-4">患者ログイン認証</th>
                       <th className="p-4">連絡先電話番号</th>
                       <th className="p-4">状態</th>
                       <th className="p-4 text-right">操作</th>
@@ -351,6 +376,7 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                     {filteredFacilities.map((facility) => {
                       const theme = getThemeById(facility.theme_colors?.preset_id || 'terracotta');
                       const indInfo = INDUSTRY_LABELS[facility.industry_type || 'medical'] || INDUSTRY_LABELS.medical;
+                      const isAuthOn = facility.is_patient_auth_enabled === true;
                       return (
                         <tr key={facility.id} className="hover:bg-slate-800/40 transition-colors">
                           <td className="p-4">
@@ -381,6 +407,35 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                           <td className="p-4 font-mono font-bold text-slate-200">
                             ¥{Number(facility.monthly_fee || 0).toLocaleString()}
                           </td>
+                          <td className="p-4">
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const nextVal = !isAuthOn;
+                                const updatedFacility = { ...facility, is_patient_auth_enabled: nextVal };
+                                await saveFacilityProfile(updatedFacility);
+                                if (supabase && facility.id) {
+                                  try {
+                                    await supabase
+                                      .from('facilities')
+                                      .update({ is_patient_auth_enabled: nextVal })
+                                      .eq('id', facility.id);
+                                  } catch (e) {}
+                                }
+                                setFacilities(facilities.map((f) => (f.id === facility.id ? updatedFacility : f)));
+                                showToast(`患者認証を「${nextVal ? 'ON (本番認証)' : 'OFF (ダミー/スルー)'}」に更新しました`);
+                              }}
+                              className={`px-2.5 py-1 rounded-full text-[11px] font-bold cursor-pointer transition-all flex items-center gap-1 border ${
+                                isAuthOn
+                                  ? 'bg-blue-950 text-blue-300 border-blue-700/80 hover:bg-blue-900'
+                                  : 'bg-amber-950/60 text-amber-300 border-amber-600/60 hover:bg-amber-900/60'
+                              }`}
+                              title="クリックで患者認証のON/OFFを切替"
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${isAuthOn ? 'bg-blue-400' : 'bg-amber-400'}`} />
+                              <span>{isAuthOn ? 'ON (厳格認証)' : 'OFF (デモ/スルー)'}</span>
+                            </button>
+                          </td>
                           <td className="p-4 font-mono text-slate-400">{facility.phone}</td>
                           <td className="p-4">
                             <span
@@ -400,16 +455,23 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                             >
                               設定・契約管理
                             </button>
-                            <button
-                              onClick={() => {
-                                window.location.hash = 'admin';
-                                window.location.reload();
-                              }}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 cursor-pointer"
+                            <a
+                              href={`/${facility.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs border border-slate-700 cursor-pointer"
+                              title="予約画面を別タブで確認"
+                            >
+                              <ExternalLink size={12} />
+                              予約画面
+                            </a>
+                            <a
+                              href={`/${facility.slug}/admin`}
+                              className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-950/60 hover:bg-indigo-900/60 text-indigo-300 font-bold text-xs border border-indigo-700/60 cursor-pointer"
                               title="施設管理画面へログイン"
                             >
-                              施設画面 →
-                            </button>
+                              管理画面 →
+                            </a>
                           </td>
                         </tr>
                       );
@@ -433,16 +495,22 @@ export default function SuperAdminDashboard({ onSwitchView }) {
               </button>
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => {
-                    window.location.hash = 'admin';
-                    window.location.reload();
-                  }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-700 cursor-pointer"
+                <a
+                  href={`/${selectedFacility.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold flex items-center gap-1.5 border border-slate-700 cursor-pointer"
+                >
+                  <ExternalLink size={14} />
+                  予約画面を開く
+                </a>
+                <a
+                  href={`/${selectedFacility.slug}/admin`}
+                  className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-indigo-600/30 cursor-pointer"
                 >
                   <Eye size={14} />
                   この施設の管理画面を開く
-                </button>
+                </a>
               </div>
             </div>
 
@@ -490,9 +558,11 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       }
                       className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     >
-                      <option value="medical">医療・歯科・クリニック（患者様/診療）</option>
-                      <option value="beauty">サロン・エステ・美容（お客様/施術）</option>
-                      <option value="general">一般店舗・サービス（お客様/ご予約）</option>
+                      <option value="medical">🏥 医療・歯科・クリニック（患者様/診療）</option>
+                      <option value="beauty">💇‍♀️ サロン・エステ・美容（お客様/施術）</option>
+                      <option value="fitness">🏋️ パーソナルトレーナー・ジム（お客様・会員様/セッション）</option>
+                      <option value="relax">💆‍♂️ 整体・リラクゼーション（お客様/施術）</option>
+                      <option value="general">🏢 一般店舗・サービス（お客様/ご予約）</option>
                     </select>
                   </div>
                 </div>
@@ -535,6 +605,45 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                       className="w-full h-11 px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     />
                   </div>
+                </div>
+
+                {/* 患者ログイン認証モード切り替え（OnOff） */}
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-700/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="space-y-0.5">
+                    <div className="text-xs font-bold text-white flex items-center gap-2">
+                      <UserCheck size={16} className="text-indigo-400" />
+                      <span>患者WEB予約時 ログイン認証モード</span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          selectedFacility.is_patient_auth_enabled
+                            ? 'bg-blue-950 text-blue-300 border border-blue-700/80'
+                            : 'bg-amber-950/80 text-amber-300 border border-amber-600/80'
+                        }`}
+                      >
+                        {selectedFacility.is_patient_auth_enabled ? 'ON（厳格認証・実名入力モード）' : 'OFF（デモ・ダミースルーモード）'}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      OFF時はLINE/Apple/Googleボタンをタップするだけでデモ患者として認証を即スルーします。ON時は氏名・電話番号・メールの正規認証を実行します。
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setSelectedFacility({
+                        ...selectedFacility,
+                        is_patient_auth_enabled: !selectedFacility.is_patient_auth_enabled,
+                      })
+                    }
+                    className={`shrink-0 px-4 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all flex items-center gap-2 border ${
+                      selectedFacility.is_patient_auth_enabled
+                        ? 'bg-blue-600 hover:bg-blue-500 text-white border-blue-500 shadow-md shadow-blue-600/30'
+                        : 'bg-slate-800 hover:bg-slate-700 text-amber-300 border-amber-500/50'
+                    }`}
+                  >
+                    <span>{selectedFacility.is_patient_auth_enabled ? '✓ 認証ON (本番)' : '⚡ 認証OFF (デモスルー)'}</span>
+                  </button>
                 </div>
               </div>
 
@@ -761,9 +870,11 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                   }
                   className="w-full h-11 px-3.5 bg-slate-800 border border-slate-700 rounded-xl text-white font-bold text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 >
-                  <option value="medical">医療・歯科・クリニック（患者様/診療）</option>
-                  <option value="beauty">サロン・エステ・美容（お客様/施術）</option>
-                  <option value="general">一般店舗・サービス（お客様/ご予約）</option>
+                  <option value="medical">🏥 医療・歯科・クリニック（患者様/診療）</option>
+                  <option value="beauty">💇‍♀️ サロン・エステ・美容（お客様/施術）</option>
+                  <option value="fitness">🏋️ パーソナルトレーナー・ジム（お客様・会員様/セッション）</option>
+                  <option value="relax">💆‍♂️ 整体・リラクゼーション（お客様/施術）</option>
+                  <option value="general">🏢 一般店舗・サービス（お客様/ご予約）</option>
                 </select>
               </div>
 
@@ -800,6 +911,21 @@ export default function SuperAdminDashboard({ onSwitchView }) {
                     <option value="indigo">ロイヤルインディゴ</option>
                   </select>
                 </div>
+              </div>
+
+              <div className="p-3 bg-slate-800/80 rounded-xl border border-slate-700 flex items-center justify-between">
+                <div>
+                  <span className="font-bold text-slate-200 block">患者ログイン認証</span>
+                  <span className="text-[10px] text-slate-400">ON=厳格認証 / OFF=デモ・ダミースルー</span>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={newFacilityData.is_patient_auth_enabled}
+                  onChange={(e) =>
+                    setNewFacilityData({ ...newFacilityData, is_patient_auth_enabled: e.target.checked })
+                  }
+                  className="w-5 h-5 rounded accent-indigo-600 cursor-pointer"
+                />
               </div>
             </div>
 

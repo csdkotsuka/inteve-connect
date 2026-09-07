@@ -1,24 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake, Megaphone, ShieldCheck } from 'lucide-react';
+import { Phone, MapPin, Menu, X, CheckCircle, UserCheck, RefreshCw, Sparkles, Calendar, Clock, Settings, HeartHandshake, Megaphone, ShieldCheck, QrCode } from 'lucide-react';
 import AuthModal from './components/AuthModal';
 import AIChat from './components/AIChat';
 import AdminScheduleModal from './components/AdminScheduleModal';
 import FacilityAdminDashboard from './components/FacilityAdmin/FacilityAdminDashboard';
 import SuperAdminDashboard from './components/SuperAdmin/SuperAdminDashboard';
+import LeafletView from './components/Leaflet/LeafletView';
 import { getThemeById, getCurrentTheme, applyTheme } from './utils/themeService';
 import { getFacilityProfile } from './utils/facilityService';
 import { getLabels } from './constants/labels';
+import { parseUrl, createPath, VIEW_MODES } from './utils/urlRouter';
 
 const STEPS = {
   CHAT: 'chat',         // 一体型問診・カレンダー空き枠提案・即確定チャット
   COMPLETE: 'complete', // 予約確定
-};
-
-const VIEW_MODES = {
-  BOOKING: 'booking',
-  ADMIN: 'admin',
-  SUPER_ADMIN: 'super_admin',
 };
 
 // 歯科医院らしい清潔でエレガントな歯のエムブレムロゴ
@@ -31,41 +27,22 @@ function DentalToothLogo({ className = "w-6 h-6 text-white" }) {
 }
 
 function App() {
-  const getViewModeFromUrl = () => {
-    if (typeof window !== 'undefined') {
-      const pathname = window.location.pathname;
-      const hash = window.location.hash;
-      const search = window.location.search;
-
-      if (pathname === '/super-admin' || hash === '#super-admin' || search.includes('mode=super-admin')) {
-        return VIEW_MODES.SUPER_ADMIN;
-      }
-      if (pathname === '/admin' || hash === '#admin' || search.includes('mode=admin')) {
-        return VIEW_MODES.ADMIN;
-      }
-    }
-    return VIEW_MODES.BOOKING;
-  };
-
-  const [viewMode, setViewModeState] = useState(getViewModeFromUrl);
+  const [urlState, setUrlState] = useState(() => parseUrl());
+  const viewMode = urlState.viewMode;
+  const currentSlug = urlState.slug;
 
   const setViewMode = (mode) => {
-    setViewModeState(mode);
+    const nextPath = createPath(currentSlug, mode);
+    setUrlState((prev) => ({ ...prev, viewMode: mode }));
     try {
-      if (mode === VIEW_MODES.SUPER_ADMIN) {
-        window.history.pushState(null, '', '/super-admin');
-      } else if (mode === VIEW_MODES.ADMIN) {
-        window.history.pushState(null, '', '/admin');
-      } else {
-        window.history.pushState(null, '', '/');
-      }
+      window.history.pushState(null, '', nextPath);
     } catch (e) {}
   };
 
   // ブラウザの戻る・進むボタンやURL直接変更に対応
   useEffect(() => {
     const handlePopState = () => {
-      setViewModeState(getViewModeFromUrl());
+      setUrlState(parseUrl());
     };
     window.addEventListener('popstate', handlePopState);
     window.addEventListener('hashchange', handlePopState);
@@ -75,7 +52,6 @@ function App() {
     };
   }, []);
 
-
   const [currentUser, setCurrentUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isAdminModalOpen, setIsAdminModalOpen] = useState(false);
@@ -84,27 +60,42 @@ function App() {
   const [finalReservation, setFinalReservation] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [facilityProfile, setFacilityProfile] = useState(null);
+  const [isLoadingFacility, setIsLoadingFacility] = useState(true);
   const [activeTheme, setActiveTheme] = useState(getCurrentTheme());
 
-  // 初期化時にSupabase施設情報からテーマと施設情報を取得
+  // 初期化および slug 変更時に Supabase 施設情報からテーマと施設情報を取得
   useEffect(() => {
-    getFacilityProfile().then((data) => {
-      setFacilityProfile(data);
-      const themePresetId = data.theme_colors?.preset_id || data.theme_id || 'terracotta';
-      const theme = getThemeById(themePresetId);
-      setActiveTheme(theme);
-      applyTheme(theme);
+    let isCancelled = false;
+    setIsLoadingFacility(true);
 
-      // ウィンドウタイトルをSupabaseの施設名に合わせて動的更新
-      if (viewMode === VIEW_MODES.SUPER_ADMIN) {
-        document.title = `スーパー管理者 | ${data.name || 'クリニック予約システム'}`;
-      } else if (viewMode === VIEW_MODES.ADMIN) {
-        document.title = `施設管理 | ${data.name || 'クリニック予約システム'}`;
+    getFacilityProfile(currentSlug).then((data) => {
+      if (isCancelled) return;
+      setIsLoadingFacility(false);
+      setFacilityProfile(data);
+
+      if (data) {
+        const themePresetId = data.theme_colors?.preset_id || data.theme_id || 'terracotta';
+        const theme = getThemeById(themePresetId);
+        setActiveTheme(theme);
+        applyTheme(theme);
+
+        // ウィンドウタイトルをSupabaseの施設名に合わせて動的更新
+        if (viewMode === VIEW_MODES.SUPER_ADMIN) {
+          document.title = `スーパー管理者 | ${data.name || 'クリニック予約システム'}`;
+        } else if (viewMode === VIEW_MODES.ADMIN) {
+          document.title = `施設管理 | ${data.name || 'クリニック予約システム'}`;
+        } else {
+          document.title = `${data.name || 'クリニック'} | WEB予約`;
+        }
       } else {
-        document.title = `${data.name || 'クリニック'} | WEB予約`;
+        document.title = '施設が見つかりません | inteve connect';
       }
     });
-  }, [viewMode]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [currentSlug, viewMode]);
 
   // 認証完了時
   const handleAuthenticated = (userData) => {
@@ -130,6 +121,7 @@ function App() {
     setIsAuthModalOpen(true);
   };
 
+  // スーパー管理者画面
   if (viewMode === VIEW_MODES.SUPER_ADMIN) {
     return (
       <SuperAdminDashboard
@@ -140,8 +132,80 @@ function App() {
     );
   }
 
+  // 施設ロード中（初回）
+  if (isLoadingFacility) {
+    return (
+      <div className="min-h-screen bg-[#FAF7EF] flex flex-col items-center justify-center p-6">
+        <div className="w-12 h-12 border-3 border-amber-600/20 border-t-amber-600 rounded-full animate-spin mb-4" />
+        <p className="text-slate-500 font-serif text-sm tracking-wider">施設情報を読み込んでいます...</p>
+      </div>
+    );
+  }
+
+  // 指定された slug の施設が存在しない場合
+  if (!facilityProfile) {
+    return (
+      <div className="min-h-screen bg-[#FAF7EF] flex flex-col items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 rounded-3xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700 shadow-sm mb-6">
+          <DentalToothLogo className="w-10 h-10 text-amber-700" />
+        </div>
+        <span className="px-3 py-1 rounded-full bg-amber-100/80 text-amber-800 text-xs font-bold font-mono mb-3">
+          404 NOT FOUND
+        </span>
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-800 font-serif mb-3">
+          ご指定の施設が見つかりません
+        </h1>
+        <p className="text-slate-500 text-sm max-w-md mx-auto mb-8 leading-relaxed font-sans">
+          URL（<span className="font-mono text-amber-700 font-semibold">/{currentSlug}</span>）に対応する施設は未登録か、URLが変更された可能性があります。
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState(null, '', '/');
+              setUrlState(parseUrl());
+            }}
+            className="px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-800 text-white font-bold text-sm shadow-md shadow-amber-700/20 transition-all cursor-pointer font-serif"
+          >
+            トップページ（つばき歯科クリニック）へ戻る
+          </a>
+          <a
+            href="/super-admin"
+            onClick={(e) => {
+              e.preventDefault();
+              window.history.pushState(null, '', '/super-admin');
+              setUrlState(parseUrl());
+            }}
+            className="px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm border border-slate-200 shadow-xs transition-all cursor-pointer"
+          >
+            スーパー管理者画面
+          </a>
+        </div>
+      </div>
+    );
+  }
+
   if (viewMode === VIEW_MODES.ADMIN) {
-    return <FacilityAdminDashboard onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)} />;
+    return (
+      <FacilityAdminDashboard
+        facilityProfile={facilityProfile}
+        currentSlug={currentSlug}
+        onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)}
+        onOpenLeaflet={() => setViewMode(VIEW_MODES.LEAFLET)}
+      />
+    );
+  }
+
+  if (viewMode === VIEW_MODES.LEAFLET) {
+    return (
+      <LeafletView
+        facilityProfile={facilityProfile}
+        currentSlug={currentSlug}
+        onBackToAdmin={() => setViewMode(VIEW_MODES.ADMIN)}
+        onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)}
+      />
+    );
   }
 
   const facilityName = facilityProfile?.name || 'つばき歯科クリニック';
@@ -162,6 +226,8 @@ function App() {
         patientType={currentUser?.isReturning ? 'returning' : 'new'}
         onAuthenticated={handleAuthenticated}
         industryType={facilityProfile?.industry_type}
+        isAuthEnabled={facilityProfile?.is_patient_auth_enabled === true}
+        facilityId={facilityProfile?.id}
       />
 
       {/* Patient Status Bar */}
@@ -428,6 +494,40 @@ function App() {
                         <span className="font-bold text-slate-800">{finalReservation?.phone}</span>
                       </div>
                     </div>
+                  </div>
+
+                  {/* 来院受付用デジタルQRコード */}
+                  <div className="bg-slate-900 text-white p-5 rounded-2xl mb-6 shadow-lg border border-slate-800 text-center space-y-3">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+                      <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-sans">
+                        <QrCode size={15} />
+                        ご来院時チェックイン用QRコード
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-mono">
+                        {currentUser?.customerCode || '受付用'}
+                      </span>
+                    </div>
+
+                    <div className="p-2.5 bg-white rounded-xl inline-block shadow-md mx-auto">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                          JSON.stringify({
+                            type: 'inteve_checkin',
+                            phone: finalReservation?.phone || currentUser?.phone || '',
+                            customer_code: currentUser?.customerCode || 'PT-1000',
+                            name: currentUser?.name || '予約患者',
+                            res_id: finalReservation?.id || '',
+                          })
+                        )}`}
+                        alt="チェックインQRコード"
+                        className="w-32 h-32 sm:w-36 sm:h-36 mx-auto"
+                      />
+                    </div>
+
+                    <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
+                      ご来院時は受付端末のカメラにこのQRコードをかざしてください。<br />
+                      診察券不要でワンタッチで来院受付が完了します。
+                    </p>
                   </div>
 
                   <button

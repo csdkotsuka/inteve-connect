@@ -25,3 +25,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+*.pdf
+test_*.jpg
+leaflet_output/
+screen shot/
+vite_debug.txt
+install.log
