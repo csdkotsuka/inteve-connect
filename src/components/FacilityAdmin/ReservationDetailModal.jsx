@@ -184,14 +184,27 @@ export default function ReservationDetailModal({
           };
         }
         if (gasPayload.action) {
-          const res = await fetch(gasUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(gasPayload),
-          });
-          const json = await res.json();
-          gasOk = json.ok === true;
-          gasError = json.error || null;
+          try {
+            const url = new URL(gasUrl);
+            Object.entries(gasPayload).forEach(([k, v]) => {
+              if (v !== undefined && v !== null) url.searchParams.set(k, String(v));
+            });
+            const res = await fetch(url.toString(), { method: 'GET' });
+            if (res.ok) {
+              const json = await res.json();
+              gasOk = json.ok === true;
+              gasError = json.error || null;
+            }
+          } catch (err) {
+            const res = await fetch(gasUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify(gasPayload),
+            });
+            const json = await res.json();
+            gasOk = json.ok === true;
+            gasError = json.error || null;
+          }
         }
       }
     } catch (e) {

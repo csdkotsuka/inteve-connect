@@ -38,19 +38,41 @@ const GAS_URL = import.meta.env.VITE_GAS_API_URL;
 const FROM_EMAIL = 'kotsuka@creativesd.net';
 
 /**
- * メッセージ送信ヘルパー（GAS経由）
+ * メッセージ送信ヘルパー（GAS経由：CORS完全回避設計）
  */
 async function sendViaGas(action, payload) {
   if (!GAS_URL) {
     console.warn('VITE_GAS_API_URL 未設定');
     return { ok: false, error: 'GAS URL未設定' };
   }
-  const res = await fetch(GAS_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ action, ...payload }),
-  });
-  return res.json();
+  // 1. GET パラメータ方式（Google Apps Script の CORS preflight エラーを完全に回避）
+  try {
+    const url = new URL(GAS_URL);
+    url.searchParams.set('action', action);
+    Object.entries(payload).forEach(([key, val]) => {
+      if (val !== undefined && val !== null) {
+        url.searchParams.set(key, String(val));
+      }
+    });
+    const res = await fetch(url.toString(), { method: 'GET' });
+    if (res.ok) {
+      return await res.json();
+    }
+  } catch (e) {
+    console.warn('[GAS GET fallback to text/plain POST]', e);
+  }
+
+  // 2. フォールバック（OPTIONS preflight を起こさない text/plain POST）
+  try {
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action, ...payload }),
+    });
+    return await res.json();
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
 }
 
 export default function MessagingPanel({ facilityId, theme, industryType }) {
