@@ -62,13 +62,17 @@ export default function AdminScheduleModal({ isOpen, onClose, onConfigSaved }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-        className="w-full max-w-xl bg-white rounded-[32px] shadow-2xl overflow-hidden border border-brand-gold/20"
-      >
+    <div
+      className="fixed inset-0 z-50 overflow-y-auto overscroll-y-contain bg-black/60 backdrop-blur-sm p-3 sm:p-4 md:p-6"
+      style={{ WebkitOverflowScrolling: 'touch' }}
+    >
+      <div className="min-h-full flex items-center justify-center py-4 sm:py-6">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          className="w-full max-w-xl bg-white rounded-3xl sm:rounded-[32px] shadow-2xl overflow-hidden border border-brand-gold/20 my-auto"
+        >
         {/* Header */}
         <div className="bg-gradient-to-r from-brand-brown to-[#563e26] text-white p-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -257,6 +261,7 @@ export default function AdminScheduleModal({ isOpen, onClose, onConfigSaved }) {
           </div>
         )}
       </motion.div>
+      </div>
     </div>
   );
 }
