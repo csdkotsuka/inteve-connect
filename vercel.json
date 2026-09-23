@@ -22,6 +22,18 @@
       "destination": "/about/:path*"
     },
     {
+      "source": "/images/:path*",
+      "destination": "/about/images/:path*"
+    },
+    {
+      "source": "/favicon.ico",
+      "destination": "/about/images/favicon.png"
+    },
+    {
+      "source": "/favicon.png",
+      "destination": "/about/images/favicon.png"
+    },
+    {
       "source": "/((?!about|assets|favicon|logo|images).*)",
       "destination": "/index.html"
     }

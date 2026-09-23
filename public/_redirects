@@ -1,3 +1,4 @@
+/images/*   /about/images/:splat 200
 /about/*    /about/:splat    200
 /connect/*  /about/:splat    301
 /*          /index.html      200
