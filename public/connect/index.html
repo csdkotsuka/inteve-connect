@@ -118,9 +118,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
             <!-- Brand Logo -->
             <a href="index.html" class="flex items-center gap-3 group flex-shrink-0">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center shadow-md shadow-brand-500/25 group-hover:scale-105 transition-transform duration-300">
-                    <i class="fas fa-link text-lg"></i>
-                </div>
+                <img src="images/brand_icon.png" alt="CONNECT Logo" class="w-11 h-11 rounded-2xl object-cover shadow-md shadow-slate-900/10 group-hover:scale-105 transition-transform duration-300" />
                 <div>
                     <div class="flex items-center gap-1.5">
                         <span class="text-xl font-black tracking-tight text-slate-800 whitespace-nowrap">CONNECT</span>
@@ -132,6 +130,10 @@
 
             <!-- Desktop Nav Items (Top Global Links) -->
             <nav class="hidden md:flex items-center gap-5 xl:gap-8 flex-shrink-0">
+                <a href="/leaflet" class="text-sm font-bold text-slate-700 hover:text-amber-600 transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-file-pdf text-amber-600 text-xs"></i>
+                    <span>リーフレット (4P)</span>
+                </a>
                 <a href="about.html" class="text-sm font-bold text-slate-700 hover:text-brand-600 transition-colors flex items-center gap-1.5">
                     <i class="fas fa-building text-slate-400 text-xs"></i>
                     <span>事業者概要</span>
@@ -171,6 +173,10 @@
             <a href="/" class="flex items-center gap-2 text-base font-bold text-amber-600 hover:text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
                 <i class="fas fa-calendar-check text-amber-600"></i>
                 <span>実際の受付ページ（WEB予約）を体験する</span>
+            </a>
+            <a href="/leaflet" class="flex items-center gap-2 text-base font-bold text-slate-800 hover:text-amber-600 p-1">
+                <i class="fas fa-file-pdf text-amber-600"></i>
+                <span>4Pリーフレットを見る・PDF印刷</span>
             </a>
             <a href="about.html" class="block text-base font-bold text-slate-800 hover:text-brand-600">事業者概要・知財情報</a>
             <a href="privacy.html" class="block text-base font-bold text-slate-800 hover:text-brand-600">プライバシーポリシー</a>
@@ -927,10 +933,14 @@
                         シンプルで誰でも直感的に扱える美しいUIデザイン。画像をクリックして拡大してご覧いただけます。
                     </p>
 
-                    <div class="mt-4">
+                    <div class="mt-4 flex flex-wrap items-center justify-center gap-3">
                         <a href="/" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105">
                             <i class="fas fa-arrow-up-right-from-square text-amber-400"></i>
                             <span>実際の受付ページ（AIチャット予約・カレンダー）を体験する &rarr;</span>
+                        </a>
+                        <a href="/leaflet" class="inline-flex items-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs sm:text-sm font-bold px-6 py-3 rounded-full border border-amber-200 shadow-2xs hover:shadow-md transition-all">
+                            <i class="fas fa-file-pdf text-amber-600"></i>
+                            <span>4Pリーフレットを閲覧・PDF出力</span>
                         </a>
                     </div>
 
@@ -1422,6 +1432,10 @@
             <div class="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-slate-600 text-xs sm:text-sm mb-4">
                 <a href="/" class="hover:text-amber-700 text-amber-700 font-bold transition-colors flex items-center gap-1">
                     <i class="fas fa-calendar-check text-xs"></i> 実際の受付ページ
+                </a>
+                <span class="text-slate-300">|</span>
+                <a href="/leaflet" class="hover:text-amber-700 text-amber-800 font-bold transition-colors flex items-center gap-1">
+                    <i class="fas fa-file-pdf text-xs text-amber-600"></i> リーフレット (4P)
                 </a>
                 <span class="text-slate-300">|</span>
                 <a href="index.html" class="hover:text-brand-600 transition-colors font-medium">ホーム</a>
