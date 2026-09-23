@@ -830,7 +830,7 @@ function Page3Facility({ isSpread = false }) {
 
       {/* ── 4つのキーポイント (2x2 グリッド・縦長大型画像・グレー枠・影なし) ── */}
       <div className="px-10 py-3.5 flex-1 grid grid-cols-2 gap-4">
-        {/* KEY 01: 直感的D&Dタイムライン */}
+        {/* KEY 01: 直感的D&Dタイムライン ＆ 担当スタッフ管理 */}
         <div className="p-4 rounded-2xl bg-slate-50 flex flex-col justify-between">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -838,24 +838,27 @@ function Page3Facility({ isSpread = false }) {
                 KEY 01
               </span>
               <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
-                日別・週別切替
+                担当制 ＆ 日別・週別切替
               </span>
             </div>
             <h3 className="text-sm font-black text-slate-900">
-              スタッフ別 個別タイムライン（予約台帳）
+              スタッフ別 個別タイムライン ＆ 担当制台帳
             </h3>
             <p className="text-[11px] text-slate-600 leading-relaxed">
-              院長・医師・衛生士・スタッフそれぞれの空き状況を一元表示。予約変更もD&Dで一瞬。「★新規受付」枠も一目で判別可能。
+              院長・医師・施術者ごとの空き状況を一元表示。再診患者の専任担当者割り当てや予約変更もD&Dで一瞬。「★新規受付」枠も一目で判別可能。
             </p>
             <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
               <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
                 ドラッグ＆ドロップ変更
               </span>
               <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
+                担当スタッフ専任指定
+              </span>
+              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
                 新患受付ハイライト
               </span>
               <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
-                カレンダー同期
+                日別・週別切替
               </span>
             </div>
           </div>
@@ -906,50 +909,12 @@ function Page3Facility({ isSpread = false }) {
           </div>
         </div>
 
-        {/* KEY 03: 顧客カルテ・メッセージ統合 */}
+        {/* KEY 03: フレキシブル店舗設定（元のKEY 04より移動） */}
         <div className="p-4 rounded-2xl bg-slate-50 flex flex-col justify-between">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
               <span className="px-2.5 py-0.5 rounded-full bg-teal-600 text-white font-black text-xs font-mono">
                 KEY 03
-              </span>
-              <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
-                CSVインポート対応
-              </span>
-            </div>
-            <h3 className="text-sm font-black text-slate-900">
-              電子カルテ・顧客情報 ＆ 担当制
-            </h3>
-            <p className="text-[11px] text-slate-600 leading-relaxed">
-              受診履歴、VIP/一般ランク、電子カルテデータ一括インポート対応。再診患者の担当者指定や個別メッセージ送信も同一画面で完結。
-            </p>
-            <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
-              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
-                担当スタッフ指定
-              </span>
-              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
-                VIP/一般ランク
-              </span>
-              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700">
-                LINE/メール直接送信
-              </span>
-            </div>
-          </div>
-          <div className="mt-2 rounded-xl overflow-hidden bg-white h-[240px] border border-slate-200">
-            <img
-              src={CROPPED.customer}
-              alt="顧客カルテ管理"
-              className="w-full h-full object-cover object-top"
-            />
-          </div>
-        </div>
-
-        {/* KEY 04: フレキシブル店舗設定 */}
-        <div className="p-4 rounded-2xl bg-slate-50 flex flex-col justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center justify-between">
-              <span className="px-2.5 py-0.5 rounded-full bg-teal-600 text-white font-black text-xs font-mono">
-                KEY 04
               </span>
               <span className="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded-md">
                 枠時間自動アサイン
@@ -979,6 +944,106 @@ function Page3Facility({ isSpread = false }) {
               alt="店舗スケジュール設定"
               className="w-full h-full object-cover object-top"
             />
+          </div>
+        </div>
+
+        {/* KEY 04: 目玉機能 QRコード受付リーダー */}
+        <div className="p-4 rounded-2xl bg-gradient-to-b from-amber-50/70 via-slate-50 to-slate-50 flex flex-col justify-between border-2 border-amber-300/80 shadow-xs relative">
+          <div className="space-y-1">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 text-white font-black text-xs font-mono shadow-xs">
+                  KEY 04
+                </span>
+                <span className="text-[9px] font-black text-amber-800 bg-amber-200/90 px-2 py-0.5 rounded-full uppercase tracking-wider">
+                  ★ 目玉機能
+                </span>
+              </div>
+              <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-md flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                かざすだけ照会
+              </span>
+            </div>
+            <h3 className="text-sm font-black text-slate-900">
+              スマホQRかざすだけ！瞬時カルテ照会＆来院受付
+            </h3>
+            <p className="text-[11px] text-slate-600 leading-relaxed">
+              患者がスマホで表示した受付QRをカメラにかざすだけで対象カルテと予約枠を即座に自動表示。お名前聞き取りや検索の手間ゼロでスムーズ受付完了。
+            </p>
+            <div className="flex items-center gap-1.5 pt-0.5 flex-wrap">
+              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700 border border-slate-200/60">
+                待ち時間ゼロ受付
+              </span>
+              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700 border border-slate-200/60">
+                カルテ自動呼び出し
+              </span>
+              <span className="text-[9px] px-2 py-0.5 rounded-md bg-white font-bold text-slate-700 border border-slate-200/60">
+                ピッと電子音確認
+              </span>
+            </div>
+          </div>
+
+          {/* QRスキャナーUIモックアップ（ベクター品質・高解像度） */}
+          <div className="mt-2 rounded-xl overflow-hidden bg-slate-950 h-[240px] border border-slate-800 relative flex flex-col items-center justify-between p-3 select-none">
+            {/* 上部ステータスバー */}
+            <div className="w-full flex items-center justify-between text-[9px] text-slate-400 font-mono border-b border-slate-800/80 pb-1.5 px-1">
+              <div className="flex items-center gap-1.5 text-emerald-400 font-bold">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>QR CHECK-IN SCANNER ACTIVE</span>
+              </div>
+              <span className="text-slate-500">HD CAMERA READY</span>
+            </div>
+
+            {/* 中央: スキャンビューファインダー ＆ レーザー */}
+            <div className="relative w-36 h-24 flex items-center justify-center my-auto">
+              {/* 四隅のターゲットコーナー */}
+              <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-emerald-400 rounded-tl-sm" />
+              <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-emerald-400 rounded-tr-sm" />
+              <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-emerald-400 rounded-bl-sm" />
+              <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-emerald-400 rounded-br-sm" />
+
+              {/* スキャンレーザー線 */}
+              <div className="w-full h-0.5 bg-gradient-to-r from-transparent via-emerald-400 to-transparent shadow-[0_0_8px_rgba(52,211,153,0.9)] my-auto" />
+
+              {/* かざされたQRコードのシルエット */}
+              <div className="absolute w-16 h-16 bg-white/10 rounded-lg p-1.5 flex flex-col items-center justify-between border border-white/20 backdrop-blur-2xs opacity-80">
+                <div className="grid grid-cols-4 gap-1 w-full h-full opacity-60">
+                  <div className="bg-emerald-300 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-emerald-300 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-emerald-400 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-emerald-400 rounded-2xs" />
+                  <div className="bg-emerald-300 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-slate-400 rounded-2xs" />
+                  <div className="bg-emerald-300 rounded-2xs" />
+                </div>
+              </div>
+            </div>
+
+            {/* 下部: 瞬時照会完了ポップアップカード */}
+            <div className="w-full bg-gradient-to-r from-emerald-950/95 to-slate-900/95 border border-emerald-500/50 rounded-xl p-2.5 shadow-lg flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 min-w-0">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-md">
+                  <CheckCircle2 size={16} />
+                </div>
+                <div className="min-w-0">
+                  <div className="text-[11px] font-black text-white flex items-center gap-1.5 truncate">
+                    <span>大塚 一樹 様</span>
+                    <span className="text-[9px] text-emerald-300 font-mono font-normal">PT-1000</span>
+                  </div>
+                  <div className="text-[9px] text-emerald-200/90 truncate">
+                    本日 14:30 予約（担当: 院長）
+                  </div>
+                </div>
+              </div>
+              <span className="text-[9px] px-2 py-0.5 rounded-full bg-emerald-500 text-white font-bold shrink-0 shadow-xs">
+                来院受付完了
+              </span>
+            </div>
           </div>
         </div>
       </div>
