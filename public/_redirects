@@ -1,2 +1,3 @@
-/connect/*   /connect/:splat   200
-/*           /index.html       200
+/about/*    /about/:splat    200
+/connect/*  /about/:splat    301
+/*          /index.html      200

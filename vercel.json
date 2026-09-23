@@ -1,7 +1,28 @@
 {
+  "cleanUrls": true,
+  "redirects": [
+    {
+      "source": "/connect",
+      "destination": "/about",
+      "permanent": true
+    },
+    {
+      "source": "/connect/:path*",
+      "destination": "/about/:path*",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/about",
+      "destination": "/about/index.html"
+    },
+    {
+      "source": "/about/:path*",
+      "destination": "/about/:path*"
+    },
+    {
+      "source": "/((?!about|assets|favicon|logo|images).*)",
       "destination": "/index.html"
     }
   ]
