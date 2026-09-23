@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 120" width="100%" height="100%">
+  <defs>
+    <!-- Gold Linear Gradient -->
+    <linearGradient id="goldHGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ca8a04" />
+      <stop offset="25%" stop-color="#eab308" />
+      <stop offset="50%" stop-color="#fef08a" />
+      <stop offset="75%" stop-color="#eab308" />
+      <stop offset="100%" stop-color="#a16207" />
+    </linearGradient>
+    <linearGradient id="foldGold" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" />
+      <stop offset="100%" stop-color="#451a03" />
+    </linearGradient>
+    <filter id="goldShadow" x="-10%" y="-20%" width="120%" height="160%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <g filter="url(#goldShadow)">
+    <!-- Left Ribbon Tail Behind -->
+    <path d="M 50 35 L 10 65 L 50 95 L 80 95 L 80 35 Z" fill="#92400e" />
+    <!-- Right Ribbon Tail Behind -->
+    <path d="M 550 35 L 590 65 L 550 95 L 520 95 L 520 35 Z" fill="#92400e" />
+
+    <!-- Left Fold Triangle -->
+    <path d="M 75 75 L 75 95 L 95 75 Z" fill="url(#foldGold)" />
+    <!-- Right Fold Triangle -->
+    <path d="M 525 75 L 525 95 L 505 75 Z" fill="url(#foldGold)" />
+
+    <!-- Center Main Ribbon Banner -->
+    <path d="M 75 15 L 525 15 L 525 75 L 75 75 Z" fill="url(#goldHGrad)" />
+
+    <!-- Inner Dashed Stitch Line -->
+    <line x1="85" y1="22" x2="515" y2="22" stroke="#78350f" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6" />
+    <line x1="85" y1="68" x2="515" y2="68" stroke="#78350f" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6" />
+  </g>
+</svg>

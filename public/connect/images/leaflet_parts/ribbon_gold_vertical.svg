@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 320" width="100%" height="100%">
+  <defs>
+    <!-- Gold Linear Gradient -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="30%" stop-color="#eab308" />
+      <stop offset="60%" stop-color="#ca8a04" />
+      <stop offset="85%" stop-color="#a16207" />
+      <stop offset="100%" stop-color="#78350f" />
+    </linearGradient>
+    <!-- Dark Gold Shadow Gradient -->
+    <linearGradient id="goldShadow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#78350f" />
+      <stop offset="100%" stop-color="#451a03" />
+    </linearGradient>
+    <!-- Metallic Sheen -->
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.6"/>
+      <stop offset="25%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <!-- Drop Shadow Filter -->
+    <filter id="ribbonShadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.25" />
+    </filter>
+  </defs>
+
+  <!-- Hanging Bookmark Ribbon Body -->
+  <g filter="url(#ribbonShadow)">
+    <!-- Main Ribbon Body -->
+    <path d="M 20 0 L 180 0 L 180 270 L 100 230 L 20 270 Z" fill="url(#goldGradient)" />
+    <!-- Inner Gold Border -->
+    <path d="M 28 8 L 172 8 L 172 254 L 100 218 L 28 254 Z" fill="none" stroke="#fef08a" stroke-width="2" stroke-dasharray="4,2" opacity="0.8" />
+    <!-- Metallic Sheen Overlay -->
+    <path d="M 20 0 L 180 0 L 180 270 L 100 230 L 20 270 Z" fill="url(#sheen)" />
+  </g>
+</svg>

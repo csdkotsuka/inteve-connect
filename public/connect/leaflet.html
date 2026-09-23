@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT A3両面（A4×4ページ）リーフレット | Creative System Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        },
+                        csd: {
+                            blue: '#005bac',
+                            navy: '#003366',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans JP', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Print Styles: Strict A3 Landscape Spread / A4 4-Page Output */
+        @page {
+            size: A3 landscape;
+            margin: 0;
+        }
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a3-spread {
+                width: 420mm !important;
+                height: 297mm !important;
+                page-break-after: always;
+                page-break-inside: avoid;
+                margin: 0 !important;
+                box-shadow: none !important;
+                border: none !important;
+                overflow: hidden !important;
+            }
+        }
+        .a3-spread {
+            width: 100%;
+            max-width: 1400px;
+            aspect-ratio: 420 / 297;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen py-8 px-4 sm:px-6 antialiased font-sans">
+
+    <!-- Top Navigation Toolbar (Screen Only) -->
+    <header class="max-w-7xl mx-auto mb-8 no-print">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-4 bg-slate-900/90 border border-slate-800 p-5 rounded-2xl shadow-2xl backdrop-blur-md">
+            <div>
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-[11px] bg-brand-500/20 text-brand-300 font-bold px-2.5 py-0.5 rounded-full border border-brand-500/30 uppercase tracking-wider">A3 2つ折り（A4×4ページ）</span>
+                    <h1 class="text-xl sm:text-2xl font-black text-white">CONNECT 製品紹介リーフレット</h1>
+                </div>
+                <p class="text-xs sm:text-sm text-slate-400">歯科医院・クリニック・サロン向け 24h AI即レス予約＆スタッフ管理システム</p>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="flex flex-wrap items-center gap-3">
+                <a href="leaflet_parts.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-brand-300 rounded-xl text-xs sm:text-sm font-bold transition-colors flex items-center gap-2 border border-brand-500/30">
+                    <i class="fas fa-cubes"></i>
+                    <span>個別パーツ・素材DL</span>
+                </a>
+                <a href="index.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center gap-2 border border-slate-700">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>特設ページへ戻る</span>
+                </a>
+                <button onclick="window.print()" class="px-5 py-2 bg-gradient-to-r from-brand-600 to-teal-500 hover:from-brand-500 hover:to-teal-400 text-white rounded-xl text-xs sm:text-sm font-bold shadow-lg shadow-brand-600/30 transition-all flex items-center gap-2">
+                    <i class="fas fa-print"></i>
+                    <span>A3印刷 / PDF書き出し</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- View Switcher Tabs -->
+        <div class="flex flex-wrap border-b border-slate-800 mt-6 gap-2">
+            <button onclick="switchView('spreads')" id="tab-spreads" class="tab-btn px-5 py-3 font-bold text-sm text-brand-400 border-b-2 border-brand-400 flex items-center gap-2 transition-all">
+                <i class="fas fa-columns"></i>
+                <span>① A3見開きビュー（2見開き）</span>
+            </button>
+            <button onclick="switchView('pages')" id="tab-pages" class="tab-btn px-5 py-3 font-semibold text-sm text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 transition-all">
+                <i class="fas fa-file-alt"></i>
+                <span>② A4単ページビュー（P.1〜P.4）</span>
+            </button>
+            <button onclick="switchView('html')" id="tab-html" class="tab-btn px-5 py-3 font-semibold text-sm text-slate-400 hover:text-slate-200 border-b-2 border-transparent flex items-center gap-2 transition-all">
+                <i class="fas fa-code"></i>
+                <span>③ 印刷用HTML組版レイアウト（実画面・ロゴ搭載）</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto space-y-12 pb-16">
+
+        <!-- ========================================== -->
+        <!-- VIEW 1: High-Res A3 Spread Mockups         -->
+        <!-- ========================================== -->
+        <div id="view-spreads" class="space-y-12 transition-opacity duration-300">
+            
+            <!-- Spread 1: Outside (Page 4 Back Cover + Page 1 Front Cover) -->
+            <section class="space-y-3">
+                <div class="flex items-center justify-between no-print">
+                    <div class="flex items-center gap-2 text-brand-400 font-bold text-sm sm:text-base">
+                        <span class="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-xs font-black">1</span>
+                        <span>外面見開き（左：裏表紙 P.4 導入メリット＆CTA / 右：表紙 P.1 メインビジュアル）</span>
+                    </div>
+                    <a href="images/leaflet_a3_outside_spread.jpg" download="CONNECT_A3_Outside_Spread.jpg" class="text-xs text-slate-400 hover:text-brand-300 flex items-center gap-1.5 underline">
+                        <i class="fas fa-download"></i> 高解像度画像をダウンロード
+                    </a>
+                </div>
+                <div class="bg-slate-900/60 rounded-3xl p-3 sm:p-4 border border-slate-800 shadow-2xl">
+                    <img src="images/leaflet_a3_outside_spread.jpg" alt="CONNECT A3 外面見開き (P4 + P1)" class="w-full h-auto rounded-2xl block shadow-lg">
+                </div>
+            </section>
+
+            <!-- Spread 2: Inside (Page 2 Patient Experience + Page 3 Staff Admin Experience) -->
+            <section class="space-y-3">
+                <div class="flex items-center justify-between no-print">
+                    <div class="flex items-center gap-2 text-brand-400 font-bold text-sm sm:text-base">
+                        <span class="w-6 h-6 rounded-full bg-brand-500/20 text-brand-300 flex items-center justify-center text-xs font-black">2</span>
+                        <span>中面見開き（左：P.2 患者様体験 / 右：P.3 医院・スタッフ管理体験）</span>
+                    </div>
+                    <a href="images/leaflet_a3_inside_spread.jpg" download="CONNECT_A3_Inside_Spread.jpg" class="text-xs text-slate-400 hover:text-brand-300 flex items-center gap-1.5 underline">
+                        <i class="fas fa-download"></i> 高解像度画像をダウンロード
+                    </a>
+                </div>
+                <div class="bg-slate-900/60 rounded-3xl p-3 sm:p-4 border border-slate-800 shadow-2xl">
+                    <img src="images/leaflet_a3_inside_spread.jpg" alt="CONNECT A3 中面見開き (P2 + P3)" class="w-full h-auto rounded-2xl block shadow-lg">
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: High-Res A4 Individual Pages       -->
+        <!-- ========================================== -->
+        <div id="view-pages" class="hidden space-y-12 transition-opacity duration-300">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Page 1: 表紙 -->
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-brand-400">P.1 表紙（Cover）</span>
+                        <a href="images/leaflet_p1_cover.jpg" download="CONNECT_Leaflet_P1_Cover.jpg" class="text-xs text-slate-400 hover:text-brand-300 underline">
+                            <i class="fas fa-download"></i> 保存
+                        </a>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-700/50">
+                        <img src="images/leaflet_p1_cover.jpg" alt="P.1 表紙" class="w-full h-auto block">
+                    </div>
+                </div>
+
+                <!-- Page 2: 患者様体験 -->
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-400">P.2 中面左（患者様体験）</span>
+                        <a href="images/leaflet_p2_patient.jpg" download="CONNECT_Leaflet_P2_Patient.jpg" class="text-xs text-slate-400 hover:text-brand-300 underline">
+                            <i class="fas fa-download"></i> 保存
+                        </a>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-700/50">
+                        <img src="images/leaflet_p2_patient.jpg" alt="P.2 患者様体験" class="w-full h-auto block">
+                    </div>
+                </div>
+
+                <!-- Page 3: 医院管理体験 -->
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-teal-400">P.3 中面右（医院・店舗管理）</span>
+                        <a href="images/leaflet_p3_admin.jpg" download="CONNECT_Leaflet_P3_Admin.jpg" class="text-xs text-slate-400 hover:text-brand-300 underline">
+                            <i class="fas fa-download"></i> 保存
+                        </a>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-700/50">
+                        <img src="images/leaflet_p3_admin.jpg" alt="P.3 医院管理体験" class="w-full h-auto block">
+                    </div>
+                </div>
+
+                <!-- Page 4: 裏表紙 -->
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-3xl border border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-cyan-400">P.4 裏表紙（導入効果・CTA）</span>
+                        <a href="images/leaflet_p4_back.jpg" download="CONNECT_Leaflet_P4_Back.jpg" class="text-xs text-slate-400 hover:text-brand-300 underline">
+                            <i class="fas fa-download"></i> 保存
+                        </a>
+                    </div>
+                    <div class="rounded-2xl overflow-hidden shadow-xl border border-slate-700/50">
+                        <img src="images/leaflet_p4_back.jpg" alt="P.4 裏表紙" class="w-full h-auto block">
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: Print-Ready Structured HTML Layout -->
+        <!-- ========================================== -->
+        <div id="view-html" class="hidden space-y-16 transition-opacity duration-300">
+
+            <!-- ========================================== -->
+            <!-- SPREAD 1 (OUTSIDE): P4 (Left) + P1 (Right) -->
+            <!-- ========================================== -->
+            <div class="a3-spread bg-white text-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 mx-auto grid grid-cols-2">
+                
+                <!-- ========================================== -->
+                <!-- PAGE 4: 裏表紙 (Back Cover / Left Half)    -->
+                <!-- ========================================== -->
+                <div class="p-8 lg:p-12 flex flex-col justify-between border-r border-slate-100 bg-gradient-to-b from-slate-50 via-white to-teal-50/30">
+                    <div>
+                        <!-- Header badge -->
+                        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200">
+                            <span class="text-[11px] font-extrabold text-brand-700 bg-brand-100 px-3 py-1 rounded-full uppercase tracking-wider">導入効果・信頼性</span>
+                            <span class="text-xs text-slate-400 font-bold">CONNECT Smart DX</span>
+                        </div>
+
+                        <!-- Main stats title -->
+                        <h2 class="text-2xl font-black text-slate-900 mb-6 leading-tight">
+                            導入で得られる<span class="text-brand-600">3つの劇的インパクト</span>
+                        </h2>
+
+                        <!-- 3 Stats Grid -->
+                        <div class="grid grid-cols-3 gap-3 mb-8">
+                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                                <div class="text-2xl lg:text-3xl font-black text-emerald-600 mb-1">+35<span class="text-sm font-bold">%</span></div>
+                                <div class="text-xs font-bold text-slate-700 mb-1">予約獲得率UP</div>
+                                <div class="text-[10px] text-slate-400 leading-tight">夜間・休診日の予約取りこぼしを解消</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                                <div class="text-2xl lg:text-3xl font-black text-teal-600 mb-1">-70<span class="text-sm font-bold">%</span></div>
+                                <div class="text-xs font-bold text-slate-700 mb-1">受付電話工数</div>
+                                <div class="text-[10px] text-slate-400 leading-tight">日程調整・問診の電話対応を自動化</div>
+                            </div>
+                            <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm text-center">
+                                <div class="text-2xl lg:text-3xl font-black text-cyan-600 mb-1">0<span class="text-sm font-bold">件へ</span></div>
+                                <div class="text-xs font-bold text-slate-700 mb-1">無断キャンセル</div>
+                                <div class="text-[10px] text-slate-400 leading-tight">カレンダー連携＆前日リマインド</div>
+                            </div>
+                        </div>
+
+                        <!-- Target Industries -->
+                        <div class="mb-8">
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-3">幅広い予約・顧客管理に対応</h3>
+                            <div class="grid grid-cols-2 gap-2 text-xs">
+                                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-100 font-bold text-slate-700">
+                                    <span>🦷</span> 歯科・デンタルクリニック
+                                </div>
+                                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-100 font-bold text-slate-700">
+                                    <span>🏥</span> 医科・皮膚科・小児科
+                                </div>
+                                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-100 font-bold text-slate-700">
+                                    <span>💆</span> 美容サロン・エステ・ネイル
+                                </div>
+                                <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white border border-slate-100 font-bold text-slate-700">
+                                    <span>🌿</span> 整体・鍼灸・接骨院
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security & Trust -->
+                        <div class="p-4 rounded-2xl bg-teal-500/10 border border-teal-500/20 flex items-start gap-3 mb-6">
+                            <i class="fas fa-shield-alt text-teal-600 text-lg mt-0.5"></i>
+                            <div>
+                                <h4 class="text-xs font-bold text-teal-950 mb-0.5">安心のセキュリティ＆手厚い導入支援</h4>
+                                <p class="text-[11px] text-teal-900 leading-relaxed">
+                                    通信・データのSSL暗号化、国内高信頼サーバー運用。既存電子カルテからのデータ移行や初期メニュー設定も専門チームが丁寧にサポートします。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom CTA & Company Footer -->
+                    <div>
+                        <!-- CTA Banner -->
+                        <div class="p-5 rounded-2xl bg-gradient-to-r from-slate-900 to-brand-950 text-white flex items-center justify-between gap-4 mb-6 shadow-md">
+                            <div>
+                                <div class="text-[10px] text-brand-300 font-bold tracking-wide">無料オンラインデモ実施中</div>
+                                <div class="text-sm lg:text-base font-black">実際の操作画面をお試しいただけます</div>
+                            </div>
+                            <div class="px-4 py-2 bg-brand-500 text-white font-bold rounded-xl text-xs whitespace-nowrap">
+                                相談無料
+                            </div>
+                        </div>
+
+                        <!-- Official Company Logo & Information -->
+                        <div class="pt-4 border-t border-slate-200 flex items-center justify-between gap-4">
+                            <div>
+                                <img src="images/site_logo2.png" alt="Creative System Design" class="h-6 sm:h-7 w-auto mb-1.5">
+                                <p class="text-[10px] text-slate-500 font-medium">株式会社 Creative System Design</p>
+                                <p class="text-[9px] text-slate-400">Web: https://connect.creativesd.net/</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-[10px] text-slate-400 font-semibold block">P.4</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- PAGE 1: 表紙 (Front Cover / Right Half)    -->
+                <!-- ========================================== -->
+                <div class="p-8 lg:p-12 flex flex-col justify-between bg-gradient-to-br from-brand-50/50 via-white to-teal-100/20 relative overflow-hidden">
+                    
+                    <!-- Decorative background element -->
+                    <div class="absolute -top-20 -right-20 w-80 h-80 bg-brand-200/40 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div>
+                        <!-- Top Header Logo Row -->
+                        <div class="flex items-center justify-between pb-4 mb-6 border-b border-slate-200/60 relative z-10">
+                            <img src="images/site_logo2.png" alt="Creative System Design" class="h-6 sm:h-7 w-auto">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm font-black tracking-tight text-slate-800">CONNECT</span>
+                                <span class="text-[10px] bg-brand-100 text-brand-700 font-bold px-2 py-0.5 rounded-md">Smart DX</span>
+                            </div>
+                        </div>
+
+                        <!-- Badge -->
+                        <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white border border-brand-200 text-brand-800 text-xs font-bold shadow-xs mb-4">
+                            <span class="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
+                            <span>24時間 AI即レス予約 ＆ スタッフ個別管理システム</span>
+                        </div>
+
+                        <!-- Main Catchphrase -->
+                        <h1 class="text-3xl lg:text-4xl font-black text-slate-900 tracking-tight leading-[1.25] mb-4">
+                            患者様には<span class="text-brand-600">即レスの心地よさ</span>を。<br>
+                            スタッフには<span class="text-slate-800 underline decoration-brand-300 decoration-wavy decoration-2">ゆとりと確実さ</span>を。
+                        </h1>
+
+                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed mb-6 font-normal">
+                            LINE・スマホで簡単ログイン。AIチャットで症状を伝えるだけで、空き枠を自動提案して即時予約完了。スタッフ別タイムラインと電子カルテ連携で、毎日の受付・予約管理のストレスをゼロにします。
+                        </p>
+
+                        <!-- Device Visual Presentation -->
+                        <div class="relative my-6 flex items-center justify-center gap-4">
+                            <!-- Mobile Chat Mockup -->
+                            <div class="w-36 lg:w-44 rounded-2xl overflow-hidden border-2 border-slate-800 shadow-2xl bg-slate-900 transform -rotate-3 hover:rotate-0 transition-transform">
+                                <img src="images/patient_chat_slots.png" alt="患者AIチャット" class="w-full h-auto block">
+                            </div>
+                            <!-- Desktop Calendar Mockup -->
+                            <div class="w-64 lg:w-80 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-2xl bg-white transform rotate-2 hover:rotate-0 transition-transform">
+                                <img src="images/admin_calendar.png" alt="スタッフ別カレンダー" class="w-full h-auto block">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3 Feature Points -->
+                    <div class="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200">
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-black text-xs shrink-0">1</div>
+                            <div class="text-[11px] font-bold text-slate-800 leading-tight">24h AI即レス予約<span class="block text-[9px] text-slate-400 font-normal">LINE/Webで即確定</span></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-black text-xs shrink-0">2</div>
+                            <div class="text-[11px] font-bold text-slate-800 leading-tight">スタッフ別カレンダー<span class="block text-[9px] text-slate-400 font-normal">D&D直感タイムライン</span></div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <div class="w-7 h-7 rounded-xl bg-brand-100 text-brand-700 flex items-center justify-center font-black text-xs shrink-0">3</div>
+                            <div class="text-[11px] font-bold text-slate-800 leading-tight">電子カルテ連携<span class="block text-[9px] text-slate-400 font-normal">患者データ一元管理</span></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ========================================== -->
+            <!-- SPREAD 2 (INSIDE): P2 (Left) + P3 (Right)  -->
+            <!-- ========================================== -->
+            <div class="a3-spread bg-white text-slate-800 rounded-3xl overflow-hidden shadow-2xl border border-slate-200 mx-auto grid grid-cols-2">
+                
+                <!-- ========================================== -->
+                <!-- PAGE 2: 中面左 (Patient Flow / Left Half)  -->
+                <!-- ========================================== -->
+                <div class="p-8 lg:p-12 flex flex-col justify-between border-r border-slate-100 bg-white">
+                    <div>
+                        <!-- Header badge -->
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-200">
+                            <span class="text-[11px] font-extrabold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">患者様体験（Patient Experience）</span>
+                            <span class="text-xs text-slate-400 font-bold">P.2</span>
+                        </div>
+
+                        <!-- Section Title -->
+                        <h2 class="text-2xl font-black text-slate-900 mb-2 leading-tight">
+                            「待たせない・迷わない」<br>
+                            <span class="text-emerald-600">スマホで完結する次世代予約体験</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mb-6">専用アプリ不要。LINEやブラウザから3タップで最短20秒予約が完了します。</p>
+
+                        <!-- 4 Step Cards -->
+                        <div class="space-y-3.5">
+                            
+                            <!-- Step 1 -->
+                            <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5">1</span>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h3 class="text-xs font-bold text-slate-900">マルチ認証で簡単ログイン</h3>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">面倒な新規登録なし</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">LINE、Apple、Google、メールアドレスに対応。患者様が普段使うアカウントですぐに開始。</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 2 -->
+                            <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5">2</span>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h3 class="text-xs font-bold text-slate-900">AIチャットで症状を伝える</h3>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">24時間即時応答</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">「奥歯がしみる」「定期検診希望」など自然な言葉で送信。AIが内容を理解し適切な所要枠を判定。</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 3 -->
+                            <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5">3</span>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h3 class="text-xs font-bold text-slate-900">空き枠提案・タップで即確定</h3>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">リアルタイム空き同期</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">医師・衛生士の空き時間を瞬時に計算し候補を提示。希望の日時を1タップするだけで予約完了。</p>
+                                </div>
+                            </div>
+
+                            <!-- Step 4 -->
+                            <div class="flex items-start gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-100">
+                                <span class="w-6 h-6 rounded-full bg-emerald-600 text-white font-black text-xs flex items-center justify-center shrink-0 mt-0.5">4</span>
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-0.5">
+                                        <h3 class="text-xs font-bold text-slate-900">カレンダー登録＆通知リマインド</h3>
+                                        <span class="text-[10px] text-emerald-600 font-semibold">予約忘れゼロへ</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-500 leading-snug">確認メールに加え、スマホ標準カレンダー（Google/iOS）にワンタップ追加。前日通知で受診をサポート。</p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Screen Thumbnails Row -->
+                    <div class="grid grid-cols-3 gap-2.5 pt-4 border-t border-slate-200">
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs">
+                            <img src="images/patient_login.png" alt="ログイン画面" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-slate-600">① 簡単ログイン</div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs">
+                            <img src="images/patient_chat_init.png" alt="AI問診チャット" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-slate-600">② AI即レス問診</div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xs">
+                            <img src="images/patient_chat_slots.png" alt="空き枠タップ確定" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-slate-600">③ タップ即確定</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- PAGE 3: 中面右 (Staff Experience / Right)   -->
+                <!-- ========================================== -->
+                <div class="p-8 lg:p-12 flex flex-col justify-between bg-gradient-to-br from-white via-slate-50 to-teal-50/20">
+                    <div>
+                        <!-- Header badge -->
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-200">
+                            <span class="text-[11px] font-extrabold text-teal-700 bg-teal-100 px-3 py-1 rounded-full uppercase tracking-wider">医院・店舗管理体験（Staff & Management）</span>
+                            <span class="text-xs text-slate-400 font-bold">P.3</span>
+                        </div>
+
+                        <!-- Section Title -->
+                        <h2 class="text-2xl font-black text-slate-900 mb-2 leading-tight">
+                            電話対応・日程調整ゼロへ。<br>
+                            <span class="text-teal-600">スタッフ個別タイムライン管理</span>
+                        </h2>
+                        <p class="text-xs text-slate-500 mb-6">医師・衛生士別のリアルタイム同期と、ドラッグ＆ドロップの直感操作で受付DXを実現。</p>
+
+                        <!-- Main Admin Feature Highlights -->
+                        <div class="grid grid-cols-2 gap-3.5 mb-6">
+                            
+                            <!-- Feature 1 -->
+                            <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                                <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xs mb-2">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <h3 class="text-xs font-bold text-slate-900 mb-1">個別タイムライン・D&D操作</h3>
+                                <p class="text-[11px] text-slate-500 leading-snug">医師や施術者ごとのスケジュールを並列表示。枠の移動・変更もマウス操作で直感完了。</p>
+                            </div>
+
+                            <!-- Feature 2 -->
+                            <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                                <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xs mb-2">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 class="text-xs font-bold text-slate-900 mb-1">患者一覧・電子カルテ連携</h3>
+                                <p class="text-[11px] text-slate-500 leading-snug">Webからの新規患者も、院内の既存カルテデータも一括インポート・シームレス同期。</p>
+                            </div>
+
+                            <!-- Feature 3 -->
+                            <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                                <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xs mb-2">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <h3 class="text-xs font-bold text-slate-900 mb-1">診療メニュー＆枠間隔設定</h3>
+                                <p class="text-[11px] text-slate-500 leading-snug">初診・再診、処置ごとに必要な所要時間や準備バッファ時間を医院に合わせて自由に制御。</p>
+                            </div>
+
+                            <!-- Feature 4 -->
+                            <div class="p-3.5 rounded-2xl bg-white border border-slate-100 shadow-sm">
+                                <div class="w-7 h-7 rounded-xl bg-teal-100 text-teal-700 flex items-center justify-center text-xs mb-2">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <h3 class="text-xs font-bold text-slate-900 mb-1">トップ告知・休診お知らせ</h3>
+                                <p class="text-[11px] text-slate-500 leading-snug">臨時休診や予約時の注意事項を、患者画面のトップにワンクリックで即座に告知。</p>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Admin Screens Row -->
+                    <div class="grid grid-cols-3 gap-2.5 pt-4 border-t border-slate-200">
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shadow-xs">
+                            <img src="images/admin_calendar.png" alt="台帳カレンダー" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-white bg-slate-800">予約台帳タイムライン</div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shadow-xs">
+                            <img src="images/admin_patients.png" alt="患者カルテ連携" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-white bg-slate-800">患者一覧・カルテ連携</div>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-slate-200 bg-slate-900 shadow-xs">
+                            <img src="images/admin_schedule.png" alt="時間設定" class="w-full h-auto block">
+                            <div class="p-1.5 text-center text-[10px] font-bold text-white bg-slate-800">診療枠・間隔設定</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Interactive View Switcher Script -->
+    <script>
+        function switchView(view) {
+            const viewSpreads = document.getElementById('view-spreads');
+            const viewPages = document.getElementById('view-pages');
+            const viewHtml = document.getElementById('view-html');
+            const tabSpreads = document.getElementById('tab-spreads');
+            const tabPages = document.getElementById('tab-pages');
+            const tabHtml = document.getElementById('tab-html');
+
+            const allViews = [viewSpreads, viewPages, viewHtml];
+            const allTabs = [tabSpreads, tabPages, tabHtml];
+
+            allViews.forEach(v => v.classList.add('hidden'));
+            allTabs.forEach(t => {
+                t.classList.remove('text-brand-400', 'border-brand-400');
+                t.classList.add('text-slate-400', 'border-transparent');
+            });
+
+            if (view === 'spreads') {
+                viewSpreads.classList.remove('hidden');
+                tabSpreads.classList.add('text-brand-400', 'border-brand-400');
+                tabSpreads.classList.remove('text-slate-400', 'border-transparent');
+            } else if (view === 'pages') {
+                viewPages.classList.remove('hidden');
+                tabPages.classList.add('text-brand-400', 'border-brand-400');
+                tabPages.classList.remove('text-slate-400', 'border-transparent');
+            } else if (view === 'html') {
+                viewHtml.classList.remove('hidden');
+                tabHtml.classList.add('text-brand-400', 'border-brand-400');
+                tabHtml.classList.remove('text-slate-400', 'border-transparent');
+            }
+        }
+    </script>
+
+</body>
+</html>

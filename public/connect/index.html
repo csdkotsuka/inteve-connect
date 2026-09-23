@@ -1,0 +1,1594 @@
+<!DOCTYPE html>
+<html lang="ja" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT（コネクト）| 24時間AI即レス予約＆顧客管理システム</title>
+    <meta name="description" content="歯科医院をはじめ、接骨院・サロン・パーソナルジムなど幅広い業種に対応する24時間AI即レス予約＆顧客管理システム「CONNECT」。LINE・スマホから直感チャット予約、スタッフ別タイムラインカレンダー、電子カルテ連携で日々の予約・受付業務をスマートに。">
+
+    <link rel="icon" href="images/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="images/favicon.png" />
+
+    <!-- OGP Settings -->
+    <meta property="og:title" content="CONNECT | 24時間AI即レス予約＆顧客管理システム" />
+    <meta property="og:description" content="患者・顧客には即レスの心地よさを。スタッフにはゆとりと確実さを。歯科医院・接骨院・サロン向けの次世代予約・顧客管理システム。" />
+    <meta property="og:url" content="https://connect.creativesd.net/" />
+    <meta property="og:image" content="https://connect.creativesd.net/images/admin_calendar.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Plus Jakarta Sans & Noto Sans JP -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            300: '#5eead4',
+                            400: '#2dd4bf',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                        },
+                        warm: {
+                            50: '#faf8f5',
+                            100: '#f5f0e6',
+                            200: '#eae2d1',
+                            800: '#3a3328',
+                            900: '#262019',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', '"Noto Sans JP"', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'soft': '0 10px 35px -8px rgba(15, 118, 110, 0.07)',
+                        'soft-lg': '0 20px 50px -12px rgba(13, 148, 136, 0.12)',
+                        'floating': '0 25px 60px -15px rgba(15, 23, 42, 0.12)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+            letter-spacing: 0.02em;
+        }
+        .soft-gradient {
+            background: linear-gradient(135deg, #f0fdf9 0%, #ffffff 50%, #faf8f5 100%);
+        }
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.90);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .badge-pulse {
+            box-shadow: 0 0 0 0 rgba(20, 184, 166, 0.7);
+            animation: pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+        @keyframes pulse {
+            to {
+                box-shadow: 0 0 0 12px rgba(20, 184, 166, 0);
+            }
+        }
+        /* Custom smooth scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f8fafc;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-warm-50 text-slate-700 antialiased overflow-x-hidden selection:bg-brand-200 selection:text-brand-900">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-brand-800 via-brand-700 to-teal-800 text-white text-xs md:text-sm py-2 px-3 sm:px-4 text-center font-medium shadow-inner flex flex-col md:flex-row items-center justify-center gap-1.5 md:gap-3">
+        <div class="flex items-center gap-2">
+            <span class="bg-emerald-400/20 text-emerald-200 border border-emerald-400/30 px-2 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wide flex-shrink-0">NEW RELEASE</span>
+            <span>24時間AI即レス予約＆スタッフ個別管理システム「CONNECT」が登場</span>
+        </div>
+        <a href="#contact" class="underline underline-offset-4 hover:text-brand-200 font-bold transition-colors whitespace-nowrap">無料デモ・オンライン相談受付中 &rarr;</a>
+    </div>
+
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-50 glass-nav border-b border-slate-200/60 transition-all duration-300 shadow-xs" id="header">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <a href="index.html" class="flex items-center gap-3 group flex-shrink-0">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-600 to-brand-400 text-white flex items-center justify-center shadow-md shadow-brand-500/25 group-hover:scale-105 transition-transform duration-300">
+                    <i class="fas fa-link text-lg"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-xl font-black tracking-tight text-slate-800 whitespace-nowrap">CONNECT</span>
+                        <span class="text-[10px] bg-brand-100 text-brand-700 font-bold px-1.5 py-0.5 rounded-md whitespace-nowrap">Smart DX</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium tracking-wider whitespace-nowrap">by Creative System Design</p>
+                </div>
+            </a>
+
+            <!-- Desktop Nav Items (Top Global Links) -->
+            <nav class="hidden md:flex items-center gap-5 xl:gap-8 flex-shrink-0">
+                <a href="about.html" class="text-sm font-bold text-slate-700 hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-building text-slate-400 text-xs"></i>
+                    <span>事業者概要</span>
+                </a>
+                <a href="privacy.html" class="text-sm font-bold text-slate-700 hover:text-brand-600 transition-colors flex items-center gap-1.5">
+                    <i class="fas fa-shield-alt text-slate-400 text-xs"></i>
+                    <span>プライバシーポリシー</span>
+                </a>
+                <a href="#contact" class="text-sm font-semibold text-slate-600 hover:text-brand-600 transition-colors">お問い合わせ</a>
+            </nav>
+
+            <!-- CTA Actions -->
+            <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                <!-- 実際の受付ページへのリンク -->
+                <a href="/" class="inline-flex items-center gap-1.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white text-xs sm:text-sm font-bold px-3.5 sm:px-4 py-2 rounded-full shadow-md shadow-amber-600/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                    <i class="fas fa-calendar-check text-xs"></i>
+                    <span>実際の受付画面</span>
+                </a>
+                <a href="#contact" class="hidden sm:inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-bold px-4 sm:px-5 py-2 sm:py-2.5 rounded-full shadow-md shadow-brand-600/20 hover:shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap">
+                    <span>お問い合わせ</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </a>
+                <a href="https://creativesd.net/" class="hidden xl:inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 px-3.5 py-2 rounded-xl border border-slate-200/80 bg-white/80 hover:bg-white transition-all shadow-2xs whitespace-nowrap">
+                    <i class="fas fa-arrow-left text-slate-400"></i>
+                    <span>CSD 公式</span>
+                </a>
+                <!-- Mobile Menu Button -->
+                <button id="mobile-toggle" class="md:hidden p-2 text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100" aria-label="メニューを開く">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 border-b border-slate-200 px-6 py-6 space-y-4 backdrop-blur-lg">
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider pb-1 border-b border-slate-100">システム体験・案内</div>
+            <a href="/" class="flex items-center gap-2 text-base font-bold text-amber-600 hover:text-amber-700 bg-amber-50 p-2.5 rounded-xl border border-amber-200">
+                <i class="fas fa-calendar-check text-amber-600"></i>
+                <span>実際の受付ページ（WEB予約）を体験する</span>
+            </a>
+            <a href="about.html" class="block text-base font-bold text-slate-800 hover:text-brand-600">事業者概要・知財情報</a>
+            <a href="privacy.html" class="block text-base font-bold text-slate-800 hover:text-brand-600">プライバシーポリシー</a>
+            
+            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider pt-2 pb-1 border-b border-slate-100">コンテンツ目次</div>
+            <a href="#features" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">特長</a>
+            <a href="#patient-flow" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">患者・顧客の体験</a>
+            <a href="#admin-features" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">医院・店舗の管理機能</a>
+            <a href="#screens" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">実際の画面</a>
+            <a href="#industries" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">対応業種</a>
+            <a href="#faq" class="block text-sm font-semibold text-slate-600 hover:text-brand-600">よくある質問</a>
+            
+            <div class="pt-4 border-t border-slate-100 flex flex-col gap-3">
+                <a href="https://creativesd.net/" class="text-center text-sm font-medium text-slate-600 py-2.5 rounded-xl border border-slate-200">CSD メインサイトへ</a>
+                <a href="#contact" class="text-center text-sm font-bold bg-brand-600 text-white py-3 rounded-full shadow-md">無料デモ・お問い合わせ</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- FLOATING LEFT TABLE OF CONTENTS (TOC NAV) -->
+    <aside id="toc-container" class="fixed left-3 2xl:left-6 top-1/2 -translate-y-1/2 z-40 hidden lg:block transition-all duration-300">
+        <div id="toc-panel" class="bg-white/90 backdrop-blur-md border border-slate-200/90 shadow-xl shadow-slate-300/30 rounded-2xl p-3 w-48 text-slate-700 transition-all duration-300">
+            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100">
+                <div class="flex items-center gap-1.5 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                    <i class="fas fa-list-ul text-brand-600"></i>
+                    <span id="toc-title">目次</span>
+                </div>
+                <button id="toc-toggle" class="text-slate-400 hover:text-slate-600 p-1 rounded-md transition-colors" title="目次を折りたたむ/展開">
+                    <i id="toc-toggle-icon" class="fas fa-chevron-left text-[11px]"></i>
+                </button>
+            </div>
+            <nav id="toc-list" class="space-y-1">
+                <a href="#features" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="features">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">特長</span>
+                </a>
+                <a href="#patient-flow" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="patient-flow">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">患者・顧客の体験</span>
+                </a>
+                <a href="#admin-features" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="admin-features">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">管理機能</span>
+                </a>
+                <a href="#screens" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="screens">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">実際の画面</span>
+                </a>
+                <a href="#industries" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="industries">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">対応業種</span>
+                </a>
+                <a href="#faq" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="faq">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">よくある質問</span>
+                </a>
+                <a href="#contact" class="toc-link group flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:text-brand-700 hover:bg-brand-50/80 transition-all" data-target="contact">
+                    <span class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 toc-dot transition-all flex-shrink-0"></span>
+                    <span class="truncate toc-text">お問い合わせ</span>
+                </a>
+            </nav>
+            <div class="pt-2 mt-2 border-t border-slate-100 flex items-center justify-center text-[10px] text-slate-400">
+                <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" class="hover:text-brand-600 flex items-center gap-1 transition-colors">
+                    <i class="fas fa-arrow-up text-[9px]"></i>
+                    <span class="toc-text">最上部へ</span>
+                </button>
+            </div>
+        </div>
+    </aside>
+
+    <main>
+        <!-- HERO SECTION -->
+        <section class="relative pt-12 pb-24 lg:pt-20 lg:pb-36 overflow-hidden soft-gradient">
+            <!-- Background Decorative Orbs -->
+            <div class="absolute top-10 left-1/2 -translate-x-1/2 w-[1000px] h-[550px] bg-gradient-to-b from-brand-200/40 via-teal-100/20 to-transparent rounded-full blur-3xl pointer-events-none -z-10"></div>
+            <div class="absolute top-1/4 -left-20 w-80 h-80 bg-emerald-100/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+            <div class="absolute bottom-10 -right-20 w-96 h-96 bg-brand-100/30 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Hero Top Badge -->
+                <div class="text-center max-w-4xl lg:max-w-5xl mx-auto mb-10">
+                    <div class="inline-flex flex-col sm:flex-row items-center gap-1 sm:gap-2 px-4 py-2 sm:py-1.5 rounded-2xl sm:rounded-full bg-white/90 border border-brand-200 text-brand-800 text-xs sm:text-sm font-semibold shadow-2xs mb-6">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-brand-500 badge-pulse flex-shrink-0"></span>
+                            <span>24時間 AI即レス予約</span>
+                        </div>
+                        <span class="hidden sm:inline text-brand-300">＆</span>
+                        <span>スタッフ個別管理システム</span>
+                    </div>
+
+                    <!-- Main Catchphrase -->
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black text-slate-900 tracking-tight leading-[1.3] mb-6">
+                        <span class="block lg:inline">患者様には<span class="text-brand-600">即レスの心地よさ</span>を。</span>
+                        <span class="block lg:inline">スタッフには<span class="text-slate-800 underline decoration-brand-300 decoration-wavy decoration-2">ゆとりと確実さ</span>を。</span>
+                    </h1>
+
+                    <!-- Subcopy -->
+                    <p class="text-base sm:text-lg text-slate-600 font-normal leading-relaxed mb-8 max-w-3xl mx-auto">
+                        <span class="block sm:inline">LINE・スマホで簡単ログイン。AIチャットで症状を伝えるだけで、空き枠を自動提案して即時予約完了。</span>
+                        <span class="block sm:inline mt-1 sm:mt-0">スタッフ別タイムラインカレンダーと電子カルテ連携で、毎日の受付・予約管理のストレスをゼロにします。</span>
+                    </p>
+
+                    <!-- Hero Action Buttons -->
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-3.5">
+                        <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-700 hover:to-amber-600 text-white font-bold text-base px-8 py-3.5 rounded-full shadow-lg shadow-amber-600/25 hover:shadow-xl hover:-translate-y-0.5 transition-all whitespace-nowrap">
+                            <i class="fas fa-calendar-check text-amber-200"></i>
+                            <span>実際の受付画面（WEB予約）を体験する</span>
+                        </a>
+                        <a href="#patient-flow" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white/90 hover:bg-white text-slate-700 hover:text-brand-700 font-bold text-base px-6 py-3.5 rounded-full border border-slate-200/80 shadow-2xs hover:shadow-md transition-all whitespace-nowrap">
+                            <i class="fas fa-play-circle text-brand-500"></i>
+                            <span>機能の流れを見る</span>
+                        </a>
+                        <a href="#contact" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-50 hover:bg-brand-100 text-brand-800 font-bold text-base px-6 py-3.5 rounded-full border border-brand-200 transition-all whitespace-nowrap">
+                            <i class="fas fa-envelope text-brand-600"></i>
+                            <span>無料デモ・お問い合わせ</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Industry Tags Banner -->
+                <div class="mt-8 mb-16 text-center">
+                    <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400 mb-3.5">幅広い予約・顧客管理に柔軟対応</p>
+                    <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 max-w-4xl mx-auto">
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>🦷</span> 歯科医院・デンタルクリニック
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>🦴</span> 接骨院・整骨院・鍼灸院
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>💆‍♀️</span> エステ・リラクゼーション
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>💇‍♂️</span> 理髪店・美容院
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>💅</span> ネイル・アイラッシュ
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/80 text-xs sm:text-sm font-semibold text-slate-700 shadow-2xs hover:border-brand-300 transition-colors">
+                            <span>🏋️‍♂️</span> パーソナルトレーニング
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Hero Visual Showcase (Screenshots Mockup) -->
+                <div class="relative max-w-5xl mx-auto">
+                    <!-- Main Showcase Container -->
+                    <div class="relative rounded-3xl p-3 sm:p-5 bg-white/80 backdrop-blur-md border border-white/90 shadow-floating">
+                        <!-- Mac OS style title bar dots -->
+                        <div class="flex items-center justify-between pb-3 px-2 border-b border-slate-100">
+                            <div class="flex items-center gap-2">
+                                <span class="w-3 h-3 rounded-full bg-rose-400 inline-block"></span>
+                                <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span>
+                                <span class="w-3 h-3 rounded-full bg-emerald-400 inline-block"></span>
+                                <span class="text-xs font-semibold text-slate-400 ml-2">CONNECT Management Suite &amp; AI Patient Reception</span>
+                            </div>
+                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-full border border-brand-100">リアルタイム同期中</span>
+                        </div>
+
+                        <!-- Grid preview of Admin Calendar & Patient Chat -->
+                        <div class="grid lg:grid-cols-12 gap-4 mt-3">
+                            <!-- Left: Admin Calendar Timeline -->
+                            <div class="lg:col-span-8 overflow-hidden rounded-2xl border border-slate-100 shadow-xs bg-slate-900 group relative cursor-pointer" onclick="openModal('images/admin_calendar.png', '予約台帳・タイムライン管理（スタッフ別D&D操作）')">
+                                <img src="images/admin_calendar.png" alt="CONNECT 予約台帳・タイムライン管理画面" class="w-full h-auto object-cover transform group-hover:scale-[1.01] transition-transform duration-500">
+                                <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md rounded-xl p-3 text-white text-xs flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-calendar-alt text-brand-400 text-sm"></i>
+                                        <span class="font-bold">スタッフ別タイムライン（日別・週別）</span>
+                                    </div>
+                                    <span class="text-slate-300 text-[11px]">ドラッグ＆ドロップで予約変更可能</span>
+                                </div>
+                            </div>
+
+                            <!-- Right: Patient Chat Interface -->
+                            <div class="lg:col-span-4 overflow-hidden rounded-2xl border border-slate-100 shadow-xs bg-slate-900 group relative flex flex-col justify-center cursor-pointer" onclick="openModal('images/patient_chat_slots.png', '患者様画面：即レスAI空き枠提案・タップ即確定')">
+                                <img src="images/patient_chat_slots.png" alt="患者用 チャット予約画面" class="w-full h-auto object-cover transform group-hover:scale-[1.01] transition-transform duration-500">
+                                <div class="absolute bottom-3 left-3 right-3 bg-slate-900/85 backdrop-blur-md rounded-xl p-3 text-white text-xs flex items-center justify-between">
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-robot text-teal-400 text-sm"></i>
+                                        <span class="font-bold">即レスAIコンシェルジュ</span>
+                                    </div>
+                                    <span class="text-brand-300 text-[11px]">空き枠タップで即確定</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Floating Feature Badges -->
+                    <div class="hidden md:flex absolute -bottom-6 -left-6 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-soft-lg border border-slate-100 items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">カルテ連携 & 自動照合</p>
+                            <p class="text-[11px] text-slate-500">既存の電子カルテからスムーズに移行</p>
+                        </div>
+                    </div>
+
+                    <div class="hidden md:flex absolute -top-6 -right-6 bg-white/95 backdrop-blur-md p-4 rounded-2xl shadow-soft-lg border border-slate-100 items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-brand-100 text-brand-600 flex items-center justify-center font-bold text-lg">
+                            <i class="fas fa-bell"></i>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-slate-800">スマホカレンダー自動登録</p>
+                            <p class="text-[11px] text-slate-500">うっかり忘れ・ドタキャンを防止</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- THREE CORE VALUES SECTION -->
+        <section class="py-24 bg-white" id="features">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-4xl mx-auto mb-20">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">WHY CONNECT</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4 leading-snug">
+                        <span class="inline-block">予約体験と受付業務を、</span><span class="inline-block">もっと心地よく、もっと確かに。</span>
+                    </h2>
+                    <p class="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto">
+                        <span class="inline-block">患者様・お客様の予約ストレスを解消しながら、</span><span class="inline-block">スタッフの煩雑なスケジュール調整・連絡業務を劇的に効率化します。</span>
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-8 lg:gap-12">
+                    <!-- Value 1 -->
+                    <div class="bg-warm-50/60 p-8 sm:p-10 rounded-3xl border border-slate-100 hover:border-brand-200 hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-2xl mb-6 shadow-2xs">
+                                <i class="fas fa-comments"></i>
+                            </div>
+                            <span class="text-xs font-bold text-brand-700 bg-brand-50 px-2.5 py-1 rounded-md">患者様・お客様へ</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-3 mb-3 leading-snug">
+                                <span class="inline-block">迷わない、待たせない。</span><br class="hidden sm:inline">
+                                <span class="inline-block">即レスチャット予約</span>
+                            </h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                LINEやメールでサッとログイン。チャットで症状や希望を選ぶだけでAIが空き枠を自動検索。タップ一つで予約が完了し、スマホのカレンダーに即連携されます。
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-slate-200/60 flex items-center gap-2 text-xs font-semibold text-brand-700">
+                            <i class="fas fa-check text-brand-500"></i>
+                            <span>リマインド通知で来院忘れを防止</span>
+                        </div>
+                    </div>
+
+                    <!-- Value 2 -->
+                    <div class="bg-warm-50/60 p-8 sm:p-10 rounded-3xl border border-slate-100 hover:border-brand-200 hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-teal-100 text-teal-700 flex items-center justify-center text-2xl mb-6 shadow-2xs">
+                                <i class="fas fa-users-cog"></i>
+                            </div>
+                            <span class="text-xs font-bold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-md">医院・店舗スタッフへ</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-3 mb-3 leading-snug">
+                                <span class="inline-block">個別タイムラインと</span><br class="hidden sm:inline">
+                                <span class="inline-block">直感ドラッグ＆ドロップ</span>
+                            </h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                医師・衛生士・スタッフそれぞれの予定を一画面で俯瞰。Webからの予約はリアルタイムで反映され、予約変更もドラッグ＆ドロップで一瞬。画面から直接連絡メールも送信できます。
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-slate-200/60 flex items-center gap-2 text-xs font-semibold text-teal-700">
+                            <i class="fas fa-check text-teal-500"></i>
+                            <span>Googleカレンダー双方向同期対応</span>
+                        </div>
+                    </div>
+
+                    <!-- Value 3 -->
+                    <div class="bg-warm-50/60 p-8 sm:p-10 rounded-3xl border border-slate-100 hover:border-brand-200 hover:shadow-soft-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+                        <div>
+                            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center text-2xl mb-6 shadow-2xs">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <span class="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md">カスタマイズ性</span>
+                            <h3 class="text-xl font-bold text-slate-900 mt-3 mb-3 leading-snug">
+                                <span class="inline-block">業種を選ばない</span><br class="hidden sm:inline">
+                                <span class="inline-block">自由なメニュー＆時間設定</span>
+                            </h3>
+                            <p class="text-slate-600 text-sm leading-relaxed">
+                                歯科医院はもちろん、接骨院・サロン・パーソナルジムなど、メニュー名・所要時間・料金・独自休診日を自由に設定。AI提案ロジックも運用の形に合わせて自動最適化されます。
+                            </p>
+                        </div>
+                        <div class="mt-6 pt-6 border-t border-slate-200/60 flex items-center gap-2 text-xs font-semibold text-amber-800">
+                            <i class="fas fa-check text-amber-600"></i>
+                            <span>電子カルテ・顧客データのCSVインポート対応</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- PATIENT EXPERIENCE FLOW SECTION -->
+        <section class="py-24 bg-warm-50" id="patient-flow">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Section Header -->
+                <div class="max-w-3xl mb-16">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">PATIENT &amp; CLIENT EXPERIENCE</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4">
+                        患者様・お客様の体験フロー
+                    </h2>
+                    <p class="text-slate-600 text-base leading-relaxed">
+                        アカウント連携から予約完了、当日のリマインドまで。ストレスを感じさせないスムーズな設計です。
+                    </p>
+                </div>
+
+                <!-- 4 Steps Flow with screenshots and cards -->
+                <div class="grid lg:grid-cols-4 gap-6 sm:gap-8">
+                    <!-- Step 1 -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-soft flex flex-col justify-between relative group hover:border-brand-300 transition-all">
+                        <div class="absolute -top-3.5 left-6 bg-brand-600 text-white font-black text-xs px-3 py-1 rounded-full shadow-2xs">
+                            STEP 01
+                        </div>
+                        <div>
+                            <div class="mt-2 mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 aspect-[4/3] flex items-center justify-center cursor-pointer" onclick="openModal('images/patient_login.png', '患者認証＆カルテ照合画面')">
+                                <img src="images/patient_login.png" alt="患者認証・ログイン画面" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-2">
+                                多彩なログイン＆カルテ照合
+                            </h3>
+                            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                LINE・Apple・Google・メールに対応。「新患」「再診」を選んでワンタップログイン。カルテ番号や登録情報と自動照合されます。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] font-semibold text-brand-700">
+                            <i class="fab fa-line text-emerald-500 text-sm"></i>
+                            <i class="fab fa-apple text-slate-700 text-sm"></i>
+                            <i class="fab fa-google text-red-500 text-sm"></i>
+                            <span class="text-slate-500">パスワード不要で簡単</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-soft flex flex-col justify-between relative group hover:border-brand-300 transition-all">
+                        <div class="absolute -top-3.5 left-6 bg-brand-600 text-white font-black text-xs px-3 py-1 rounded-full shadow-2xs">
+                            STEP 02
+                        </div>
+                        <div>
+                            <div class="mt-2 mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 aspect-[4/3] flex items-center justify-center cursor-pointer" onclick="openModal('images/patient_chat_init.png', 'チャット予約コンシェルジュ画面')">
+                                <img src="images/patient_chat_init.png" alt="チャット予約コンシェルジュ画面" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-2">
+                                即レスAIチャットで症状選択
+                            </h3>
+                            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                「歯が痛い」「定期検診」「相談」など、分かりやすいカードからタップして問診。自由記述にも自然に応答し、適切な所要時間を自動判定。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] font-semibold text-brand-700">
+                            <i class="fas fa-bolt text-amber-500"></i>
+                            <span>待ち時間ゼロの即時応答</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-soft flex flex-col justify-between relative group hover:border-brand-300 transition-all">
+                        <div class="absolute -top-3.5 left-6 bg-brand-600 text-white font-black text-xs px-3 py-1 rounded-full shadow-2xs">
+                            STEP 03
+                        </div>
+                        <div>
+                            <div class="mt-2 mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 aspect-[4/3] flex items-center justify-center cursor-pointer" onclick="openModal('images/patient_chat_slots.png', 'リアルタイム空き枠提案・タップ即確定')">
+                                <img src="images/patient_chat_slots.png" alt="空き枠タップで即確定" class="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-300">
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-2">
+                                空き枠タップで即時予約完了
+                            </h3>
+                            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                リアルタイムの空き枠候補がチャット内に一覧表示。希望の枠をタップするだけで即確定。仮予約待ちの煩わしさがありません。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] font-semibold text-brand-700">
+                            <i class="fas fa-check-circle text-brand-500"></i>
+                            <span>休診日・時間をAIが自動除外</span>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="bg-white rounded-3xl p-6 sm:p-7 border border-slate-100 shadow-soft flex flex-col justify-between relative group hover:border-brand-300 transition-all">
+                        <div class="absolute -top-3.5 left-6 bg-brand-600 text-white font-black text-xs px-3 py-1 rounded-full shadow-2xs">
+                            STEP 04
+                        </div>
+                        <div>
+                            <div class="mt-2 mb-4 overflow-hidden rounded-2xl border border-slate-100 bg-slate-50 aspect-[4/3] flex items-center justify-center p-4">
+                                <div class="w-full h-full bg-gradient-to-br from-brand-50 to-teal-100/50 rounded-xl p-4 flex flex-col justify-center items-center text-center">
+                                    <div class="w-12 h-12 rounded-full bg-white shadow-sm text-brand-600 flex items-center justify-center text-xl mb-2">
+                                        <i class="fas fa-calendar-plus"></i>
+                                    </div>
+                                    <span class="text-xs font-bold text-slate-800">スマホカレンダーへ自動登録</span>
+                                    <span class="text-[10px] text-slate-500 mt-1">Google / Apple / Outlook対応</span>
+                                </div>
+                            </div>
+                            <h3 class="text-lg font-bold text-slate-900 mb-2">
+                                完了メール ＆ 通知リマインド
+                            </h3>
+                            <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                                予約完了メールが即時送信され、スマホのカレンダーにワンタップで登録。前日・当日の通知で「予約のうっかり忘れ」を確実に防ぎます。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-100 flex items-center gap-2 text-[11px] font-semibold text-brand-700">
+                            <i class="fas fa-bell text-brand-500"></i>
+                            <span>ドタキャン防止＆来院率向上</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- STAFF & ADMIN MANAGEMENT FEATURES SECTION -->
+        <section class="py-24 bg-white" id="admin-features">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Section Header -->
+                <div class="text-center max-w-4xl mx-auto mb-16">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">POWERFUL ADMIN SUITE</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4 leading-snug">
+                        <span class="inline-block">医院・店舗の運営を力強く支える</span><span class="inline-block">管理機能</span>
+                    </h2>
+                    <p class="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto">
+                        <span class="inline-block">日々のスケジュール調整からスタッフ管理、</span><span class="inline-block">顧客カルテのインポート、お知らせ更新まで。</span><span class="inline-block">現場スタッフが迷わず使える直感UIにこだわりました。</span>
+                    </p>
+                </div>
+
+                <!-- Feature Grid with 8 features -->
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                    <!-- Admin Feature 1: Timeline Calendar -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-brand-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-brand-500/30">
+                                <i class="fas fa-calendar-week"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                スタッフ別 個別タイムライン
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                院長・医師・衛生士・受付それぞれの空き状況を縦軸時間・横軸スタッフで一元表示。日別・週別・月別を瞬時に切り替え可能。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-brand-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-sync-alt"></i> Googleカレンダー連携
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 2: Drag & Drop -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-teal-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-teal-500/30">
+                                <i class="fas fa-hand-pointer"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                リアルタイム反映 ＆ D&amp;D
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Webから入った予約は即座に画面へ反映。日時の変更やスタッフの変更も、マウスのドラッグ＆ドロップだけで完了します。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-teal-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-bolt"></i> 即時タイムライン同期
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 3: Direct Notification -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-emerald-500/30">
+                                <i class="fas fa-paper-plane"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                同一画面からメール/LINE通知
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                予約変更や連絡事項を、カレンダーや患者詳細画面から直接メール・LINEで送信。別ソフトを開く手間が一切ありません。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-emerald-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-comment-dots"></i> 送受信履歴も一括管理
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 4: Electronic Medical Records Import -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-blue-500/30">
+                                <i class="fas fa-file-import"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                電子カルテデータ インポート
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                Web新規患者はもちろん、既存の電子カルテやレセコンのデータをインポート。予約後のカルテ作成・照合が驚くほどスムーズに。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-blue-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-id-card"></i> VIP/一般ランク管理対応
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 5: Custom Chat Messages -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-indigo-500/30">
+                                <i class="fas fa-comment-dots"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                チャットメッセージ自由更新
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                患者様側のチャット画面で案内する挨拶文や質問文を、いつでも管理画面から自由に編集・更新できます。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-indigo-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-edit"></i> 季節の挨拶やキャンペーンに
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 6: Working Hours & Holidays -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-amber-500/30">
+                                <i class="fas fa-calendar-times"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                診療時間・休診日の簡単設定
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                曜日別の診療時間、祝日自動判定、夏季・年末年始・院内研修などの独自休診日を設定。AI提案から自動除外されます。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-amber-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-ban"></i> 二重予約・休診日誤認防止
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 7: Menu / Treatment Settings -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-rose-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-rose-500/30">
+                                <i class="fas fa-list-ul"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                診療・施術メニュー管理
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                初診・再診・各種診療メニューごとに所要時間、参考料金、WEB公開/非公開を管理。患者への提案精度を高めます。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-rose-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-clock"></i> 枠時間自動アサイン
+                        </div>
+                    </div>
+
+                    <!-- Admin Feature 8: Staff Management & Routing -->
+                    <div class="bg-warm-50/70 p-6 rounded-3xl border border-slate-100 hover:border-brand-300 hover:shadow-soft transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="w-12 h-12 rounded-2xl bg-violet-500 text-white flex items-center justify-center text-xl mb-4 shadow-sm shadow-violet-500/30">
+                                <i class="fas fa-user-check"></i>
+                            </div>
+                            <h3 class="text-base font-bold text-slate-900 mb-2">
+                                担当制切替 ＆ カレンダー連携
+                            </h3>
+                            <p class="text-slate-600 text-xs leading-relaxed">
+                                担当者指名制の有効/無効切替、新規・フリー用の「初回受付カレンダー」指定、再来客の自動担当者振り分けに対応。
+                            </p>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-slate-200/50 text-[11px] text-violet-700 font-semibold flex items-center gap-1.5">
+                            <i class="fas fa-route"></i> 指名制・フリー両対応
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- NEW FEATURE HIGHLIGHTS CONTAINER -->
+                <div class="mt-20 space-y-16">
+
+                    <!-- Highlight 1: 3 Industry Categories & Text Optimization -->
+                    <div class="bg-gradient-to-br from-brand-50/70 via-white to-warm-50/80 rounded-3xl p-8 sm:p-12 border border-brand-100/80 shadow-soft-lg">
+                        <div class="grid lg:grid-cols-12 gap-10 items-center">
+                            <div class="lg:col-span-6 space-y-6">
+                                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-100/80 border border-brand-200 text-brand-800 text-xs font-bold">
+                                    <i class="fas fa-magic"></i> 業種カテゴリー設定による文言最適化
+                                </div>
+                                <h3 class="text-2xl sm:text-3xl font-black text-slate-900 leading-tight">
+                                    選べる3つの業種カテゴリーで、<br class="hidden sm:inline">
+                                    <span class="text-brand-600">管理画面・予約画面の表現を自動最適化</span>
+                                </h3>
+                                <p class="text-slate-600 text-sm sm:text-base leading-relaxed">
+                                    業種に合わないシステム用語は、顧客体験や現場の使いやすさを損ないます。CONNECTでは、設定から業種カテゴリーを選択するだけで、予約画面・管理画面・通知文の用語が自動で切り替わります。
+                                </p>
+                                
+                                <div class="space-y-3 pt-2">
+                                    <div class="flex items-start gap-3 bg-white/90 p-3.5 rounded-2xl border border-slate-100 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm shrink-0">🏥</div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">医療・歯科・クリニック</h4>
+                                            <p class="text-[11px] text-slate-500 mt-0.5">「患者様」「診療」「初診・再診」「カルテ番号」「問診」などの表記へ最適化</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3 bg-white/90 p-3.5 rounded-2xl border border-slate-100 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center font-bold text-sm shrink-0">💆‍♀️</div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">サロン・エステ・美容</h4>
+                                            <p class="text-[11px] text-slate-500 mt-0.5">「お客様」「施術」「初回来店・再来」「カウンセリング」「スタイリスト」などへ最適化</p>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3 bg-white/90 p-3.5 rounded-2xl border border-slate-100 shadow-2xs">
+                                        <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold text-sm shrink-0">🏢</div>
+                                        <div>
+                                            <h4 class="text-xs font-bold text-slate-800">一般店舗・サービス</h4>
+                                            <p class="text-[11px] text-slate-500 mt-0.5">「お客様」「ご予約」「新規・リピート」「担当スタッフ」「プラン」など標準サービス用語へ最適化</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Visual Card -->
+                            <div class="lg:col-span-6 bg-white rounded-2xl p-6 sm:p-8 border border-slate-200/80 shadow-soft">
+                                <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+                                    <span class="text-xs font-bold text-slate-400 tracking-wider uppercase">TERMINOLOGY COMPARISON</span>
+                                    <span class="text-xs bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full border border-emerald-100">設定1つで一括反映</span>
+                                </div>
+
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-xs text-left">
+                                        <thead>
+                                            <tr class="text-slate-400 border-b border-slate-100">
+                                                <th class="pb-2.5 font-semibold">項目</th>
+                                                <th class="pb-2.5 font-bold text-blue-700">🏥 医療・歯科</th>
+                                                <th class="pb-2.5 font-bold text-rose-700">💆‍♀️ 美容サロン</th>
+                                                <th class="pb-2.5 font-bold text-amber-700">🏢 一般店舗</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-slate-100 text-slate-700 font-medium">
+                                            <tr>
+                                                <td class="py-3 text-slate-400">呼称</td>
+                                                <td class="py-3 font-bold text-slate-800">患者様</td>
+                                                <td class="py-3 font-bold text-slate-800">お客様</td>
+                                                <td class="py-3 font-bold text-slate-800">お客様</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-3 text-slate-400">予約内容</td>
+                                                <td class="py-3">診療・治療</td>
+                                                <td class="py-3">施術・コース</td>
+                                                <td class="py-3">ご予約・利用</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-3 text-slate-400">利用区分</td>
+                                                <td class="py-3">初診 / 再診</td>
+                                                <td class="py-3">初回 / 再来</td>
+                                                <td class="py-3">新規 / リピート</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-3 text-slate-400">対応者</td>
+                                                <td class="py-3">担当医・衛生士</td>
+                                                <td class="py-3">担当施術者</td>
+                                                <td class="py-3">担当スタッフ</td>
+                                            </tr>
+                                            <tr>
+                                                <td class="py-3 text-slate-400">事前確認</td>
+                                                <td class="py-3">症状問診</td>
+                                                <td class="py-3">カウンセリング</td>
+                                                <td class="py-3">ご要望・相談</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="text-[11px] text-slate-400 mt-4 text-center">※設定変更後、すべてのチャット案内文・予約確認メール・台帳表示に即時反映されます。</p>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Highlight 2: Revisit Staff Assignment & Calendar Routing -->
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-800 text-white rounded-3xl p-8 sm:p-12 border border-slate-700 shadow-soft-xl">
+                        <div class="text-center max-w-3xl mx-auto mb-12">
+                            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-500/20 border border-brand-400/30 text-brand-300 text-xs font-bold mb-3">
+                                <i class="fas fa-calendar-check"></i> 柔軟な担当ルーティング ＆ 自動連携
+                            </div>
+                            <h3 class="text-2xl sm:text-3xl font-black text-white leading-tight">
+                                再来客は担当カレンダーへ自動登録。<br class="hidden sm:inline">
+                                <span class="text-brand-400">担当制のON/OFF ＆ 初回受付カレンダーも自由自在。</span>
+                            </h3>
+                            <p class="text-slate-300 text-sm sm:text-base leading-relaxed mt-4">
+                                「いつも同じ先生・スタッフが対応する」「初回やフリー客は受付用カレンダーに集約する」など、現場の運用ルールに合わせて最適なカレンダーへ自動ルーティングします。
+                            </p>
+                        </div>
+
+                        <div class="grid lg:grid-cols-2 gap-8">
+                            <!-- Feature A: Revisit Staff Assignment -->
+                            <div class="bg-slate-800/80 rounded-2xl p-6 sm:p-7 border border-slate-700/80 flex flex-col justify-between group hover:border-brand-400/50 transition-all">
+                                <div>
+                                    <div class="overflow-hidden rounded-xl bg-slate-950 aspect-[16/10] mb-5 border border-slate-700/80 cursor-pointer" onclick="openModal('images/Screenshot 2026-09-05 at 12.11.07.png', 'お客様情報一覧：担当スタッフ指定（再来時の自動カレンダー登録）')">
+                                        <img src="images/Screenshot 2026-09-05 at 12.11.07.png" alt="お客様情報一覧 担当スタッフ指定" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-[11px] font-bold bg-brand-500/20 text-brand-300 px-2.5 py-0.5 rounded-md border border-brand-400/30">顧客カルテ管理</span>
+                                        <h4 class="text-lg font-bold text-white">再来客の担当者指定 ＆ 自動追加</h4>
+                                    </div>
+                                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                        お客様一覧画面で患者様・お客様ごとに担当スタッフを指定可能。指定された顧客がWebから再予約すると、自動的にその**担当スタッフのGoogleカレンダーに予定が追加**されます。
+                                    </p>
+                                </div>
+                                <div class="mt-5 pt-4 border-t border-slate-700/80 flex items-center justify-between text-xs text-brand-300 font-semibold">
+                                    <span><i class="fas fa-check-circle mr-1.5"></i> 担当スタッフの空き枠を自動確保</span>
+                                    <button onclick="openModal('images/Screenshot 2026-09-05 at 12.11.07.png', 'お客様情報一覧：担当スタッフ指定')" class="text-slate-400 hover:text-white transition-colors text-xs flex items-center gap-1">
+                                        拡大表示 <i class="fas fa-search-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Feature B: Staff Settings & Dedicated Initial Calendar -->
+                            <div class="bg-slate-800/80 rounded-2xl p-6 sm:p-7 border border-slate-700/80 flex flex-col justify-between group hover:border-brand-400/50 transition-all">
+                                <div>
+                                    <div class="overflow-hidden rounded-xl bg-slate-950 aspect-[16/10] mb-5 border border-slate-700/80 cursor-pointer" onclick="openModal('images/Screenshot 2026-09-05 at 12.13.09.png', '担当者・スタッフ管理：担当者指名制の切替 ＆ 初回受付カレンダー設定')">
+                                        <img src="images/Screenshot 2026-09-05 at 12.13.09.png" alt="担当者・スタッフ管理 ＆ カレンダー連携" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                    </div>
+                                    <div class="flex items-center gap-2 mb-2">
+                                        <span class="text-[11px] font-bold bg-teal-500/20 text-teal-300 px-2.5 py-0.5 rounded-md border border-teal-400/30">スタッフ設定</span>
+                                        <h4 class="text-lg font-bold text-white">担当制ON/OFF ＆ 初回受付カレンダー</h4>
+                                    </div>
+                                    <p class="text-slate-300 text-xs sm:text-sm leading-relaxed">
+                                        スタッフ管理画面から「担当者指名制」自体の有効/無効をワンクリック切替。新規顧客や担当が決まっていない方の予約を登録する専用の「初回受付カレンダー」も自由に割り当て可能です。
+                                    </p>
+                                </div>
+                                <div class="mt-5 pt-4 border-t border-slate-700/80 flex items-center justify-between text-xs text-teal-300 font-semibold">
+                                    <span><i class="fas fa-toggle-on mr-1.5"></i> 指名制・フリー受付の両運用に対応</span>
+                                    <button onclick="openModal('images/Screenshot 2026-09-05 at 12.13.09.png', '担当者・スタッフ管理：指名制切替＆初回受付カレンダー設定')" class="text-slate-400 hover:text-white transition-colors text-xs flex items-center gap-1">
+                                        拡大表示 <i class="fas fa-search-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+
+        <!-- INTERACTIVE SCREENSHOT GALLERY SECTION -->
+        <section class="py-24 bg-warm-50" id="screens">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Section Header -->
+                <div class="text-center max-w-3xl mx-auto mb-12">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">ACTUAL SCREENS</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4">
+                        実際の管理画面・患者画面
+                    </h2>
+                    <p class="text-slate-600 text-base leading-relaxed">
+                        シンプルで誰でも直感的に扱える美しいUIデザイン。画像をクリックして拡大してご覧いただけます。
+                    </p>
+
+                    <div class="mt-4">
+                        <a href="/" class="inline-flex items-center gap-2 bg-slate-900 hover:bg-black text-white text-xs sm:text-sm font-bold px-6 py-3 rounded-full shadow-md hover:shadow-lg transition-all hover:scale-105">
+                            <i class="fas fa-arrow-up-right-from-square text-amber-400"></i>
+                            <span>実際の受付ページ（AIチャット予約・カレンダー）を体験する &rarr;</span>
+                        </a>
+                    </div>
+
+                    <!-- Filter Tabs -->
+                    <div class="flex flex-wrap items-center justify-center gap-2 mt-8">
+                        <button class="gallery-tab active px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-brand-600 text-white shadow-2xs transition-all" data-target="all">すべて表示</button>
+                        <button class="gallery-tab px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 transition-all border border-slate-200/60" data-target="patient">患者様用画面</button>
+                        <button class="gallery-tab px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 transition-all border border-slate-200/60" data-target="admin">施設管理画面</button>
+                        <button class="gallery-tab px-5 py-2 rounded-full text-xs sm:text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 transition-all border border-slate-200/60" data-target="theme">カラーバリエーション</button>
+                    </div>
+                </div>
+
+                <!-- Gallery Grid -->
+                <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6" id="gallery-container">
+
+                    <!-- Item 1: Admin Calendar -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_calendar.png', '予約台帳・タイムライン管理（スタッフ別D&amp;D操作）')">
+                            <img src="images/admin_calendar.png" alt="予約台帳・タイムライン管理" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">予約台帳・タイムライン管理</h4>
+                            <p class="text-xs text-slate-500">スタッフ別のタイムラインと日別・週別切替、Googleカレンダー同期。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 2: Patient Chat Slots -->
+                    <div class="gallery-item patient bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/patient_chat_slots.png', '患者様画面：即レスAI空き枠提案・タップ即確定')">
+                            <img src="images/patient_chat_slots.png" alt="患者用 チャット予約画面" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">患者様用画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">リアルタイム空き枠提案</h4>
+                            <p class="text-xs text-slate-500">AIが空き枠を検索してボタン表示。タップするだけで即確定。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 3: Patient Login -->
+                    <div class="gallery-item patient bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/patient_login.png', '患者様画面：患者認証＆カルテ照合（LINE/Apple/Google/Mail）')">
+                            <img src="images/patient_login.png" alt="患者認証＆カルテ照合" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-md">患者様用画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">患者認証 ＆ カルテ照合</h4>
+                            <p class="text-xs text-slate-500">LINE/Apple/Google/メール対応。新患・再診もワンタップ認証。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 4: Admin Patients List -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_patients.png', '施設管理画面：患者情報一覧・電子カルテ連携')">
+                            <img src="images/admin_patients.png" alt="患者情報一覧" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">患者情報一覧 ＆ 検索</h4>
+                            <p class="text-xs text-slate-500">受診履歴、VIP/一般ランク、電子カルテデータの一括インポート対応。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 5: Admin Schedule Settings -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_schedule.png', '施設管理画面：診療時間・休診日・予約枠間隔設定')">
+                            <img src="images/admin_schedule.png" alt="診療時間・休診日設定" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">診療時間 ＆ 独自休診日設定</h4>
+                            <p class="text-xs text-slate-500">祝日連動、夏季・年末年始休暇などの設定でAI提案から自動除外。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 6: Admin Menu Settings -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_menus.png', '施設管理画面：診療・施術メニュー管理')">
+                            <img src="images/admin_menus.png" alt="診療・施術メニュー管理" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">診療・施術メニュー管理</h4>
+                            <p class="text-xs text-slate-500">カテゴリ、所要時間、料金、WEB公開の切り替えを自由に管理。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 7: Admin Staff Settings -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_staff.png', '施設管理画面：スタッフ管理＆Googleカレンダー連携')">
+                            <img src="images/admin_staff.png" alt="スタッフ管理＆Googleカレンダー連携" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">スタッフ管理 ＆ カレンダーID</h4>
+                            <p class="text-xs text-slate-500">スタッフごとに対応するGoogleカレンダーIDを割り当てて同期。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 8: Admin Customer Staff Assignment (NEW) -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/Screenshot 2026-09-05 at 12.11.07.png', '施設管理画面：お客様情報・担当スタッフ指定（再来時の自動カレンダー連携）')">
+                            <img src="images/Screenshot 2026-09-05 at 12.11.07.png" alt="お客様情報・担当スタッフ指定" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">顧客カルテ ＆ 担当スタッフ指定</h4>
+                            <p class="text-xs text-slate-500">再来客の予約を指定担当者のGoogleカレンダーへ自動登録。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 9: Admin Calendar Routing & Mode Setting (NEW) -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/Screenshot 2026-09-05 at 12.13.09.png', '施設管理画面：担当者指名制切替 ＆ 初回受付カレンダー設定')">
+                            <img src="images/Screenshot 2026-09-05 at 12.13.09.png" alt="担当者指名制切替 ＆ 初回受付カレンダー設定" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">担当制ON/OFF ＆ 初回受付カレンダー</h4>
+                            <p class="text-xs text-slate-500">指名制運用の切替と、新規顧客・担当未設定客の割当カレンダー設定。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 10: Admin Notices -->
+                    <div class="gallery-item admin bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/admin_notices.png', '施設管理画面：トップお知らせ告知の管理')">
+                            <img src="images/admin_notices.png" alt="トップお知らせ告知の管理" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-brand-50 text-brand-700 px-2 py-0.5 rounded-md">施設管理画面</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">トップお知らせ告知の管理</h4>
+                            <p class="text-xs text-slate-500">予約画面ヘッダーのお知らせ文章をいつでも即時反映。</p>
+                        </div>
+                    </div>
+
+                    <!-- Item 9: Theme Variations -->
+                    <div class="gallery-item theme bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-soft group hover:shadow-soft-lg transition-all">
+                        <div class="overflow-hidden bg-slate-900 aspect-[16/10] relative cursor-pointer" onclick="openModal('images/theme_green.png', 'カラーバリエーション：ミントグリーンテーマ')">
+                            <img src="images/theme_green.png" alt="カラーテーマ：グリーン" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                            <div class="absolute inset-0 bg-brand-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-sm font-bold transition-opacity">
+                                <i class="fas fa-search-plus text-xl mr-2"></i> クリックで拡大
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <span class="text-[10px] font-bold bg-purple-50 text-purple-700 px-2 py-0.5 rounded-md">カラーテーマ</span>
+                            <h4 class="font-bold text-slate-900 text-base mt-2 mb-1">医院に合わせたカラー展開</h4>
+                            <p class="text-xs text-slate-500">グリーン、ローズ、スレート、パープル、ブルーなど自在に調整可能。</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- MULTI-INDUSTRY APPLICABILITY SECTION -->
+        <section class="py-24 bg-white" id="industries">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-4xl mx-auto mb-16">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">APPLICABLE INDUSTRIES</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4 leading-snug">
+                        <span class="inline-block">3つの業種カテゴリー設定で、</span><span class="inline-block">多彩な対面サービスの予約・顧客管理にフィット</span>
+                    </h2>
+                    <p class="text-slate-600 text-base leading-relaxed max-w-2xl mx-auto">
+                        <span class="inline-block">設定画面で「業種カテゴリー」を選ぶだけで、患者様/お客様などの呼称や診療/施術/ご予約といった表現が自動で最適化。</span><span class="inline-block">メニューやスタッフ枠を整えれば、様々な業種ですぐに運用開始できます。</span>
+                    </p>
+
+                    <!-- 3 Category Quick Badges -->
+                    <div class="flex flex-wrap justify-center items-center gap-3 mt-6">
+                        <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-blue-50 text-blue-800 border border-blue-200/70 text-xs font-bold shadow-2xs">
+                            <span>🏥</span> 医療・歯科・クリニック
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-rose-50 text-rose-800 border border-rose-200/70 text-xs font-bold shadow-2xs">
+                            <span>💆‍♀️</span> サロン・エステ・美容
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-4 py-2 rounded-2xl bg-amber-50 text-amber-800 border border-amber-200/70 text-xs font-bold shadow-2xs">
+                            <span>🏢</span> 一般店舗・サービス
+                        </span>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Industry 1: Dental -->
+                    <div class="bg-gradient-to-b from-brand-50/50 to-white p-8 rounded-3xl border border-brand-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-brand-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                🦷
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">歯科医院・クリニック</h3>
+                                <p class="text-xs text-brand-700 font-semibold">初診・再診・定期検診</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            医師と歯科衛生士の担当分け、チェアー別の空き枠、電子カルテとの照合で受付業務の負担を大幅軽減。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-brand-500 mr-1.5"></i> 症状別（虫歯・クリーニング・矯正等）の自動時間設定</div>
+                            <div><i class="fas fa-check text-brand-500 mr-1.5"></i> 定期検診のリマインド通知で通院率向上</div>
+                        </div>
+                    </div>
+
+                    <!-- Industry 2: Orthopedic & Acupuncture -->
+                    <div class="bg-gradient-to-b from-teal-50/50 to-white p-8 rounded-3xl border border-teal-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                🦴
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">接骨院・整骨院・鍼灸院</h3>
+                                <p class="text-xs text-teal-700 font-semibold">保険診療・自費整体</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            施術スタッフ別の空き枠管理やベッド枠管理。痛みの箇所や希望メニューをチャットで事前ヒアリング可能。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-teal-500 mr-1.5"></i> 初診問診の事前チャット化で受付渋滞を解消</div>
+                            <div><i class="fas fa-check text-teal-500 mr-1.5"></i> スタッフ指名・担当割り振りに対応</div>
+                        </div>
+                    </div>
+
+                    <!-- Industry 3: Esthetic & Salon -->
+                    <div class="bg-gradient-to-b from-rose-50/50 to-white p-8 rounded-3xl border border-rose-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                💆‍♀️
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">エステ・リラクゼーション</h3>
+                                <p class="text-xs text-rose-700 font-semibold">フェイシャル・ボディ・脱毛</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            施術コースごとの所要時間や部屋割り、カウンセリング枠の管理。上品で落ち着いたデザインで世界観を損ないません。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-rose-500 mr-1.5"></i> VIP顧客/一般ランクの管理対応</div>
+                            <div><i class="fas fa-check text-rose-500 mr-1.5"></i> LINE連携でクーポンや案内も簡単配信</div>
+                        </div>
+                    </div>
+
+                    <!-- Industry 4: Hair Salon & Barber -->
+                    <div class="bg-gradient-to-b from-amber-50/50 to-white p-8 rounded-3xl border border-amber-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                💇‍♂️
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">理髪店・美容室・ヘアサロン</h3>
+                                <p class="text-xs text-amber-700 font-semibold">カット・カラー・パーマ</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            スタイリスト別のシフトと予約枠の同期。セットメニューに応じた時間自動計算でブッキングを防止。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-amber-500 mr-1.5"></i> スタイリスト指名予約とフリー予約の振り分け</div>
+                            <div><i class="fas fa-check text-amber-500 mr-1.5"></i> 予約完了メールからカレンダーに直結</div>
+                        </div>
+                    </div>
+
+                    <!-- Industry 5: Nail & Eyelash -->
+                    <div class="bg-gradient-to-b from-purple-50/50 to-white p-8 rounded-3xl border border-purple-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                💅
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">ネイル・アイラッシュサロン</h3>
+                                <p class="text-xs text-purple-700 font-semibold">オフあり/なし・アートコース</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            ネイリストごとの技術レベルに合わせた所要時間設定や、オフ有無による時間変動もチャットで自然にヒアリング。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-purple-500 mr-1.5"></i> 施術メニューに応じた時間スロット自動調整</div>
+                            <div><i class="fas fa-check text-purple-500 mr-1.5"></i> 来店履歴と写真メモの連携</div>
+                        </div>
+                    </div>
+
+                    <!-- Industry 6: Personal Gym -->
+                    <div class="bg-gradient-to-b from-blue-50/50 to-white p-8 rounded-3xl border border-blue-100 shadow-2xs hover:shadow-soft transition-all">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl shadow-2xs">
+                                🏋️‍♂️
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-lg">パーソナルトレーニング</h3>
+                                <p class="text-xs text-blue-700 font-semibold">体験レッスン・個別指導</p>
+                            </div>
+                        </div>
+                        <p class="text-slate-600 text-xs sm:text-sm leading-relaxed mb-4">
+                            トレーナーとブースの空き状況をリアルタイム管理。体験レッスンの即時受付で入会成約率を最大化。
+                        </p>
+                        <div class="bg-white/90 p-3.5 rounded-2xl border border-slate-100 text-xs text-slate-600 space-y-1.5">
+                            <div><i class="fas fa-check text-blue-500 mr-1.5"></i> Googleカレンダー完全連動でダブルブッキング防止</div>
+                            <div><i class="fas fa-check text-blue-500 mr-1.5"></i> ドタキャンを防ぐ事前リマインド通知</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- FAQ SECTION -->
+        <section class="py-24 bg-warm-50" id="faq">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <span class="text-brand-600 text-xs sm:text-sm font-bold tracking-widest uppercase">FAQ</span>
+                    <h2 class="text-2xl sm:text-4xl font-black text-slate-900 mt-2 mb-4">
+                        よくあるご質問
+                    </h2>
+                    <p class="text-slate-600 text-sm sm:text-base">
+                        導入や設定に関する疑問にお答えします。
+                    </p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- Q1 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-2xs">
+                        <div class="flex items-start gap-3">
+                            <span class="font-black text-brand-600 text-lg leading-none mt-0.5">Q.</span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-2">現在使っている電子カルテや顧客データを取り込めますか？</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    はい、CSV形式でのデータインポートに対応しております。既存の患者様・顧客データ（お名前、電話番号、カルテ番号、受診履歴など）を取り込むことで、導入初日からスムーズにご利用いただけます。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-2xs">
+                        <div class="flex items-start gap-3">
+                            <span class="font-black text-brand-600 text-lg leading-none mt-0.5">Q.</span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-2">歯科医院以外のサロンや一般店舗でも違和感なく使えますか？</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    はい、可能です。管理画面で「医療・歯科・クリニック」「サロン・エステ・美容」「一般店舗・サービス」の3カテゴリーから業種を選択でき、呼称（患者様/お客様）や利用区分（初診・再診/初回・再来/新規・リピート）などの表現がシステム全体で自動最適化されます。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q3 (NEW) -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-2xs">
+                        <div class="flex items-start gap-3">
+                            <span class="font-black text-brand-600 text-lg leading-none mt-0.5">Q.</span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-2">スタッフの担当制や、新規・フリー客のカレンダー振り分けは可能ですか？</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    はい、対応しています。顧客一覧で担当スタッフを紐づけておくことで、再来予約時にそのスタッフのGoogleカレンダーへ自動登録されます。また、そもそも担当制を行わない運用のための「担当者指名制の無効化」や、新規客・フリー客を割り当てる「初回受付カレンダー」の設定も簡単に行えます。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-2xs">
+                        <div class="flex items-start gap-3">
+                            <span class="font-black text-brand-600 text-lg leading-none mt-0.5">Q.</span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-2">Googleカレンダーとの同期はどのように行われますか？</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    スタッフごとに個別GoogleカレンダーIDを設定可能です。システム側で予約が入るとGoogleカレンダーへリアルタイムに反映され、スタッフ個人のスケジュール管理ともスムーズに連携します。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Q4 -->
+                    <div class="bg-white rounded-2xl p-6 border border-slate-100 shadow-2xs">
+                        <div class="flex items-start gap-3">
+                            <span class="font-black text-brand-600 text-lg leading-none mt-0.5">Q.</span>
+                            <div>
+                                <h3 class="font-bold text-slate-900 text-base mb-2">導入前に実際の画面やデモを体験できますか？</h3>
+                                <p class="text-slate-600 text-sm leading-relaxed">
+                                    はい、オンラインにて実際の操作画面をご覧いただけるデモや、テスト環境のご案内を行っております。下記のお問い合わせフォームよりお気軽にお申し付けください。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- CONTACT / CTA SECTION -->
+        <section class="py-24 bg-white relative overflow-hidden" id="contact">
+            <!-- Decorative background glow -->
+            <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-gradient-to-t from-brand-100/40 to-transparent rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div class="bg-gradient-to-br from-slate-900 via-brand-950 to-teal-950 rounded-3xl p-8 sm:p-14 text-white shadow-2xl relative overflow-hidden">
+                    <!-- Subtle background mesh -->
+                    <div class="absolute top-0 right-0 w-96 h-96 bg-brand-500/10 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-0 left-0 w-80 h-80 bg-teal-500/10 rounded-full blur-3xl"></div>
+
+                    <div class="relative z-10 max-w-2xl mx-auto">
+                        <span class="inline-block bg-brand-500/20 text-brand-300 text-xs font-bold px-3.5 py-1 rounded-full border border-brand-500/30 mb-4">
+                            無料オンライン相談 ＆ デモ体験
+                        </span>
+                        <h2 class="text-2xl sm:text-4xl font-black tracking-tight mb-4 leading-snug">
+                            <span class="inline-block">予約業務のゆとりを、</span><span class="inline-block">あなたの医院・サロンに。</span>
+                        </h2>
+                        <p class="text-slate-300 text-sm sm:text-base leading-relaxed mb-8">
+                            「自院の運用に合うか相談したい」「実際の操作感を試したい」など、お気軽にお問い合わせください。専門スタッフが丁寧にご案内いたします。
+                        </p>
+
+                        <!-- CTA Contact Form / Link -->
+                        <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                            <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-black text-base px-8 py-4 rounded-full shadow-lg hover:shadow-amber-500/25 transition-all">
+                                <i class="fas fa-calendar-check text-white"></i>
+                                <span>実際のWEB受付画面を体験する</span>
+                            </a>
+                            <a href="https://creativesd.net/contact.html" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-brand-500 hover:bg-brand-400 text-slate-950 font-black text-base px-8 py-4 rounded-full shadow-lg hover:shadow-brand-500/25 transition-all">
+                                <i class="fas fa-envelope text-slate-900"></i>
+                                <span>お問い合わせ・デモ予約</span>
+                            </a>
+                        </div>
+
+                        <div class="mt-8 pt-8 border-t border-white/10 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-400">
+                            <span><i class="fas fa-shield-alt text-brand-400 mr-1.5"></i> SSL暗号化通信</span>
+                            <span><i class="fas fa-headset text-brand-400 mr-1.5"></i> 導入・設定サポート対応</span>
+                            <span><i class="fas fa-cloud text-brand-400 mr-1.5"></i> クラウド安全運用</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="bg-warm-100 border-t border-slate-200/70 py-14 text-slate-600">
+        <div class="container mx-auto px-6 text-center">
+            <div class="flex flex-wrap justify-center items-center gap-x-3 gap-y-2 text-slate-600 text-xs sm:text-sm mb-4">
+                <a href="/" class="hover:text-amber-700 text-amber-700 font-bold transition-colors flex items-center gap-1">
+                    <i class="fas fa-calendar-check text-xs"></i> 実際の受付ページ
+                </a>
+                <span class="text-slate-300">|</span>
+                <a href="index.html" class="hover:text-brand-600 transition-colors font-medium">ホーム</a>
+                <span class="text-slate-300">|</span>
+                <a href="about.html" class="hover:text-brand-600 transition-colors font-medium">事業者概要</a>
+                <span class="text-slate-300">|</span>
+                <a href="privacy.html" class="hover:text-brand-600 transition-colors font-medium">プライバシーポリシー</a>
+                <span class="text-slate-300">|</span>
+                <a href="https://creativesd.net/terms.html" class="hover:text-brand-600 transition-colors font-medium">利用規約</a>
+                <span class="text-slate-300">|</span>
+                <a href="https://creativesd.net/" class="hover:text-brand-600 transition-colors font-medium">CSD公式サイト</a>
+            </div>
+            <p class="text-slate-500 text-sm mb-2">&copy; 2026 Creative System Design. All rights reserved.</p>
+            <p class="text-slate-400 text-xs mb-6">※「INTEVE SCHOOL®」は、Creative System Design（代表：大塚和宏）の登録商標（第6994552号）です。</p>
+            <div class="flex justify-center items-center space-x-6">
+                <a href="https://lin.ee/tqB9kPc" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-[#06C755] transition-colors" title="LINE公式アカウント"><i class="fab fa-line text-2xl"></i></a>
+                <a href="https://note.com/csdkazuhiro" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-brand-700 transition-colors flex justify-center items-center border border-slate-400 rounded-md w-7 h-7 text-xs font-bold hover:border-brand-600" title="note">note</a>
+                <a href="https://www.facebook.com/profile.php?id=61584075158524" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-[#1877F2] transition-colors" title="Facebook"><i class="fab fa-facebook text-2xl"></i></a>
+                <a href="https://www.instagram.com/csdkotsuka/" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-[#E4405F] transition-colors" title="Instagram"><i class="fab fa-instagram text-2xl"></i></a>
+                <a href="https://www.linkedin.com/in/csdkotsuka/" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-[#0A66C2] transition-colors" title="LinkedIn"><i class="fab fa-linkedin text-2xl"></i></a>
+            </div>
+        </div>
+    </footer>
+
+
+    <!-- MODAL FOR SCREENSHOT IMAGE PREVIEW -->
+    <div id="image-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4" onclick="closeModal()">
+        <div class="relative max-w-5xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between p-4 bg-slate-900 text-white">
+                <span id="modal-title" class="text-sm font-bold truncate pr-4">画面プレビュー</span>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <i class="fas fa-times text-sm"></i>
+                </button>
+            </div>
+            <div class="p-2 sm:p-4 bg-slate-950 flex items-center justify-center max-h-[80vh] overflow-auto">
+                <img id="modal-img" src="" alt="拡大プレビュー" class="max-w-full max-h-[75vh] object-contain rounded-lg">
+            </div>
+        </div>
+    </div>
+
+
+    <!-- INTERACTION SCRIPTS -->
+    <script>
+        // Mobile Menu Toggle
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (mobileToggle && mobileMenu) {
+            mobileToggle.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+            // Close mobile menu on click link
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+        }
+
+        // Gallery Filter Tabs
+        const tabs = document.querySelectorAll('.gallery-tab');
+        const items = document.querySelectorAll('.gallery-item');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('active', 'bg-brand-600', 'text-white');
+                    t.classList.add('bg-white', 'text-slate-600');
+                });
+                tab.classList.add('active', 'bg-brand-600', 'text-white');
+                tab.classList.remove('bg-white', 'text-slate-600');
+
+                const target = tab.dataset.target;
+                items.forEach(item => {
+                    if (target === 'all' || item.classList.contains(target)) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Image Preview Modal
+        function openModal(imgSrc, title) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-img');
+            const modalTitle = document.getElementById('modal-title');
+            if (modal && modalImg && modalTitle) {
+                modalImg.src = imgSrc;
+                modalTitle.textContent = title || '画面プレビュー';
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('image-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+
+        // Floating TOC Nav Toggle & ScrollSpy
+        const tocPanel = document.getElementById('toc-panel');
+        const tocToggle = document.getElementById('toc-toggle');
+        const tocToggleIcon = document.getElementById('toc-toggle-icon');
+        const tocTexts = document.querySelectorAll('.toc-text');
+        const tocTitle = document.getElementById('toc-title');
+        let isTocCollapsed = false;
+
+        if (tocToggle && tocPanel) {
+            tocToggle.addEventListener('click', () => {
+                isTocCollapsed = !isTocCollapsed;
+                if (isTocCollapsed) {
+                    tocPanel.classList.remove('w-48');
+                    tocPanel.classList.add('w-12', 'px-2');
+                    tocTexts.forEach(el => el.classList.add('hidden'));
+                    if (tocTitle) tocTitle.classList.add('hidden');
+                    if (tocToggleIcon) {
+                        tocToggleIcon.classList.remove('fa-chevron-left');
+                        tocToggleIcon.classList.add('fa-chevron-right');
+                    }
+                } else {
+                    tocPanel.classList.remove('w-12', 'px-2');
+                    tocPanel.classList.add('w-48');
+                    tocTexts.forEach(el => el.classList.remove('hidden'));
+                    if (tocTitle) tocTitle.classList.remove('hidden');
+                    if (tocToggleIcon) {
+                        tocToggleIcon.classList.remove('fa-chevron-right');
+                        tocToggleIcon.classList.add('fa-chevron-left');
+                    }
+                }
+            });
+        }
+
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const sections = Array.from(tocLinks).map(link => {
+            const targetId = link.getAttribute('data-target');
+            return document.getElementById(targetId);
+        }).filter(Boolean);
+
+        function updateTocActive() {
+            const scrollPos = window.scrollY + window.innerHeight * 0.35;
+            let currentSection = null;
+
+            sections.forEach(section => {
+                const top = section.offsetTop;
+                const height = section.offsetHeight;
+                if (scrollPos >= top && scrollPos < top + height) {
+                    currentSection = section;
+                }
+            });
+
+            // Near bottom activation
+            if ((window.innerHeight + window.scrollY) >= document.documentElement.scrollHeight - 300) {
+                currentSection = document.getElementById('contact');
+            }
+
+            tocLinks.forEach(link => {
+                const targetId = link.getAttribute('data-target');
+                const dot = link.querySelector('.toc-dot');
+                if (currentSection && currentSection.id === targetId) {
+                    link.classList.add('bg-brand-100', 'text-brand-900', 'font-bold');
+                    link.classList.remove('text-slate-600');
+                    if (dot) {
+                        dot.classList.add('bg-brand-600', 'scale-125');
+                        dot.classList.remove('bg-slate-300');
+                    }
+                } else {
+                    link.classList.remove('bg-brand-100', 'text-brand-900', 'font-bold');
+                    link.classList.add('text-slate-600');
+                    if (dot) {
+                        dot.classList.remove('bg-brand-600', 'scale-125');
+                        dot.classList.add('bg-slate-300');
+                    }
+                }
+            });
+        }
+
+        window.addEventListener('scroll', updateTocActive, { passive: true });
+        window.addEventListener('DOMContentLoaded', updateTocActive);
+        updateTocActive();
+    </script>
+</body>
+</html>

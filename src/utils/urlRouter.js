@@ -10,7 +10,7 @@
  *  /leaflet                -> { slug: null, viewMode: 'leaflet' }
  */
 
-export const RESERVED_SLUGS = ['super-admin', 'admin', 'leaflet', 'api', 'auth', 'login'];
+export const RESERVED_SLUGS = ['super-admin', 'admin', 'leaflet', 'connect', 'api', 'auth', 'login'];
 
 export const VIEW_MODES = {
   BOOKING: 'booking',
@@ -31,6 +31,14 @@ export function parseUrl(location = typeof window !== 'undefined' ? window.locat
   const search = location.search;
   const hash = location.hash;
   const segments = pathname ? pathname.split('/') : [];
+
+  // 0. 機能紹介ページ（/connect）へのアクセス時は静的ページへ安全にリダイレクト
+  if (segments[0] === 'connect') {
+    if (typeof window !== 'undefined' && !location.pathname.endsWith('.html')) {
+      window.location.replace('/connect/index.html');
+    }
+    return { slug: null, viewMode: VIEW_MODES.BOOKING };
+  }
 
   // 1. スーパー管理者画面
   if (segments[0] === 'super-admin' || hash === '#super-admin' || search.includes('mode=super-admin')) {
