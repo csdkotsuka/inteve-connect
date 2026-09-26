@@ -27,14 +27,14 @@
     },
     {
       "source": "/favicon.ico",
-      "destination": "/about/images/favicon.png"
+      "destination": "/favicon.ico"
     },
     {
       "source": "/favicon.png",
-      "destination": "/about/images/favicon.png"
+      "destination": "/favicon.png"
     },
     {
-      "source": "/((?!about|assets|favicon|logo|images).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
