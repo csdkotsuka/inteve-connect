@@ -335,25 +335,62 @@ function App() {
       <main className="max-w-6xl mx-auto px-6 py-10">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left: Clinic Real Introduction & Guidance */}
-          <div className="space-y-4 pt-2">
+          <div className="space-y-6 pt-2">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <h1 className="text-2xl md:text-3xl font-bold leading-tight text-brand-brown font-serif">
-                {facilityName}
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-orange/10 text-brand-orange border border-brand-orange/20 text-xs font-bold rounded-full mb-3 shadow-2xs font-serif">
+                <HeartHandshake size={14} />
+                <span>お一人おひとりに寄り添う、丁寧な歯科診療</span>
+              </div>
+              <h1 className="text-2xl md:text-4xl font-bold leading-tight text-brand-brown mb-3 font-serif">
+                痛みに配慮した、<br />
+                <span className="text-brand-orange">安心で優しい診療を。</span>
               </h1>
-              <p className="text-xs md:text-sm text-slate-500 mt-1">
-                24時間WEB予約
+              <p className="text-xs md:text-sm text-slate-600 leading-relaxed max-w-lg font-serif">
+                つばき歯科クリニックでは、初めての方でも安心して受診いただけるよう、お話を丁寧にお伺いし、痛みの少ない優しい処置を大切にしています。
+                急な歯の痛みやお困りごと、定期的なお口のケアまで、お気軽にご相談ください。
               </p>
             </motion.div>
 
+            {/* 2つの程よいご案内ポイント */}
+            <div className="space-y-2.5">
+              <div className="p-3.5 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-brand-ivory text-brand-orange flex items-center justify-center shrink-0 border border-brand-gold/20">
+                  <Clock size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-brand-brown font-serif">
+                    初診・急患 随時受付
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    急な歯の痛みや詰め物が取れた場合も迅速に対応いたします。
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-brand-ivory text-brand-gold flex items-center justify-center shrink-0 border border-brand-gold/20">
+                  <Calendar size={18} />
+                </div>
+                <div>
+                  <h4 className="font-bold text-xs text-brand-brown font-serif">
+                    24時間WEB即時予約
+                  </h4>
+                  <p className="text-[11px] text-slate-500">
+                    右側のチャットから空き状況を確認し、その場で予約が完了します。
+                  </p>
+                </div>
+              </div>
+            </div>
+
             {/* Access & Contact */}
-            <div className="grid sm:grid-cols-2 gap-3 pt-2">
+            <div className="grid sm:grid-cols-2 gap-3 pt-1">
               <div className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
                 <div className="w-9 h-9 bg-brand-ivory text-brand-gold rounded-full flex items-center justify-center shrink-0">
                   <MapPin size={18} />
                 </div>
                 <div>
                   <p className="font-bold text-xs text-brand-brown">椿神社前 徒歩1分</p>
-                  <p className="text-[10px] text-slate-400">駐車場あり</p>
+                  <p className="text-[10px] text-slate-400">専用駐車場完備</p>
                 </div>
               </div>
               <div className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
@@ -362,7 +399,7 @@ function App() {
                 </div>
                 <div>
                   <p className="font-bold text-xs text-brand-brown">{facilityPhone}</p>
-                  <p className="text-[10px] text-slate-400">お電話でのご予約</p>
+                  <p className="text-[10px] text-slate-400">お電話でのご予約・お問い合わせ</p>
                 </div>
               </div>
             </div>
@@ -399,12 +436,16 @@ function App() {
                   animate={{ opacity: 1, scale: 1 }}
                   className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-brand-gold/15 text-center max-w-lg mx-auto"
                 >
-                  <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20 text-white">
-                    <CheckCircle size={28} />
+                  <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20 text-white">
+                    <CheckCircle size={32} />
                   </div>
-                  <h2 className="text-xl md:text-2xl font-bold text-brand-brown mb-4 font-serif">
-                    予約完了
+                  <h2 className="text-xl md:text-2xl font-bold text-brand-brown mb-2 font-serif">
+                    ご予約が確定いたしました
                   </h2>
+                  <p className="text-slate-600 mb-5 text-xs md:text-sm leading-relaxed font-serif">
+                    {currentUser?.name} 様のご来院を心よりお待ちしております。<br />
+                    ご予約日時の5分前を目安に受付までお越しください。
+                  </p>
 
                   <div className="bg-brand-ivory/80 p-4 rounded-2xl text-left border border-brand-gold/15 mb-5 space-y-2 text-xs">
                     <div className="grid grid-cols-2 gap-2 text-slate-600">
@@ -432,7 +473,7 @@ function App() {
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                       <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-sans">
                         <QrCode size={14} />
-                        チェックインQR
+                        来院受付用QRコード
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">
                         {currentUser?.customerCode || ''}
@@ -454,13 +495,16 @@ function App() {
                         className="w-28 h-28 mx-auto"
                       />
                     </div>
+                    <p className="text-[11px] text-slate-300">
+                      ご来院時は受付端末のカメラにかざしてください
+                    </p>
                   </div>
 
                   <button
                     onClick={reset}
                     className="w-full py-3 bg-brand-orange text-white rounded-xl font-bold hover:bg-brand-brown transition-all shadow-md text-sm cursor-pointer"
                   >
-                    トップへ
+                    トップへ戻る
                   </button>
                 </motion.div>
               )}

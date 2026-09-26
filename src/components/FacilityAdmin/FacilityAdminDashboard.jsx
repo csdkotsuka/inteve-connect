@@ -804,14 +804,14 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
           {/* TAB 4: メニュー管理 (Services & Menus) */}
           {/* ========================================================================= */}
           {activeTab === 'services' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl md:text-2xl font-bold text-slate-800 font-serif">
+                  <h2 className="text-xl font-bold text-slate-800 font-serif">
                     {labels.serviceMenu}管理
                   </h2>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    社内・専門職用の「メニュー名」と、AIチャット・WEB予約時に{labels.customer}へ表示する「チャット用表示メニュー」、所要時間、料金を設定します。
+                    WEB予約・AIチャットで患者様が選択するメニューと所要時間・料金を設定します。
                   </p>
                 </div>
                 <button
@@ -821,15 +821,15 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
                       name: '',
                       chat_label: '',
                       chat_description: '',
-                      icon: '✨',
-                      category: labels.serviceCategory || '一般メニュー',
+                      icon: '🦷',
+                      category: labels.serviceCategory || '保険診療',
                       duration_minutes: 30,
                       price: 0,
                       is_online_bookable: true,
                     });
                     setIsServiceModalOpen(true);
                   }}
-                  className="px-4 py-2 rounded-xl text-white font-bold text-xs shadow-md flex items-center gap-1.5 cursor-pointer"
+                  className="px-4 py-2 rounded-xl text-white font-bold text-xs shadow-md flex items-center gap-1.5 cursor-pointer hover:opacity-95"
                   style={{ backgroundColor: selectedTheme.primary }}
                 >
                   <Plus size={16} />
@@ -842,44 +842,36 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-200">
                     <tr>
-                      <th className="p-4">チャット用表示名（顧客向け）</th>
-                      <th className="p-4">メニュー名（社内・専門用語）</th>
-                      <th className="p-4">カテゴリ</th>
-                      <th className="p-4">所要時間</th>
-                      <th className="p-4">参考料金</th>
-                      <th className="p-4">WEB公開</th>
-                      <th className="p-4 text-right">操作</th>
+                      <th className="p-3.5">メニュー名</th>
+                      <th className="p-3.5">所要時間</th>
+                      <th className="p-3.5">参考料金</th>
+                      <th className="p-3.5">WEB公開</th>
+                      <th className="p-3.5 text-right">操作</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {services.map((srv) => (
                       <tr key={srv.id} className="hover:bg-slate-50/80 transition-colors">
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            <span className="text-base shrink-0">{srv.icon || '📝'}</span>
+                        <td className="p-3.5">
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-lg shrink-0">{srv.icon || '🦷'}</span>
                             <div>
                               <span className="font-bold text-slate-800 block text-xs">
                                 {srv.chat_label || srv.name}
                               </span>
-                              {srv.chat_description && (
-                                <span className="text-[10px] text-slate-400 block line-clamp-1">
-                                  {srv.chat_description}
+                              {srv.category && (
+                                <span className="text-[10px] text-slate-400">
+                                  {srv.category}
                                 </span>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="p-4 font-mono text-slate-600 text-[11px]">{srv.name}</td>
-                        <td className="p-4">
-                          <span className="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-medium text-[11px]">
-                            {srv.category}
-                          </span>
+                        <td className="p-3.5 text-slate-600 font-medium">{srv.duration_minutes || 30} 分</td>
+                        <td className="p-3.5 font-mono text-slate-700">
+                          {Number(srv.price) === 0 ? '保険診療 / 無料' : `¥${Number(srv.price).toLocaleString()}`}
                         </td>
-                        <td className="p-4 text-slate-600">{srv.duration_minutes} 分</td>
-                        <td className="p-4 font-mono text-slate-700">
-                          {srv.price === 0 ? '無料' : `¥${Number(srv.price).toLocaleString()}`}
-                        </td>
-                        <td className="p-4">
+                        <td className="p-3.5">
                           <span
                             className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
                               srv.is_online_bookable !== false
@@ -890,7 +882,7 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
                             {srv.is_online_bookable !== false ? '公開中' : '非公開'}
                           </span>
                         </td>
-                        <td className="p-4 text-right space-x-2">
+                        <td className="p-3.5 text-right space-x-1">
                           <button
                             type="button"
                             onClick={() => {
@@ -1114,116 +1106,67 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
       {/* ========================================================================= */}
       {isServiceModalOpen && editingService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
-          <div className="w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="font-bold text-base text-slate-800">
-                  {editingService.id ? 'メニュー編集' : '新規メニュー追加'}
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5">
-                  社内用の専門用語と、AIチャット・WEB予約でお客様に見せる言葉を使い分けられます。
-                </p>
-              </div>
+          <div className="w-full max-w-md bg-white rounded-3xl p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+              <h3 className="font-bold text-base text-slate-800 font-serif">
+                {editingService.id ? 'メニュー設定' : '新規メニュー追加'}
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsServiceModalOpen(false)}
-                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 cursor-pointer"
               >
                 <X size={18} />
               </button>
             </div>
 
-            <div className="space-y-4 text-xs">
-              {/* チャット用表示メニュー（顧客向け） */}
-              <div className="p-3.5 bg-brand-orange/5 rounded-2xl border border-brand-orange/20 space-y-1.5">
-                <label className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
-                  <span className="text-sm">💬</span>
-                  <span>チャット用表示メニュー（{labels.customer}向け文言）</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-normal">おすすめ</span>
-                </label>
-                <input
-                  type="text"
-                  value={editingService.chat_label || ''}
-                  onChange={(e) => setEditingService({ ...editingService, chat_label: e.target.value })}
-                  placeholder={`例: 歯が痛い・詰め物が取れた / 体験トレーニングを受けたい`}
-                  className="w-full p-2.5 bg-white border border-amber-300 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <p className="text-[10px] text-slate-500 leading-relaxed">
-                  ※AIチャット画面で{labels.customer}に選択肢として表示される親しみやすい表現です。（未入力時は下記のメニュー名が表示されます）
-                </p>
-              </div>
-
-              {/* メニュー名（社内・専門用語） */}
+            <div className="space-y-3.5 text-xs">
+              {/* メニュー名 */}
               <div className="space-y-1">
                 <label className="font-bold text-slate-700 block">
-                  メニュー名（社内・専門職用の名称） <span className="text-rose-500">*</span>
+                  メニュー名 <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
-                  value={editingService.name || ''}
-                  onChange={(e) => setEditingService({ ...editingService, name: e.target.value })}
-                  placeholder="例: 一般診療・急患処置 / ハイフ全顔4000shot / パーソナル体験"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium"
+                  value={editingService.name || editingService.chat_label || ''}
+                  onChange={(e) =>
+                    setEditingService({
+                      ...editingService,
+                      name: e.target.value,
+                      chat_label: e.target.value,
+                    })
+                  }
+                  placeholder="例: 虫歯・歯の痛み / 定期検診・クリーニング"
+                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500"
                   required
                 />
-                <p className="text-[10px] text-slate-400">
-                  ※予約台帳やスタッフ管理画面で表示される正式・専門的なメニュー名です。
-                </p>
               </div>
 
-              {/* 説明・補足 */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 block">チャット用説明・補足テキスト（任意）</label>
-                <input
-                  type="text"
-                  value={editingService.chat_description || ''}
-                  onChange={(e) => setEditingService({ ...editingService, chat_description: e.target.value })}
-                  placeholder="例: 痛みや腫れなど急なトラブルの処置 / 姿勢分析＋個別指導体験"
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
-                />
-              </div>
-
-              {/* アイコン & カテゴリ & 所要時間 */}
-              <div className="grid grid-cols-3 gap-3">
+              {/* アイコン & 所要時間 */}
+              <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700 block">アイコン</label>
                   <select
-                    value={editingService.icon || '✨'}
+                    value={editingService.icon || '🦷'}
                     onChange={(e) => setEditingService({ ...editingService, icon: e.target.value })}
                     className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-center text-sm"
                   >
-                    <option value="✨">✨ キラキラ</option>
                     <option value="🦷">🦷 歯・歯科</option>
                     <option value="🪥">🪥 歯ブラシ・予防</option>
-                    <option value="💇‍♀️">💇‍♀️ ヘアサロン</option>
-                    <option value="💖">💖 エステ・美肌</option>
-                    <option value="🏋️">🏋️ トレーニング</option>
-                    <option value="💪">💪 筋肉・ボディ</option>
-                    <option value="🧘">🧘 ストレッチ・ヨガ</option>
-                    <option value="💆‍♂️">💆‍♂️ 整体・リラク</option>
-                    <option value="🌿">🌿 アロマ・癒やし</option>
-                    <option value="😴">😴 ヘッドスパ・睡眠</option>
+                    <option value="✨">✨ キラキラ・審美</option>
                     <option value="💬">💬 相談・カウンセリング</option>
-                    <option value="📋">📋 診療・定期</option>
+                    <option value="📋">📋 診療・再診</option>
                     <option value="⭐">⭐ おすすめ</option>
-                    <option value="🔰">🔰 初回・体験</option>
-                    <option value="📝">📝 一般・その他</option>
+                    <option value="🔰">🔰 初診</option>
+                    <option value="📝">📝 その他</option>
                   </select>
-                </div>
-                <div className="space-y-1">
-                  <label className="font-bold text-slate-700 block">カテゴリ</label>
-                  <input
-                    type="text"
-                    value={editingService.category || ''}
-                    onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
-                    placeholder="例: 保険診療 / エステ"
-                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
-                  />
                 </div>
                 <div className="space-y-1">
                   <label className="font-bold text-slate-700 block">所要時間 (分)</label>
                   <input
                     type="number"
+                    step="5"
+                    min="5"
                     value={editingService.duration_minutes || 30}
                     onChange={(e) =>
                       setEditingService({ ...editingService, duration_minutes: Number(e.target.value) })
@@ -1233,19 +1176,31 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
                 </div>
               </div>
 
-              {/* 参考料金 */}
-              <div className="space-y-1">
-                <label className="font-bold text-slate-700 block">参考料金 (円・任意 / 0で「無料」)</label>
-                <input
-                  type="number"
-                  value={editingService.price || 0}
-                  onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
-                  className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
-                />
+              {/* 参考料金 & カテゴリ */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">料金 (円・0で無料/保険)</label>
+                  <input
+                    type="number"
+                    value={editingService.price || 0}
+                    onChange={(e) => setEditingService({ ...editingService, price: Number(e.target.value) })}
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-700 block">カテゴリ（任意）</label>
+                  <input
+                    type="text"
+                    value={editingService.category || ''}
+                    onChange={(e) => setEditingService({ ...editingService, category: e.target.value })}
+                    placeholder="例: 保険診療 / 予防歯科"
+                    className="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl"
+                  />
+                </div>
               </div>
 
               {/* 公開フラグ */}
-              <div className="flex items-center gap-2 pt-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+              <div className="flex items-center gap-2 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
                 <input
                   type="checkbox"
                   id="chk_online"
@@ -1256,23 +1211,31 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
                   className="w-4 h-4 rounded text-slate-800 focus:ring-slate-400"
                 />
                 <label htmlFor="chk_online" className="font-medium text-slate-700 cursor-pointer text-xs">
-                  WEB予約・AIチャットで選択可能にする（公開）
+                  WEB予約で選択可能にする（公開）
                 </label>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-100 flex justify-end gap-2">
+            <div className="pt-2 border-t border-slate-100 flex justify-end gap-2">
               <button
                 type="button"
                 onClick={() => setIsServiceModalOpen(false)}
-                className="px-4 py-2 text-slate-500 font-bold text-xs hover:bg-slate-100 rounded-xl"
+                className="px-4 py-2 text-slate-500 font-bold text-xs hover:bg-slate-100 rounded-xl cursor-pointer"
               >
                 キャンセル
               </button>
               <button
                 type="button"
-                onClick={() => handleSaveService(editingService)}
-                className="px-5 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                onClick={() => {
+                  const finalService = {
+                    ...editingService,
+                    name: editingService.name || editingService.chat_label || '新規メニュー',
+                    chat_label: editingService.name || editingService.chat_label || '新規メニュー',
+                  };
+                  handleSaveService(finalService);
+                }}
+                className="px-5 py-2 rounded-xl text-white font-bold text-xs shadow-md cursor-pointer hover:opacity-95"
+                style={{ backgroundColor: selectedTheme.primary }}
               >
                 保存する
               </button>

@@ -409,11 +409,11 @@ export async function deleteSingleStaff(staffId) {
 
 export const DEFAULT_SERVICES_BY_INDUSTRY = {
   medical: [
-    { id: 'srv-m01', name: '一般診療・初診（虫歯・急患処置）', chat_label: '歯が痛い・詰め物が取れた（急患）', chat_description: '痛みや腫れ、詰め物の脱離など急なトラブルの処置', category: '保険診療', duration_minutes: 30, price: 3500, icon: '🦷', is_online_bookable: true, is_active: true },
-    { id: 'srv-m02', name: '定期検診・PMTC歯石除去', chat_label: '定期検診・クリーニングを受けたい', chat_description: '虫歯・歯周病チェック、歯石除去、着色落とし', category: '予防歯科', duration_minutes: 45, price: 4000, icon: '🪥', is_online_bookable: true, is_active: true },
-    { id: 'srv-m03', name: 'オフィスホワイトニング・審美ケア', chat_label: 'ホワイトニング・歯を白くしたい', chat_description: 'クリニックで行う本格的なホワイトニングケア', category: '審美歯科', duration_minutes: 60, price: 22000, icon: '✨', is_online_bookable: true, is_active: true },
-    { id: 'srv-m04', name: '矯正・インプラント専門カウンセリング', chat_label: '矯正・インプラントの相談をしたい', chat_description: '歯並び、噛み合わせ、自費診療の事前無料相談', category: '無料相談', duration_minutes: 30, price: 0, icon: '💬', is_online_bookable: true, is_active: true },
-    { id: 'srv-m05', name: '再診・治療の続き', chat_label: '通院中の治療の続きを受けたい', chat_description: '前回からの継続処置・経過観察', category: '保険診療', duration_minutes: 30, price: 2000, icon: '📋', is_online_bookable: true, is_active: true },
+    { id: 'srv-m01', name: '虫歯・歯の痛み（急患対応）', chat_label: '虫歯・歯の痛み', category: '保険診療', duration_minutes: 30, price: 0, icon: '🦷', is_online_bookable: true, is_active: true },
+    { id: 'srv-m02', name: '定期検診・クリーニング', chat_label: '定期検診・クリーニング', category: '予防歯科', duration_minutes: 30, price: 0, icon: '🪥', is_online_bookable: true, is_active: true },
+    { id: 'srv-m03', name: 'ホワイトニング', chat_label: 'ホワイトニング', category: '自費診療', duration_minutes: 60, price: 15000, icon: '✨', is_online_bookable: true, is_active: true },
+    { id: 'srv-m04', name: '矯正・インプラント相談', chat_label: '矯正・インプラント相談', category: '無料相談', duration_minutes: 30, price: 0, icon: '💬', is_online_bookable: true, is_active: true },
+    { id: 'srv-m05', name: '治療の続き（再診）', chat_label: '治療の続き（再診）', category: '保険診療', duration_minutes: 30, price: 0, icon: '📋', is_online_bookable: true, is_active: true },
   ],
   beauty: [
     { id: 'srv-b01', name: 'カット＋オーガニックカラー＋トリートメント', chat_label: 'カット＆カラーでイメージを変えたい', chat_description: '似合わせカットと髪質改善トリートメント付きカラー', category: 'ヘアケア', duration_minutes: 90, price: 13200, icon: '💇‍♀️', is_online_bookable: true, is_active: true },
