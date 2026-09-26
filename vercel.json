@@ -1,5 +1,4 @@
 {
-  "cleanUrls": true,
   "redirects": [
     {
       "source": "/connect",
@@ -18,20 +17,24 @@
       "destination": "/about/index.html"
     },
     {
+      "source": "/about/company",
+      "destination": "/about/company.html"
+    },
+    {
+      "source": "/about/privacy",
+      "destination": "/about/privacy.html"
+    },
+    {
+      "source": "/about/leaflet",
+      "destination": "/about/leaflet.html"
+    },
+    {
       "source": "/about/:path*",
       "destination": "/about/:path*"
     },
     {
       "source": "/images/:path*",
       "destination": "/about/images/:path*"
-    },
-    {
-      "source": "/favicon.ico",
-      "destination": "/favicon.ico"
-    },
-    {
-      "source": "/favicon.png",
-      "destination": "/favicon.png"
     },
     {
       "source": "/(.*)",
