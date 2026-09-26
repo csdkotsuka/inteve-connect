@@ -362,113 +362,77 @@ export default function AuthModal({
           className="w-full max-w-lg bg-white rounded-3xl sm:rounded-[32px] shadow-2xl overflow-hidden border border-slate-100 my-auto"
         >
           {/* Header */}
-          <div className="bg-slate-900 text-white p-5 sm:p-6 md:p-7 relative">
-          <div className="flex items-center gap-3 mb-1">
-            <div className="w-11 h-11 rounded-2xl bg-[#06C755] flex items-center justify-center text-white shadow-lg shadow-green-900/30">
-              <ShieldCheck size={24} />
-            </div>
-            <div>
-              <span className="text-xs text-slate-400 font-mono uppercase tracking-widest block">
-                {labels.id.toUpperCase()} VERIFICATION
-              </span>
-              <h2 className="text-2xl font-bold font-serif">{labels.authModalTitle}</h2>
-            </div>
-          </div>
-          <p className="text-sm text-slate-300 mt-2 leading-relaxed">
-            ご希望のログイン方法をお選びください。アカウント連携でスムーズにご予約いただけます。
-          </p>
-        </div>
-
-        {/* 認証OFF時のみデモモード告知バナーを表示（ON時は本番運用レイアウトとして非表示） */}
-        {!isAuthEnabled && (
-          <div className="px-6 pt-4 pb-1">
-            <div className="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-3.5 flex items-start gap-3 text-amber-900 shadow-2xs">
-              <Sparkles className="text-amber-600 shrink-0 mt-0.5" size={18} />
-              <div className="text-xs space-y-0.5">
-                <div className="font-bold flex items-center gap-2">
-                  <span>⚡ 認証スルー設定中（デモモード）</span>
-                  <span className="bg-amber-200/80 text-amber-800 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                    SuperAdmin: OFF
-                  </span>
-                </div>
-                <p className="text-amber-750 text-[11px] leading-relaxed">
-                  認証画面はダミーでスルー可能です。下の「スルー入室」ボタンまたは各アイコンを押すと即座に入室できます。
-                </p>
+          <div className="bg-slate-900 text-white p-5 sm:p-6 relative">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#06C755] flex items-center justify-center text-white shadow-md">
+                <ShieldCheck size={22} />
+              </div>
+              <div>
+                <h2 className="text-xl font-bold font-serif">{labels.authModalTitle || '本人確認'}</h2>
               </div>
             </div>
           </div>
-        )}
 
-        {/* 顧客/患者区分セレクター（新規 / 再来） */}
-        <div className="bg-slate-50 px-6 py-3.5 border-b border-slate-200/80 flex items-center justify-between gap-3 mt-1">
-          <span className="text-sm font-bold text-slate-700">
-            {labels.patientType}:
-          </span>
-          <div className="flex items-center gap-2.5">
-            <button
-              type="button"
-              onClick={() => {
-                setPatientType('new');
-                setMatchResult(null);
-              }}
-              className={`px-5 py-1.5 text-xs md:text-sm rounded-full font-bold transition-all cursor-pointer ${
-                patientType === 'new'
-                  ? 'bg-emerald-600 text-white shadow-md'
-                  : 'bg-white border border-slate-300 text-slate-700 hover:border-emerald-500'
-              }`}
-            >
-              {labels.firstVisitShort}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setPatientType('returning');
-                if (formData.name && formData.phone) {
-                  matchPatient(formData.name, formData.phone).then(setMatchResult);
-                }
-              }}
-              className={`px-5 py-1.5 text-xs md:text-sm rounded-full font-bold transition-all cursor-pointer ${
-                patientType === 'returning'
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-white border border-slate-300 text-slate-700 hover:border-blue-500'
-              }`}
-            >
-              {labels.returningVisitShort}
-            </button>
+          {/* 顧客/患者区分セレクター（新規 / 再来） */}
+          <div className="bg-slate-50 px-6 py-3 border-b border-slate-200/80 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2 w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  setPatientType('new');
+                  setMatchResult(null);
+                }}
+                className={`flex-1 py-1.5 text-xs sm:text-sm rounded-full font-bold transition-all cursor-pointer ${
+                  patientType === 'new'
+                    ? 'bg-emerald-600 text-white shadow-md'
+                    : 'bg-white border border-slate-300 text-slate-700 hover:border-emerald-500'
+                }`}
+              >
+                {labels.firstVisitShort}
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setPatientType('returning');
+                  if (formData.name && formData.phone) {
+                    matchPatient(formData.name, formData.phone).then(setMatchResult);
+                  }
+                }}
+                className={`flex-1 py-1.5 text-xs sm:text-sm rounded-full font-bold transition-all cursor-pointer ${
+                  patientType === 'returning'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'bg-white border border-slate-300 text-slate-700 hover:border-blue-500'
+                }`}
+              >
+                {labels.returningVisitShort}
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div className="p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-5">
-          {/* ⚡ OFF時専用：1-Tap スルー入室ボタン */}
-          {!isAuthEnabled && (
-            <button
-              type="button"
-              onClick={() => handleDemoBypass(patientType === 'returning')}
-              className="w-full py-3.5 sm:py-4 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-2xl text-xs sm:text-sm md:text-base shadow-lg shadow-amber-500/25 flex items-center justify-center gap-2 sm:gap-2.5 transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.99]"
-            >
-              <Sparkles size={18} className="shrink-0" />
-              <span className="leading-snug">
-                {patientType === 'returning'
-                  ? '⚡ デモ再診患者としてスルー入室（認証スキップ）'
-                  : '⚡ デモ新規患者としてスルー入室（認証スキップ）'}
-              </span>
-              <ArrowRight size={16} className="shrink-0" />
-            </button>
-          )}
+          <div className="p-4 sm:p-6 space-y-4">
+            {/* ⚡ OFF時専用：スキップボタン */}
+            {!isAuthEnabled && (
+              <button
+                type="button"
+                onClick={() => handleDemoBypass(patientType === 'returning')}
+                className="w-full py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md flex items-center justify-center gap-2 transition-all cursor-pointer"
+              >
+                <Sparkles size={16} />
+                <span>スキップして予約へ進む</span>
+                <ArrowRight size={14} />
+              </button>
+            )}
 
           {/* 1. 認証方法を選択（LINE, Apple, Google, メール の4つ） */}
-          <div className="space-y-2.5 sm:space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-xs md:text-sm font-bold text-slate-700 uppercase tracking-wider block">
-                ログイン・予約方法を選択
-              </label>
+          <div className="space-y-2.5">
+            <div className="flex items-center justify-end">
               <button
                 type="button"
                 onClick={() => setShowLineQR(!showLineQR)}
-                className="text-[11px] sm:text-xs text-emerald-700 hover:underline font-bold flex items-center gap-1 cursor-pointer"
+                className="text-xs text-emerald-700 hover:underline font-bold flex items-center gap-1 cursor-pointer"
               >
                 <QrCode size={13} />
-                <span>{showLineQR ? 'QRを閉じる' : 'PC用LINE友だちQR'}</span>
+                <span>{showLineQR ? '閉じる' : 'LINE QR'}</span>
               </button>
             </div>
 
@@ -654,54 +618,53 @@ export default function AuthModal({
 
           {/* LINE ID照合中アニメーション */}
           {lineMatchStatus === 'checking' && (
-            <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs flex items-center gap-3 animate-pulse">
-              <RefreshCw size={18} className="animate-spin text-emerald-600" />
-              <span>Supabaseで患者カルテ情報を照合中...</span>
+            <div className="p-3 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs flex items-center gap-2.5">
+              <RefreshCw size={15} className="animate-spin text-emerald-600" />
+              <span>照合中...</span>
             </div>
           )}
 
           {/* LINE 照合成功（確認ボタンを表示して明示的に進む） */}
           {lineMatchStatus === 'found' && matchResult?.record && (
-            <div className="p-4 rounded-2xl bg-blue-50 text-blue-900 border border-blue-200 text-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <CheckCircle2 size={22} className="text-blue-600 shrink-0" />
+            <div className="p-3.5 rounded-2xl bg-blue-50 text-blue-900 border border-blue-200 text-xs flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2.5">
+                <CheckCircle2 size={18} className="text-blue-600 shrink-0" />
                 <div>
                   <div className="font-bold text-sm text-blue-950">
-                    {matchResult.record.name} 様 としてLINE照合が完了しました
+                    {matchResult.record.name} 様
                   </div>
-                  <div className="text-[11px] text-blue-750 mt-0.5">
-                    カルテ番号: {matchResult.customerCode || '登録済'} / 電話番号: {matchResult.record.phone || '登録済'}
-                  </div>
+                  {matchResult.customerCode && (
+                    <div className="text-[11px] text-blue-700">
+                      No. {matchResult.customerCode}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 w-full sm:w-auto shrink-0">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
                     setLineMatchStatus('not_found');
                     setMatchResult(null);
                   }}
-                  className="text-[11px] text-slate-500 hover:text-blue-700 underline px-2 py-1 cursor-pointer"
-                  title="お名前や電話番号を再入力して登録する"
+                  className="text-[11px] text-slate-500 hover:text-blue-700 underline px-1 cursor-pointer"
                 >
-                  再登録
+                  変更
                 </button>
                 <button
                   type="button"
                   onClick={handleProceedWithVerifiedLineUser}
-                  className="flex-1 sm:flex-initial px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md cursor-pointer shrink-0 transition-all hover:scale-105"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs flex items-center gap-1 shadow-md cursor-pointer transition-all"
                 >
-                  <span>予約画面へ進む</span>
+                  <span>次へ</span>
                   <ArrowRight size={14} />
                 </button>
               </div>
             </div>
           )}
 
-          {/* フォーム入力欄：
-              - authMethod === 'email' / 'apple' / 'google' の場合
-              - または isAuthEnabled で LINE選択 かつ lineMatchStatus === 'not_found'（未登録LINEユーザーの初回情報入力）の場合 */}
+          {/* フォーム入力欄 */}
           <AnimatePresence>
             {(authMethod === 'email' || authMethod === 'apple' || authMethod === 'google' || (isAuthEnabled && authMethod === 'line' && lineMatchStatus === 'not_found')) && (
               <motion.form
@@ -711,22 +674,6 @@ export default function AuthModal({
                 onSubmit={handleSubmit}
                 className="space-y-4 pt-2 border-t border-slate-100"
               >
-                {authMethod === 'line' && lineMatchStatus === 'not_found' && (
-                  <div className="p-3 rounded-xl bg-amber-50 text-amber-900 border border-amber-200 text-xs flex items-start gap-2">
-                    <AlertCircle size={16} className="text-amber-600 shrink-0 mt-0.5" />
-                    <span>
-                      初回LINE予約です。カルテ作成・予約確認のため、お名前と電話番号を入力してください（次回から自動認証されます）。
-                    </span>
-                  </div>
-                )}
-                {isAuthEnabled && (authMethod === 'apple' || authMethod === 'google') && (
-                  <div className="p-3 rounded-xl bg-blue-50 text-blue-900 border border-blue-200 text-xs flex items-start gap-2">
-                    <ShieldCheck size={16} className="text-blue-600 shrink-0 mt-0.5" />
-                    <span>
-                      {authMethod === 'apple' ? 'Apple' : 'Google'} アカウント連携：ご本人確認のため、お名前と電話番号を入力してください。
-                    </span>
-                  </div>
-                )}
 
                 <div>
                   <label className="text-xs md:text-sm font-bold text-slate-700 block mb-1">
@@ -749,7 +696,7 @@ export default function AuthModal({
 
                 <div>
                   <label className="text-xs md:text-sm font-bold text-slate-700 block mb-1">
-                    電話番号（照合用） <span className="text-rose-500">*</span>
+                    電話番号 <span className="text-rose-500">*</span>
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -768,7 +715,7 @@ export default function AuthModal({
 
                 <div>
                   <label className="text-xs md:text-sm font-bold text-slate-700 block mb-1">
-                    メールアドレス（予約確認用）
+                    メールアドレス
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
@@ -784,54 +731,27 @@ export default function AuthModal({
                   </div>
                 </div>
 
-                {/* 新患の案内 */}
-                {patientType === 'new' && (
-                  <div className="p-3.5 rounded-xl bg-emerald-50 text-emerald-900 border border-emerald-200 text-xs md:text-sm flex items-center gap-2.5">
-                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0" />
-                    <span>{labels.firstVisit}（新規アカウントを作成してLINEと連携します）</span>
-                  </div>
-                )}
-
                 {/* 再診/リピートで照合できた場合のバッジ */}
                 {patientType === 'returning' && matchResult?.isReturning && matchResult.customerCode && (
-                  <div className="p-3.5 rounded-xl bg-blue-50 text-blue-900 border border-blue-200 text-xs md:text-sm flex items-center gap-2.5">
-                    <CheckCircle2 size={18} className="text-blue-600 shrink-0" />
-                    <div>
-                      <span className="font-bold block">
-                        {labels.customerCode} {matchResult.customerCode} と照合しました
-                      </span>
-                      <span className="text-xs opacity-80">{labels.returningSubtitle}</span>
-                    </div>
+                  <div className="p-3 rounded-xl bg-blue-50 text-blue-900 border border-blue-200 text-xs flex items-center gap-2">
+                    <CheckCircle2 size={16} className="text-blue-600 shrink-0" />
+                    <span className="font-bold">
+                      {labels.customerCode} {matchResult.customerCode} と照合済
+                    </span>
                   </div>
                 )}
 
                 <button
                   type="submit"
                   disabled={isVerifying || !formData.name.trim() || !formData.phone.trim()}
-                  className="w-full py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-xl text-sm md:text-base shadow-lg transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2 mt-2"
+                  className="w-full py-3.5 bg-slate-900 hover:bg-black text-white font-bold rounded-xl text-sm md:text-base shadow-lg transition-all cursor-pointer disabled:opacity-40 flex items-center justify-center gap-2 mt-2"
                 >
-                  <span>{labels.consultation}・予約日時の選択へ進む</span>
+                  <span>次へ</span>
                   <ArrowRight size={18} />
                 </button>
               </motion.form>
             )}
           </AnimatePresence>
-
-          {/* 説明テキスト */}
-          {!authMethod && (
-            <p className="text-xs text-slate-500 text-center leading-relaxed">
-              {isAuthEnabled ? (
-                <>
-                  ※LINE / Apple / Googleボタンを押すとアカウント連携でスムーズにご予約いただけます。<br />
-                  アカウント連携を行わない場合は「メール入力」からお名前・電話番号を入力してください。
-                </>
-              ) : (
-                <>
-                  ※デモモード稼働中：各ボタンを押すか、上の「スルー入室」からワンタップで予約画面を開始できます。
-                </>
-              )}
-            </p>
-          )}
         </div>
       </motion.div>
       </div>

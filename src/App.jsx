@@ -232,30 +232,20 @@ function App() {
 
       {/* Patient Status Bar */}
       <div
-        className="text-white/95 text-xs md:text-sm py-2.5 px-6 md:px-10 flex justify-between items-center font-serif shadow-xs"
+        className="text-white/95 text-xs py-2 px-6 md:px-10 flex justify-between items-center font-serif shadow-xs"
         style={{ backgroundColor: activeTheme.secondary }}
       >
-        <div className="flex items-center gap-3">
-          <span
-            className="tracking-wider font-bold text-xs uppercase flex items-center gap-1.5"
-            style={{ color: activeTheme.accent }}
-          >
-            <Sparkles size={14} style={{ color: activeTheme.primary }} />
-            24時間 WEB受付システム
-          </span>
-          <span className="hidden md:inline opacity-40">|</span>
-          <span className="hidden md:inline opacity-90 text-xs text-white/80">
-            {facilityName} オンライン予約
-          </span>
+        <div className="flex items-center gap-2">
+          <Sparkles size={13} style={{ color: activeTheme.primary }} />
+          <span className="font-bold text-xs">{facilityName}</span>
         </div>
 
-        <div className="flex items-center gap-3 md:gap-4">
+        <div className="flex items-center gap-3">
           {currentUser && (
             <div className="flex items-center gap-2">
-              <UserCheck size={16} style={{ color: activeTheme.primary }} />
-              <span className="font-bold text-white text-xs md:text-sm">{currentUser.name} 様</span>
+              <span className="font-bold text-white text-xs">{currentUser.name} 様</span>
               <span
-                className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
                   currentUser.isReturning ? 'bg-emerald-600 text-white' : 'bg-amber-600 text-white'
                 }`}
               >
@@ -263,26 +253,21 @@ function App() {
               </span>
               <button
                 onClick={handleSwitchPatient}
-                className="text-[11px] underline flex items-center gap-0.5 cursor-pointer opacity-80 hover:opacity-100 ml-1"
+                className="text-[11px] underline flex items-center gap-0.5 cursor-pointer opacity-80 hover:opacity-100"
                 style={{ color: activeTheme.accent }}
               >
-                <RefreshCw size={11} />
                 切替
               </button>
             </div>
           )}
 
-          <span className="opacity-30 hidden sm:inline">|</span>
-
-          {/* 施設管理者画面への切り替えボタン */}
           <button
             onClick={() => setViewMode(VIEW_MODES.ADMIN)}
-            className="text-xs text-white font-bold flex items-center gap-1.5 cursor-pointer px-3 py-1 rounded-full transition-all border border-white/20 hover:bg-white/20 shadow-xs"
+            className="text-xs text-white font-bold flex items-center gap-1 cursor-pointer px-2.5 py-0.5 rounded-full transition-all border border-white/20 hover:bg-white/20 shadow-xs"
             style={{ backgroundColor: `${activeTheme.primary}40` }}
-            title="施設管理画面（テーマカラー・お知らせ・スケジュール設定）を開く"
           >
-            <ShieldCheck size={14} style={{ color: activeTheme.accent }} />
-            <span>施設管理画面</span>
+            <ShieldCheck size={13} style={{ color: activeTheme.accent }} />
+            <span>管理</span>
           </button>
         </div>
       </div>
@@ -290,16 +275,16 @@ function App() {
       {/* トップお知らせ告知バナー（施設管理で設定された文面） */}
       {facilityProfile?.top_announcement && (
         <div
-          className="py-2.5 px-6 md:px-10 border-b text-xs flex items-center justify-between gap-3 shadow-2xs"
+          className="py-2 px-6 md:px-10 border-b text-xs flex items-center justify-between gap-3 shadow-2xs"
           style={{
             backgroundColor: activeTheme.primaryLight,
             borderColor: `${activeTheme.primary}30`,
             color: activeTheme.secondary,
           }}
         >
-          <div className="max-w-6xl mx-auto w-full flex items-center gap-2.5">
-            <Megaphone size={16} className="shrink-0" style={{ color: activeTheme.primary }} />
-            <p className="font-medium leading-relaxed truncate">
+          <div className="max-w-6xl mx-auto w-full flex items-center gap-2">
+            <Megaphone size={14} className="shrink-0" style={{ color: activeTheme.primary }} />
+            <p className="font-medium truncate text-xs">
               {facilityProfile.top_announcement}
             </p>
           </div>
@@ -314,37 +299,29 @@ function App() {
       />
 
       {/* Navigation */}
-      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/60 px-6 md:px-10 py-3.5 flex items-center justify-between">
+      <nav className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/60 px-6 md:px-10 py-3 flex items-center justify-between">
         <div className="flex items-center gap-3 cursor-pointer" onClick={reset}>
           <div
-            className="w-10 h-10 rounded-2xl flex items-center justify-center text-white shadow-md"
+            className="w-9 h-9 rounded-xl flex items-center justify-center text-white shadow-sm"
             style={{ backgroundColor: activeTheme.primary }}
           >
             <DentalToothLogo className="w-5 h-5 text-white" />
           </div>
-          <div className="flex flex-col -gap-0.5">
-            <span
-              className="text-[9px] font-serif italic leading-none tracking-widest uppercase font-bold"
-              style={{ color: activeTheme.accent }}
-            >
-              {facilityProfile?.slug ? facilityProfile.slug.replace('-', ' ') : 'FACILITY RESERVATION'}
-            </span>
-            <span
-              className="text-lg md:text-xl font-bold font-serif leading-none mt-1"
-              style={{ color: activeTheme.secondary }}
-            >
-              {facilityName}
-            </span>
-          </div>
+          <span
+            className="text-lg font-bold font-serif leading-none"
+            style={{ color: activeTheme.secondary }}
+          >
+            {facilityName}
+          </span>
         </div>
 
-        <div className="hidden md:flex items-center gap-6 text-xs font-bold text-slate-600">
+        <div className="hidden md:flex items-center gap-4 text-xs font-bold text-slate-600">
           <a
             href={`tel:${facilityPhone}`}
-            className="text-white px-5 py-2 rounded-full transition-all shadow-md font-bold flex items-center gap-1.5 cursor-pointer hover:opacity-90"
+            className="text-white px-4 py-1.5 rounded-full transition-all shadow-sm font-bold flex items-center gap-1.5 cursor-pointer hover:opacity-90"
             style={{ backgroundColor: activeTheme.primary }}
           >
-            <Phone size={14} />
+            <Phone size={13} />
             <span>{facilityPhone}</span>
           </a>
         </div>
@@ -358,70 +335,34 @@ function App() {
       <main className="max-w-6xl mx-auto px-6 py-10">
         <div className="grid lg:grid-cols-2 gap-12 items-start">
           {/* Left: Clinic Real Introduction & Guidance */}
-          <div className="space-y-6 pt-4">
+          <div className="space-y-4 pt-2">
             <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }}>
-              <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-orange/10 text-brand-orange border border-brand-orange/20 text-xs font-bold rounded-full mb-4 shadow-2xs font-serif">
-                <HeartHandshake size={15} />
-                <span>お一人おひとりに寄り添う、丁寧な{labels.service}</span>
-              </div>
-              <h1 className="text-3xl md:text-5xl font-bold leading-tight text-brand-brown mb-4 font-serif">
-                笑顔あふれる毎日を、<br />
-                <span className="text-brand-orange">快適な空間から。</span>
+              <h1 className="text-2xl md:text-3xl font-bold leading-tight text-brand-brown font-serif">
+                {facilityName}
               </h1>
-              <p className="text-sm md:text-base text-slate-600 leading-relaxed max-w-lg font-serif">
-                {labels.topIntroDefault}
+              <p className="text-xs md:text-sm text-slate-500 mt-1">
+                24時間WEB予約
               </p>
             </motion.div>
 
-            {/* Clinic Guidance Cards (実運用向けの案内) */}
-            <div className="space-y-3">
-              <div className="p-4 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-brand-ivory text-brand-gold flex items-center justify-center shrink-0 mt-0.5 border border-brand-gold/20">
-                  <DentalToothLogo className="w-5 h-5 text-brand-orange" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-brand-brown font-serif mb-1">
-                    {labels.bookingIntro}
-                  </h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    ご予約日時の5分前にお越しください。事前のWEB事前ヒアリングにより、当日はスムーズにご案内いたします。
-                  </p>
-                </div>
-              </div>
-
-              <div className="p-4 bg-white rounded-2xl border border-brand-gold/15 shadow-xs flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-brand-ivory text-brand-gold flex items-center justify-center shrink-0 mt-0.5 border border-brand-gold/20">
-                  <Sparkles size={20} className="text-brand-gold" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-sm text-brand-brown font-serif mb-1">
-                    定期検診・予防クリーニング
-                  </h4>
-                  <p className="text-xs text-slate-500 leading-relaxed">
-                    虫歯や歯周病の早期発見とプロによる歯石除去・着色汚れ落としで、いつまでも健やかで美しい歯を守るサポートをいたします。
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {/* Access & Contact */}
             <div className="grid sm:grid-cols-2 gap-3 pt-2">
-              <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
-                <div className="w-10 h-10 bg-brand-ivory text-brand-gold rounded-full flex items-center justify-center shrink-0">
-                  <MapPin size={20} />
+              <div className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
+                <div className="w-9 h-9 bg-brand-ivory text-brand-gold rounded-full flex items-center justify-center shrink-0">
+                  <MapPin size={18} />
                 </div>
                 <div>
-                  <p className="text-[9px] text-brand-gold font-serif italic uppercase">Access</p>
-                  <p className="font-bold text-xs text-brand-brown">椿神社前 徒歩1分 / 駐車場完備</p>
+                  <p className="font-bold text-xs text-brand-brown">椿神社前 徒歩1分</p>
+                  <p className="text-[10px] text-slate-400">駐車場あり</p>
                 </div>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
-                <div className="w-10 h-10 bg-brand-ivory text-brand-orange rounded-full flex items-center justify-center shrink-0">
-                  <Phone size={20} />
+              <div className="flex items-center gap-3 p-3.5 bg-white rounded-2xl shadow-xs border border-brand-gold/10">
+                <div className="w-9 h-9 bg-brand-ivory text-brand-orange rounded-full flex items-center justify-center shrink-0">
+                  <Phone size={18} />
                 </div>
                 <div>
-                  <p className="text-[9px] text-brand-gold font-serif italic uppercase">Contact</p>
-                  <p className="font-bold text-sm text-brand-brown">{facilityPhone}</p>
+                  <p className="font-bold text-xs text-brand-brown">{facilityPhone}</p>
+                  <p className="text-[10px] text-slate-400">お電話でのご予約</p>
                 </div>
               </div>
             </div>
@@ -456,61 +397,51 @@ function App() {
                   key="complete"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-brand-gold/15 text-center max-w-xl mx-auto"
+                  className="bg-white p-6 md:p-8 rounded-3xl shadow-xl border border-brand-gold/15 text-center max-w-lg mx-auto"
                 >
-                  <div className="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/20 text-white">
-                    <CheckCircle size={40} />
+                  <div className="w-14 h-14 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20 text-white">
+                    <CheckCircle size={28} />
                   </div>
-                  <span className="text-[10px] text-emerald-600 font-bold tracking-widest uppercase bg-emerald-50 px-3 py-1 rounded-full font-serif">
-                    Reservation Confirmed
-                  </span>
-                  <h2 className="text-2xl md:text-3xl font-bold text-brand-brown mt-3 mb-3 font-serif">
-                    ご予約が確定いたしました！
+                  <h2 className="text-xl md:text-2xl font-bold text-brand-brown mb-4 font-serif">
+                    予約完了
                   </h2>
-                  <p className="text-slate-600 mb-6 text-xs md:text-sm leading-relaxed font-serif">
-                    {currentUser?.name} 様の{labels.visit}をスタッフ一同、心よりお待ちしております。<br />
-                    ご予約内容の確認とお控えをご確認ください。
-                  </p>
 
-                  <div className="bg-brand-ivory/80 p-5 rounded-2xl text-left border border-brand-gold/15 mb-6 space-y-2 text-xs">
-                    <p className="font-bold text-brand-brown font-serif text-sm">予約詳細</p>
+                  <div className="bg-brand-ivory/80 p-4 rounded-2xl text-left border border-brand-gold/15 mb-5 space-y-2 text-xs">
                     <div className="grid grid-cols-2 gap-2 text-slate-600">
                       <div>
-                        <span className="text-[10px] text-slate-400 block">予約日時</span>
+                        <span className="text-[10px] text-slate-400 block">日時</span>
                         <span className="font-bold text-brand-orange text-sm">{finalReservation?.scheduled_at}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">{labels.serviceMenu}</span>
+                        <span className="text-[10px] text-slate-400 block">メニュー</span>
                         <span className="font-bold text-slate-800">{finalReservation?.menu_type}</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">{labels.patientType}</span>
-                        <span className="font-bold text-slate-800">
-                          {finalReservation?.patient_type === 'returning' ? `${labels.returningVisit}` : `${labels.firstVisit}`}
-                        </span>
+                        <span className="text-[10px] text-slate-400 block">お名前</span>
+                        <span className="font-bold text-slate-800">{currentUser?.name} 様</span>
                       </div>
                       <div>
-                        <span className="text-[10px] text-slate-400 block">ご連絡先</span>
+                        <span className="text-[10px] text-slate-400 block">電話番号</span>
                         <span className="font-bold text-slate-800">{finalReservation?.phone}</span>
                       </div>
                     </div>
                   </div>
 
-                  {/* 来院受付用デジタルQRコード */}
-                  <div className="bg-slate-900 text-white p-5 rounded-2xl mb-6 shadow-lg border border-slate-800 text-center space-y-3">
+                  {/* チェックイン用QRコード */}
+                  <div className="bg-slate-900 text-white p-4 rounded-2xl mb-5 shadow-md border border-slate-800 text-center space-y-2">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                       <span className="text-xs font-bold text-emerald-400 flex items-center gap-1.5 font-sans">
-                        <QrCode size={15} />
-                        ご来院時チェックイン用QRコード
+                        <QrCode size={14} />
+                        チェックインQR
                       </span>
                       <span className="text-[10px] text-slate-400 font-mono">
-                        {currentUser?.customerCode || '受付用'}
+                        {currentUser?.customerCode || ''}
                       </span>
                     </div>
 
-                    <div className="p-2.5 bg-white rounded-xl inline-block shadow-md mx-auto">
+                    <div className="p-2 bg-white rounded-xl inline-block shadow-sm mx-auto">
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(
                           JSON.stringify({
                             type: 'inteve_checkin',
                             phone: finalReservation?.phone || currentUser?.phone || '',
@@ -519,22 +450,17 @@ function App() {
                             res_id: finalReservation?.id || '',
                           })
                         )}`}
-                        alt="チェックインQRコード"
-                        className="w-32 h-32 sm:w-36 sm:h-36 mx-auto"
+                        alt="QRコード"
+                        className="w-28 h-28 mx-auto"
                       />
                     </div>
-
-                    <p className="text-[11px] text-slate-300 leading-relaxed font-sans">
-                      ご来院時は受付端末のカメラにこのQRコードをかざしてください。<br />
-                      診察券不要でワンタッチで来院受付が完了します。
-                    </p>
                   </div>
 
                   <button
                     onClick={reset}
-                    className="w-full py-4 bg-brand-orange text-white rounded-2xl font-bold hover:bg-brand-brown transition-all shadow-lg shadow-brand-orange/20 text-sm font-serif cursor-pointer"
+                    className="w-full py-3 bg-brand-orange text-white rounded-xl font-bold hover:bg-brand-brown transition-all shadow-md text-sm cursor-pointer"
                   >
-                    トップへ戻る
+                    トップへ
                   </button>
                 </motion.div>
               )}
