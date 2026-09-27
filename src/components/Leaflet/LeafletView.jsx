@@ -116,93 +116,127 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
       }`}
     >
       {/* 画面上部コントロールバー（印刷時は非表示） */}
-      <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800 px-6 py-3 flex items-center justify-between shadow-lg print:hidden">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-xl bg-teal-600 flex items-center justify-center font-bold text-sm shadow-md">
-            C
+      <div className="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md text-white border-b border-slate-800 px-3 sm:px-6 py-2 sm:py-2.5 shadow-lg print:hidden">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-2 sm:gap-3">
+          
+          {/* 1行目（スマホ時）/ 左側（PC時）: タイトル ＆ 右上に縦並びナビボタン（スマホ時のみ表示） */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-teal-600 flex items-center justify-center font-bold text-xs sm:text-sm shadow-md shrink-0">
+                C
+              </div>
+              <h1 className="font-bold text-sm sm:text-base leading-tight tracking-tight whitespace-nowrap">
+                CONNECT リーフレット
+              </h1>
+            </div>
+
+            {/* ナビゲーションボタン（スマホ時は右上に縦並び） */}
+            <div className="flex md:hidden flex-col gap-1 shrink-0">
+              {onBackToAdmin && (
+                <button
+                  onClick={onBackToAdmin}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-[11px] rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  施設管理画面へ
+                </button>
+              )}
+              {onBackToBooking && (
+                <button
+                  onClick={onBackToBooking}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-[11px] rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  予約画面へ
+                </button>
+              )}
+              {onBack && !onBackToAdmin && !onBackToBooking && (
+                <button
+                  onClick={onBack}
+                  className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-[11px] rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  管理画面へ戻る
+                </button>
+              )}
+            </div>
           </div>
-          <div>
-            <h1 className="font-bold text-sm md:text-base leading-tight">
-              CONNECT 4Pリーフレット
-            </h1>
-            <p className="text-[11px] text-slate-400">
-              {layoutMode === 'paged'
-                ? '【A4 4ページモード】A4縦×4P ぴったり出力'
-                : '【A3 見開きモード】A3横×2P（表裏） ぴったり出力'}
-            </p>
+
+          {/* 2行目（スマホ時）/ 右側（PC時）: 操作ボタン ＆ PC時の縦並びナビボタン */}
+          <div className="flex items-center justify-between md:justify-end gap-2 sm:gap-3">
+            {/* 表示モード切り替え（文字量最小限: A4 / A3） */}
+            <div className="bg-slate-800 p-0.5 sm:p-1 rounded-xl flex items-center text-xs font-bold border border-slate-700 shrink-0">
+              <button
+                onClick={() => setLayoutMode('paged')}
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
+                  layoutMode === 'paged' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                A4 (4P)
+              </button>
+              <button
+                onClick={() => setLayoutMode('spread')}
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-[11px] sm:text-xs ${
+                  layoutMode === 'spread' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                A3 (2P)
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+              {/* 印刷ボタン（最小限テキスト） */}
+              <button
+                onClick={() => handlePrint()}
+                className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-teal-600 hover:bg-teal-500 text-white font-bold text-[11px] sm:text-xs rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
+                title={
+                  layoutMode === 'paged'
+                    ? 'A4用紙で全4ページのPDFを出力・印刷します'
+                    : 'A3用紙で見開きのPDFを出力・印刷します'
+                }
+              >
+                <Printer size={14} />
+                <span>印刷</span>
+              </button>
+
+              {/* PDF保存ボタン（最小限テキスト） */}
+              <a
+                href="/CONNECT_Leaflet_A4.pdf"
+                download="CONNECT_Leaflet_A4.pdf"
+                className="px-2.5 sm:px-3.5 py-1 sm:py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-[11px] sm:text-xs rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
+                title="A4 4ページのPDFを直接ダウンロードします"
+              >
+                <Download size={14} />
+                <span>PDF保存</span>
+              </a>
+            </div>
+
+            {/* PC表示時の縦並びナビボタン */}
+            <div className="hidden md:flex flex-col gap-1 ml-2 shrink-0">
+              {onBackToAdmin && (
+                <button
+                  onClick={onBackToAdmin}
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  施設管理画面へ
+                </button>
+              )}
+              {onBackToBooking && (
+                <button
+                  onClick={onBackToBooking}
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  予約画面へ
+                </button>
+              )}
+              {onBack && !onBackToAdmin && !onBackToBooking && (
+                <button
+                  onClick={onBack}
+                  className="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white font-bold text-xs rounded-lg border border-slate-700 cursor-pointer transition-colors text-center"
+                >
+                  管理画面へ戻る
+                </button>
+              )}
+            </div>
+
           </div>
-        </div>
-
-        <div className="flex items-center gap-3">
-          {/* 表示モード切り替え */}
-          <div className="bg-slate-800 p-1 rounded-xl flex items-center text-xs font-bold border border-slate-700">
-            <button
-              onClick={() => setLayoutMode('paged')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                layoutMode === 'paged' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              A4 4ページ縦一覧 (4P)
-            </button>
-            <button
-              onClick={() => setLayoutMode('spread')}
-              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
-                layoutMode === 'spread' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              A3横 2つ折り見開き (2P)
-            </button>
-          </div>
-
-          <button
-            onClick={() => handlePrint()}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs md:text-sm rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95"
-            title={
-              layoutMode === 'paged'
-                ? 'A4用紙で全4ページぴったりのPDFを出力します'
-                : 'A3横向き用紙で表面・裏面の全2ページぴったりのPDFを出力します'
-            }
-          >
-            <Printer size={16} />
-            <span>
-              {layoutMode === 'paged' ? 'A4 PDF出力 (全4P)' : 'A3見開き PDF出力 (全2P)'}
-            </span>
-          </button>
-
-          <a
-            href="/CONNECT_Leaflet_A4.pdf"
-            download="CONNECT_Leaflet_A4.pdf"
-            className="px-3.5 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs md:text-sm rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95"
-            title="A4 4ページのPDFを直接ダウンロードします"
-          >
-            <Download size={16} />
-            <span>A4 PDF保存</span>
-          </a>
-
-          {onBackToAdmin && (
-            <button
-              onClick={onBackToAdmin}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 cursor-pointer"
-            >
-              施設管理画面へ
-            </button>
-          )}
-          {onBackToBooking && (
-            <button
-              onClick={onBackToBooking}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 cursor-pointer"
-            >
-              予約画面へ
-            </button>
-          )}
-          {onBack && !onBackToAdmin && !onBackToBooking && (
-            <button
-              onClick={onBack}
-              className="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl border border-slate-700 cursor-pointer"
-            >
-              管理画面へ戻る
-            </button>
-          )}
         </div>
       </div>
 
@@ -353,45 +387,123 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
+
+          .leaflet-scaler-wrapper {
+            width: auto !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            display: block !important;
+          }
+          .leaflet-scaler-inner {
+            width: auto !important;
+            height: auto !important;
+            transform: none !important;
+            display: block !important;
+          }
         }
       `}</style>
 
-      {/* メインリーフレット表示領域 */}
-      <div className="leaflet-main-container max-w-[1200px] mx-auto py-8 px-4 flex flex-col items-center gap-8 print:p-0 print:m-0 print:max-w-none print:gap-0 print:block">
+      {/* メインリーフレット表示領域（スマホでの横切れを防ぐため overflow-x-hidden） */}
+      <div className="leaflet-main-container max-w-[1200px] mx-auto py-4 sm:py-8 px-2 sm:px-4 flex flex-col items-center gap-4 sm:gap-8 print:p-0 print:m-0 print:max-w-none print:gap-0 print:block overflow-x-hidden">
         {layoutMode === 'paged' ? (
           <>
-            <Page1Cover />
-            <Page2Customer />
-            <Page3Facility />
-            <Page4Benefits />
+            <LeafletScaler>
+              <Page1Cover />
+            </LeafletScaler>
+            <LeafletScaler>
+              <Page2Customer />
+            </LeafletScaler>
+            <LeafletScaler>
+              <Page3Facility />
+            </LeafletScaler>
+            <LeafletScaler>
+              <Page4Benefits />
+            </LeafletScaler>
           </>
         ) : (
           <>
             {/* シート1：表面（外側見開き） P4 (左) + P1 (右) */}
-            <div className="text-center font-bold text-slate-600 text-sm mb-2 print:hidden flex items-center justify-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-teal-800 text-white text-xs">
-                A3 第1面：外側見開き（表面）
+            <div className="text-center font-bold text-slate-600 text-xs sm:text-sm mb-1 print:hidden flex items-center justify-center gap-2">
+              <span className="px-2 py-0.5 rounded-full bg-teal-800 text-white text-[10px] sm:text-xs">
+                A3 第1面：外側見開き
               </span>
-              <span>左：Page 4（導入メリット＆裏表紙） ／ 右：Page 1（表紙）</span>
+              <span className="text-xs">左：Page 4（裏表紙） ／ 右：Page 1（表紙）</span>
             </div>
-            <div className="leaflet-spread-sheet flex flex-col 2xl:flex-row items-center justify-center rounded-2xl overflow-hidden print:rounded-none">
-              <Page4Benefits isSpread={true} />
-              <Page1Cover isSpread={true} />
-            </div>
+            <LeafletScaler isSpread={true}>
+              <div className="leaflet-spread-sheet flex flex-row items-center justify-center rounded-2xl overflow-hidden print:rounded-none">
+                <Page4Benefits isSpread={true} />
+                <Page1Cover isSpread={true} />
+              </div>
+            </LeafletScaler>
 
             {/* シート2：裏面（内側見開き） P2 (左) + P3 (右) */}
-            <div className="text-center font-bold text-slate-600 text-sm mb-2 mt-8 print:hidden flex items-center justify-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full bg-teal-800 text-white text-xs">
-                A3 第2面：内側見開き（裏面）
+            <div className="text-center font-bold text-slate-600 text-xs sm:text-sm mb-1 mt-6 print:hidden flex items-center justify-center gap-2">
+              <span className="px-2 py-0.5 rounded-full bg-teal-800 text-white text-[10px] sm:text-xs">
+                A3 第2面：内側見開き
               </span>
-              <span>左：Page 2（お客様体験） ／ 右：Page 3（施設管理・スタッフ体験）</span>
+              <span className="text-xs">左：Page 2（お客様体験） ／ 右：Page 3（施設管理）</span>
             </div>
-            <div className="leaflet-spread-sheet flex flex-col 2xl:flex-row items-center justify-center rounded-2xl overflow-hidden print:rounded-none">
-              <Page2Customer isSpread={true} />
-              <Page3Facility isSpread={true} />
-            </div>
+            <LeafletScaler isSpread={true}>
+              <div className="leaflet-spread-sheet flex flex-row items-center justify-center rounded-2xl overflow-hidden print:rounded-none">
+                <Page2Customer isSpread={true} />
+                <Page3Facility isSpread={true} />
+              </div>
+            </LeafletScaler>
           </>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ===================================================================================
+// リーフレット表示用レスポンシブスケーラー
+// スマホや小型画面でA4/A3が横にはみ出して切れるのを防ぎ、縦横比を完全に保持したまま画面幅に自動縮小する
+// ===================================================================================
+function LeafletScaler({ children, isSpread = false }) {
+  const baseWidth = isSpread ? 1587.4 : 793.7; // 420mm or 210mm
+  const baseHeight = 1120.6; // 296.5mm
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (typeof window === 'undefined') return;
+      const clientWidth = document.documentElement.clientWidth || window.innerWidth;
+      // スマホでは左右計16px、タブレット以上では32pxの余白
+      const padding = clientWidth < 640 ? 16 : 32;
+      const availableWidth = clientWidth - padding;
+
+      if (availableWidth < baseWidth) {
+        setScale(availableWidth / baseWidth);
+      } else {
+        setScale(1);
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [baseWidth]);
+
+  return (
+    <div
+      className="leaflet-scaler-wrapper flex justify-center items-start my-1 sm:my-3 print:my-0 print:block"
+      style={{
+        width: scale < 1 ? `${baseWidth * scale}px` : 'auto',
+        height: scale < 1 ? `${baseHeight * scale}px` : 'auto',
+      }}
+    >
+      <div
+        className="leaflet-scaler-inner print:transform-none shrink-0"
+        style={{
+          width: `${baseWidth}px`,
+          height: `${baseHeight}px`,
+          transform: scale < 1 ? `scale(${scale})` : 'none',
+          transformOrigin: 'top left',
+        }}
+      >
+        {children}
       </div>
     </div>
   );
