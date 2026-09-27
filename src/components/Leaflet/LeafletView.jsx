@@ -13,19 +13,37 @@ const A3_SPREADS = [
   { id: 2, label: '内側見開き（左：P.2 患者様体験 ／ 右：P.3 医院管理）', src: '/about/images/leaflet_a3_inside_spread.jpg', alt: 'CONNECT A3 内側見開き (P2 + P3)' },
 ];
 
+const PRICING_PAGE = {
+  id: 'pricing',
+  label: 'A4 料金プラン表（3カ月無料トライアル付）',
+  src: '/about/images/CONNECT_Pricing_A4.jpg',
+  alt: 'CONNECT A4 料金プラン表',
+  pdf: '/CONNECT_Pricing_A4.pdf',
+  pdfName: 'CONNECT_Pricing_A4.pdf',
+  htmlUrl: '/about/pricing.html',
+};
+
 export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) {
   const [layoutMode, setLayoutMode] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'spread') return 'spread';
+      if (params.get('mode') === 'pricing') return 'pricing';
     } catch {
       // ignore
     }
     return 'paged';
   });
 
-  const currentPdfUrl = layoutMode === 'paged' ? '/CONNECT_Leaflet_A4.pdf' : '/CONNECT_Leaflet_A3_Spread.pdf';
-  const currentPdfDownloadName = layoutMode === 'paged' ? 'CONNECT_Leaflet_A4.pdf' : 'CONNECT_Leaflet_A3_Spread.pdf';
+  let currentPdfUrl = '/CONNECT_Leaflet_A4.pdf';
+  let currentPdfDownloadName = 'CONNECT_Leaflet_A4.pdf';
+  if (layoutMode === 'spread') {
+    currentPdfUrl = '/CONNECT_Leaflet_A3_Spread.pdf';
+    currentPdfDownloadName = 'CONNECT_Leaflet_A3_Spread.pdf';
+  } else if (layoutMode === 'pricing') {
+    currentPdfUrl = '/CONNECT_Pricing_A4.pdf';
+    currentPdfDownloadName = 'CONNECT_Pricing_A4.pdf';
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-16 font-sans">
@@ -74,11 +92,11 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
 
           {/* 下段（スマホ時）/ 右側（PC時）: 操作ボタン ＆ PC時の縦並びナビボタン */}
           <div className="flex items-center justify-between md:justify-end gap-2 sm:gap-3">
-            {/* 表示モード切り替え（A4 / A3） */}
+            {/* 表示モード切り替え（A4 / A3 / 料金表） */}
             <div className="bg-slate-800 p-0.5 sm:p-1 rounded-xl flex items-center text-xs font-bold border border-slate-700 shrink-0">
               <button
                 onClick={() => setLayoutMode('paged')}
-                className={`px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-xs ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-xs ${
                   layoutMode === 'paged' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
@@ -86,11 +104,19 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
               </button>
               <button
                 onClick={() => setLayoutMode('spread')}
-                className={`px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-xs ${
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-xs ${
                   layoutMode === 'spread' ? 'bg-teal-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 A3 (2P)
+              </button>
+              <button
+                onClick={() => setLayoutMode('pricing')}
+                className={`px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition-all cursor-pointer text-xs ${
+                  layoutMode === 'pricing' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                料金表 (1P)
               </button>
             </div>
 
@@ -98,11 +124,11 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
             <a
               href={currentPdfUrl}
               download={currentPdfDownloadName}
-              className="px-3.5 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
-              title={`${layoutMode === 'paged' ? 'A4 4ページ' : 'A3 見開き'}のPDFを直接ダウンロードします`}
+              className="px-3 py-1.5 sm:py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs sm:text-sm rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95 shrink-0"
+              title={`${layoutMode === 'pricing' ? 'A4 料金表' : layoutMode === 'paged' ? 'A4 4ページ' : 'A3 見開き'}のPDFを直接ダウンロードします`}
             >
               <Download size={14} />
-              <span>{layoutMode === 'paged' ? 'A4 PDF保存' : 'A3 PDF保存'}</span>
+              <span>{layoutMode === 'pricing' ? '料金表 PDF保存' : layoutMode === 'paged' ? 'A4 PDF保存' : 'A3 PDF保存'}</span>
             </a>
 
             {/* PC表示時の縦並びナビボタン */}
@@ -138,7 +164,41 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
 
       {/* メインリーフレット表示領域 */}
       <main className="max-w-6xl mx-auto px-3 sm:px-6 py-6 sm:py-10">
-        {layoutMode === 'paged' ? (
+        {layoutMode === 'pricing' ? (
+          <div className="flex flex-col items-center gap-6">
+            <section className="w-full max-w-[760px] flex flex-col items-center">
+              <div className="w-full flex items-center justify-between mb-2 px-1 text-slate-400 text-xs font-semibold">
+                <span className="bg-slate-800 px-2.5 py-0.5 rounded-full border border-slate-700/80 text-emerald-400 font-bold">
+                  {PRICING_PAGE.label}
+                </span>
+                <div className="flex items-center gap-3">
+                  <a
+                    href={PRICING_PAGE.htmlUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-emerald-400 text-slate-400 transition-colors underline flex items-center gap-1"
+                  >
+                    HTML印刷版を開く
+                  </a>
+                  <a
+                    href={PRICING_PAGE.src}
+                    download="CONNECT_Pricing_A4.jpg"
+                    className="hover:text-amber-400 transition-colors underline flex items-center gap-1"
+                  >
+                    画像保存
+                  </a>
+                </div>
+              </div>
+              <div className="w-full bg-white rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+                <img
+                  src={PRICING_PAGE.src}
+                  alt={PRICING_PAGE.alt}
+                  className="w-full h-auto block select-none"
+                />
+              </div>
+            </section>
+          </div>
+        ) : layoutMode === 'paged' ? (
           <div className="flex flex-col items-center gap-8 sm:gap-12">
             {A4_PAGES.map((page) => (
               <section key={page.id} className="w-full max-w-[760px] flex flex-col items-center">

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CONNECT ご利用料金プランのご案内 | Creative System Design</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&family=Noto+Sans+JP:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf9',
+                            100: '#ccfbf1',
+                            200: '#99f6e4',
+                            500: '#14b8a6',
+                            600: '#0d9488',
+                            700: '#0f766e',
+                            800: '#115e59',
+                            900: '#134e4a',
+                            950: '#042f2e',
+                        },
+                        csd: {
+                            blue: '#005bac',
+                            navy: '#003366',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Noto Sans JP', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        @media print {
+            html, body {
+                width: 210mm !important;
+                height: 297mm !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                background: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .a4-sheet {
+                width: 210mm !important;
+                height: 297mm !important;
+                max-height: 297mm !important;
+                box-shadow: none !important;
+                border: none !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+                padding: 10mm 11mm !important;
+                page-break-after: avoid;
+                page-break-inside: avoid;
+                overflow: hidden !important;
+            }
+        }
+
+        .a4-sheet {
+            width: 210mm;
+            height: 297mm;
+            max-height: 297mm;
+            box-sizing: border-box;
+            background: white;
+            position: relative;
+            overflow: hidden;
+            padding: 10mm 11mm;
+        }
+
+        /* 視覚的背景装飾 */
+        .bg-gradient-mesh {
+            background-color: #ffffff;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(204, 251, 241, 0.45) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(254, 243, 199, 0.35) 0px, transparent 50%);
+        }
+
+        /* スクリーンショット／画像生成用モード */
+        body.sheet-only {
+            padding: 0 !important;
+            margin: 0 !important;
+            background: white !important;
+            display: flex !important;
+            justify-content: center;
+            align-items: center;
+        }
+        body.sheet-only header {
+            display: none !important;
+        }
+        body.sheet-only .a4-sheet {
+            width: 210mm !important;
+            height: 297mm !important;
+            max-height: 297mm !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            border: none !important;
+            margin: 0 !important;
+        }
+    </style>
+    <script>
+        if (new URLSearchParams(window.location.search).get('render') === 'sheet') {
+            document.addEventListener('DOMContentLoaded', () => {
+                document.body.classList.add('sheet-only');
+            });
+        }
+    </script>
+</head>
+<body class="bg-slate-900 text-slate-800 min-h-screen py-8 px-4 flex flex-col items-center justify-center font-sans antialiased">
+
+    <!-- Top Action Bar (画面表示時のみ) -->
+    <header class="w-full max-w-[210mm] mb-4 no-print flex items-center justify-between bg-slate-800/95 backdrop-blur-md p-3.5 rounded-2xl border border-slate-700 text-white shadow-xl">
+        <div class="flex items-center gap-3">
+            <span class="text-xs bg-brand-500/20 text-brand-300 font-bold px-2.5 py-0.5 rounded-full border border-brand-500/30">A4 1枚 料金シート</span>
+            <span class="text-sm font-bold text-slate-200">CONNECT ご利用料金プラン</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <a href="leaflet.html" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5">
+                <i class="fas fa-file-alt text-teal-400"></i>
+                <span>製品リーフレットへ</span>
+            </a>
+            <a href="CONNECT_Pricing_A4.pdf" download="CONNECT_Pricing_A4.pdf" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                <i class="fas fa-file-pdf"></i>
+                <span>PDFダウンロード</span>
+            </a>
+            <button onclick="window.print()" class="px-4 py-1.5 bg-gradient-to-r from-brand-600 to-teal-500 hover:from-brand-500 hover:to-teal-400 text-white rounded-lg text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+                <i class="fas fa-print"></i>
+                <span>印刷 / PDF出力</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- ======================================================== -->
+    <!-- A4 1枚 シート（210mm x 297mm 完全固定ピクセル・印刷仕様） -->
+    <!-- ======================================================== -->
+    <div class="a4-sheet bg-gradient-mesh shadow-2xl rounded-2xl flex flex-col justify-between text-slate-800 border border-slate-100">
+
+        <!-- 1. HEADER AREA -->
+        <div>
+            <!-- Top branding row -->
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200/80">
+                <div class="flex items-center gap-2">
+                    <img src="../site_logo2.png" alt="Creative System Design" class="h-5 w-auto" onerror="this.src='images/site_logo2.png'">
+                    <span class="text-[9.5px] text-slate-400 font-bold tracking-wider">| SMART CLINIC DX</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-black tracking-tight text-slate-900">CONNECT</span>
+                    <span class="text-[8.5px] bg-brand-100 text-brand-800 font-extrabold px-2 py-0.5 rounded-full border border-brand-200">
+                        24h AI即レス予約＆スタッフ管理
+                    </span>
+                </div>
+            </div>
+
+            <!-- Title & Catchphrase -->
+            <div class="mt-2.5 flex items-end justify-between">
+                <div>
+                    <div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-[9.5px] font-bold mb-1">
+                        <i class="fas fa-tags text-teal-600"></i>
+                        <span>料金プランのご案内（A4 1枚完結版）</span>
+                    </div>
+                    <h1 class="text-[21px] font-black text-slate-900 tracking-tight leading-tight">
+                        初期費用・月額ともに<span class="text-brand-600">わかりやすい明朗会計</span>。<br>
+                        まずは安心の<span class="text-orange-600 font-extrabold underline decoration-orange-300 decoration-2 underline-offset-4">「3カ月間のお試し無料期間」</span>から。
+                    </h1>
+                </div>
+                <div class="text-right shrink-0 pb-0.5">
+                    <div class="text-[9.5px] text-slate-500 font-medium">対象：歯科・クリニック・サロン</div>
+                    <div class="text-[10px] font-black text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200 mt-0.5">
+                        追加オプション費用・縛り なし
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. SPECIAL CAMPAIGN HERO BANNER -->
+        <div class="mt-2 relative rounded-xl bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white p-3 shadow-md border border-teal-700/50 overflow-hidden">
+            <!-- Background accent -->
+            <div class="absolute -right-6 -bottom-6 w-36 h-36 bg-teal-500/20 rounded-full blur-2xl pointer-events-none"></div>
+            
+            <div class="relative z-10 flex items-center justify-between gap-3">
+                <div class="space-y-0.5 flex-1">
+                    <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[9px] font-black tracking-wider uppercase">
+                            RELEASE SPECIAL
+                        </span>
+                        <span class="text-amber-300 font-black text-xs tracking-wide">
+                            ★ リリース記念特別キャンペーン
+                        </span>
+                        <span class="bg-red-500 text-white text-[8.5px] font-black px-2 py-0.2 rounded-full">
+                            先着10医院（社）様限定枠
+                        </span>
+                    </div>
+                    <div class="text-[12.5px] font-extrabold text-slate-100 leading-snug">
+                        初期費用 <span class="text-amber-400 font-black text-[14px]">半額（50% OFF）</span> ＆ 月額費用 <span class="text-amber-400 font-black text-[14px]">約67% OFF（ずっと月々2万円引）</span>！
+                    </div>
+                    <p class="text-[9.5px] text-slate-300 leading-relaxed font-normal">
+                        どちらのプランでも、導入から<strong class="text-amber-300 font-bold">「最初の3カ月間はお試し無料期間」</strong>を設けております。費用・解約リスクゼロで現場の運用改善を実感いただけます。
+                    </p>
+                </div>
+
+                <!-- Highlight badge -->
+                <div class="shrink-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl px-3 py-1.5 text-center">
+                    <div class="text-[8px] text-teal-300 font-bold">全導入共通 特典</div>
+                    <div class="text-[17px] font-black text-amber-400 leading-none my-0.5">3カ月間</div>
+                    <div class="text-[9.5px] text-white font-black tracking-wide">無料お試しトライアル</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. PRICING COMPARISON CARDS (通常 vs キャンペーン) -->
+        <div class="mt-2.5 grid grid-cols-2 gap-3 items-stretch">
+
+            <!-- Card A: 通常プラン -->
+            <div class="bg-white rounded-xl p-3.5 border border-slate-200 shadow-xs flex flex-col justify-between relative">
+                <div>
+                    <div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100">
+                        <span class="text-xs font-black text-slate-700">通常プラン（定価）</span>
+                        <span class="text-[9px] text-slate-400 font-semibold">Standard Plan</span>
+                    </div>
+
+                    <!-- Initial Cost -->
+                    <div class="mb-2.5">
+                        <div class="text-[9.5px] text-slate-500 font-bold mb-0.5">イニシャルコスト（初期導入費用）</div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-[23px] font-black text-slate-800 leading-none">100,000</span>
+                            <span class="text-xs font-bold text-slate-600">円</span>
+                            <span class="text-[9px] text-slate-400 font-medium">（税込 110,000円）</span>
+                        </div>
+                        <p class="text-[8.5px] text-slate-400 mt-0.5 leading-tight">専用環境構築・LINE連携設定・診療メニュー/担当者初期登録</p>
+                    </div>
+
+                    <!-- Running Cost -->
+                    <div class="pt-2 border-t border-slate-100 mb-1.5">
+                        <div class="text-[9.5px] text-slate-500 font-bold mb-0.5">ランニングコスト（月額利用料）</div>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-[23px] font-black text-slate-800 leading-none">30,000</span>
+                            <span class="text-xs font-bold text-slate-600">円 / 月</span>
+                            <span class="text-[9px] text-slate-400 font-medium">（税込 33,000円）</span>
+                        </div>
+                        <p class="text-[8.5px] text-slate-400 mt-0.5 leading-tight">24h AI即レス予約・スタッフ管理・クラウド保守・定期機能更新</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 rounded-lg p-2 border border-slate-100 text-[9px] text-slate-500 space-y-0.5 mt-1.5">
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas fa-check text-slate-400 text-[8.5px]"></i>
+                        <span>スタッフ登録数・患者登録数・予約受付数 すべて無制限</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                        <i class="fas fa-check text-slate-400 text-[8.5px]"></i>
+                        <span>導入後 3カ月間無料お試し期間 を適用</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card B: リリース記念特別キャンペーンプラン -->
+            <div class="bg-gradient-to-b from-teal-50/70 via-white to-amber-50/40 rounded-xl p-3.5 border-2 border-teal-500 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                <!-- Ribbon / Tag -->
+                <div class="absolute top-0 right-0 bg-gradient-to-l from-orange-500 to-amber-500 text-white text-[8.5px] font-black px-2.5 py-0.5 rounded-bl-lg shadow-2xs">
+                    先着10医院（社）限定枠
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-1.5 pb-1.5 mb-2 border-b border-teal-100">
+                        <span class="w-3.5 h-3.5 rounded-full bg-teal-600 text-white flex items-center justify-center text-[8px] font-black">★</span>
+                        <span class="text-xs font-black text-teal-900">リリース記念特別プラン</span>
+                    </div>
+
+                    <!-- Initial Cost (Discounted) -->
+                    <div class="mb-2.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9.5px] text-teal-900 font-bold">イニシャルコスト（初期導入費用）</span>
+                            <span class="text-[8.5px] bg-red-100 text-red-600 font-black px-1.5 py-0.2 rounded-full">50% OFF</span>
+                        </div>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            <span class="text-[10px] text-slate-400 line-through">100,000円</span>
+                            <span class="text-[23px] font-black text-brand-700 leading-none">50,000</span>
+                            <span class="text-xs font-bold text-brand-700">円</span>
+                            <span class="text-[9px] text-slate-500 font-bold">（税込 55,000円）</span>
+                        </div>
+                        <p class="text-[8.5px] text-teal-900 mt-0.5 font-medium leading-tight">専任チームによる完全伴走セットアップ代行付き</p>
+                    </div>
+
+                    <!-- Running Cost (Discounted) -->
+                    <div class="pt-2 border-t border-teal-100 mb-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[9.5px] text-teal-900 font-bold">ランニングコスト（月額利用料）</span>
+                            <span class="text-[8.5px] bg-red-100 text-red-600 font-black px-1.5 py-0.2 rounded-full">ずっと 約67% OFF</span>
+                        </div>
+                        <div class="flex items-baseline gap-1 mt-0.5">
+                            <span class="text-[10px] text-slate-400 line-through">30,000円</span>
+                            <span class="text-[23px] font-black text-orange-600 leading-none">10,000</span>
+                            <span class="text-xs font-bold text-orange-600">円 / 月</span>
+                            <span class="text-[9px] text-slate-500 font-bold">（税込 11,000円）</span>
+                        </div>
+                        <p class="text-[8.5px] text-teal-900 mt-0.5 font-medium leading-tight">キャンペーン適用後は4カ月目以降も月額10,000円が永続</p>
+                    </div>
+                </div>
+
+                <!-- Trial Highlight Box -->
+                <div class="bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg p-2 shadow-2xs text-center mt-1.5">
+                    <div class="text-[8px] font-extrabold tracking-wider uppercase text-amber-100">SPECIAL TRIAL OFFER</div>
+                    <div class="text-[11.5px] font-black leading-tight mt-0.5">
+                        導入から 3カ月間 月額 0 円（完全無料）
+                    </div>
+                    <div class="text-[8px] text-amber-100 mt-0.5 font-medium">
+                        万が一効果にご満足いただけない場合、期間中いつでも違約金なしで解約可能
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- 4. 3-MONTH TRIAL FLOW & ZERO RISK -->
+        <div class="mt-2 bg-slate-50/90 rounded-xl p-2.5 border border-slate-200">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-4 h-4 rounded bg-teal-600 text-white flex items-center justify-center text-[9px] font-black">
+                        <i class="fas fa-calendar-check"></i>
+                    </span>
+                    <h3 class="text-[11px] font-black text-slate-900">
+                        「3カ月間のお試し無料期間」安心の導入ステップ
+                    </h3>
+                </div>
+                <span class="text-[8.5px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                    現場に負担をかけない完全伴走型サポート
+                </span>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center">
+                <!-- Step 1 -->
+                <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
+                    <div class="text-[8px] font-black text-brand-600 mb-0.5">STEP 01</div>
+                    <div class="text-[10px] font-black text-slate-800 mb-0.5">お申し込み・初期設定</div>
+                    <div class="text-[8.5px] text-slate-500 leading-snug">専任チームが診療メニュー・担当枠・LINE連携を最短3日で構築。</div>
+                </div>
+                <!-- Step 2 -->
+                <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
+                    <div class="text-[8px] font-black text-brand-600 mb-0.5">STEP 02</div>
+                    <div class="text-[10px] font-black text-slate-800 mb-0.5">スタッフ操作案内</div>
+                    <div class="text-[8.5px] text-slate-500 leading-snug">直感的なD&D操作。複雑な研修は不要で、翌日からスムーズに運用。</div>
+                </div>
+                <!-- Step 3 -->
+                <div class="bg-white p-2 rounded-lg border-2 border-teal-500 shadow-2xs relative">
+                    <span class="absolute -top-1.5 -right-1 bg-amber-500 text-white text-[7.5px] font-black px-1.5 py-0.2 rounded-full shadow-2xs">月額0円</span>
+                    <div class="text-[8px] font-black text-teal-700 mb-0.5">STEP 03</div>
+                    <div class="text-[10px] font-black text-teal-950 mb-0.5">3カ月 実践トライアル</div>
+                    <div class="text-[8.5px] text-slate-600 leading-snug">予約獲得率UP・電話対応70%減・無断キャンセル防止を現場で体感。</div>
+                </div>
+                <!-- Step 4 -->
+                <div class="bg-white p-2 rounded-lg border border-slate-200/80 shadow-2xs">
+                    <div class="text-[8px] font-black text-brand-600 mb-0.5">STEP 04</div>
+                    <div class="text-[10px] font-black text-slate-800 mb-0.5">本運用への継続判断</div>
+                    <div class="text-[8.5px] text-slate-500 leading-snug">十分に効果をご実感いただいた場合のみ、4カ月目より月額課金開始。</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. ALL-INCLUDED FEATURES (標準搭載機能) -->
+        <div class="mt-2">
+            <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">標準搭載機能（追加オプション料金は一切かかりません）</span>
+                <span class="text-[8.5px] text-teal-700 font-black"><i class="fas fa-check-circle text-teal-600 mr-1"></i>すべて基本料金に含まれます</span>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">24時間 AI即レス問診＆予約</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">夜間・休日の取りこぼし解消、最短20秒で即確定</div>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fab fa-line"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">LINE / Google / Apple 認証</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">専用アプリ不要、普段のSNSアカウントで簡単開始</div>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">スタッフ別D&Dタイムライン</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">ドラッグ＆ドロップで予約枠を直感変更・空き枠連動</div>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fas fa-bell"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">カレンダー連携＆前日リマインド</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">標準カレンダー自動同期＆通知でうっかり忘れ防止</div>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">6色カラー即時カスタマイズ</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">医院の雰囲気に合わせてブルー・グリーン等即切替</div>
+                    </div>
+                </div>
+
+                <div class="p-2 rounded-lg bg-white border border-slate-200/80 shadow-2xs flex items-start gap-2">
+                    <div class="w-6 h-6 rounded bg-teal-50 text-teal-700 flex items-center justify-center text-xs shrink-0 mt-0.5">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <div>
+                        <div class="text-[10px] font-bold text-slate-800">SSL暗号化 ＆ 完全個別DB</div>
+                        <div class="text-[8.5px] text-slate-500 leading-snug">最高水準の医療・個人情報保護、自動バックアップ</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 6. FOOTER / CONTACT & CTA AREA -->
+        <div class="mt-2.5 pt-2 border-t border-slate-200 flex items-center justify-between gap-3">
+            
+            <!-- Left: Company info & Contact -->
+            <div class="space-y-0.5">
+                <div class="flex items-center gap-2">
+                    <span class="text-[11px] font-black text-slate-900">株式会社 Creative System Design</span>
+                    <span class="text-[8.5px] bg-slate-100 text-slate-600 px-1.5 py-0.2 rounded border border-slate-200 font-semibold">CONNECT 運営チーム</span>
+                </div>
+                <div class="text-[9px] text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-0.5">
+                    <span><i class="fas fa-envelope text-slate-400 mr-1"></i>info@creative-sd.com</span>
+                    <span><i class="fas fa-globe text-slate-400 mr-1"></i>https://connect.inteve-cloud.com/about/</span>
+                </div>
+                <div class="text-[8px] text-slate-400">
+                    ※価格はすべて税抜表示です（別途消費税が加算されます）。先着10枠に達し次第、予告なくキャンペーン終了となる場合がございます。
+                </div>
+            </div>
+
+            <!-- Right: QR Code & CTA -->
+            <div class="flex items-center gap-2.5 bg-white p-1.5 rounded-xl border border-slate-200 shadow-2xs shrink-0">
+                <div class="text-right">
+                    <div class="text-[8px] font-extrabold text-brand-700 bg-brand-50 px-1.5 py-0.2 rounded mb-0.5 inline-block border border-brand-200">無料オンライン相談</div>
+                    <div class="text-[11px] font-black text-slate-900 leading-tight">デモ体験・お申し込み</div>
+                    <div class="text-[8px] text-slate-400 mt-0.5">スマホでQRをスキャン</div>
+                </div>
+                <img src="../connect_qr.png" alt="CONNECT QR" style="width: 52px; height: 52px; max-width: 52px; max-height: 52px;" class="rounded border border-slate-100 p-0.5 object-contain" onerror="this.src='../connect_qr.png'">
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+</html>
