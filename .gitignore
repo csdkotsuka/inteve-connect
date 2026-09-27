@@ -26,6 +26,9 @@ dist-ssr
 *.sln
 *.sw?
 *.pdf
+!public/**/*.pdf
+!public/*.pdf
+*.xlsx
 test_*.jpg
 leaflet_output/
 screen shot/

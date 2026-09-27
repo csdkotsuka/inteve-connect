@@ -13,6 +13,7 @@ import {
   Lock,
   Cloud,
   HeartHandshake,
+  Download,
 } from 'lucide-react';
 import { CROPPED } from './leafletAssets';
 
@@ -167,6 +168,16 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
               {layoutMode === 'paged' ? 'A4 PDF出力 (全4P)' : 'A3見開き PDF出力 (全2P)'}
             </span>
           </button>
+
+          <a
+            href="/CONNECT_Leaflet_A4.pdf"
+            download="CONNECT_Leaflet_A4.pdf"
+            className="px-3.5 py-2 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs md:text-sm rounded-xl flex items-center gap-1.5 shadow-md cursor-pointer transition-all active:scale-95"
+            title="A4 4ページのPDFを直接ダウンロードします"
+          >
+            <Download size={16} />
+            <span>A4 PDF保存</span>
+          </a>
 
           {onBackToAdmin && (
             <button

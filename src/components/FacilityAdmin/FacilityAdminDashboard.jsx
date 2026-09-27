@@ -23,6 +23,7 @@ import {
   ArrowDown,
   QrCode,
   Camera,
+  ExternalLink,
 } from 'lucide-react';
 
 import { getThemeById, getCurrentTheme, applyTheme } from '../../utils/themeService';
@@ -349,8 +350,8 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
           })}
         </nav>
 
-        {/* 予約画面プレビューへ戻るボタン */}
-        <div className="p-4 border-t border-slate-100">
+        {/* 予約画面プレビューへ戻るボタン ＆ サービス紹介（About）リンク */}
+        <div className="p-4 border-t border-slate-100 space-y-2">
           <button
             onClick={onBackToBooking}
             className="w-full py-2.5 rounded-2xl border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer"
@@ -358,6 +359,15 @@ export default function FacilityAdminDashboard({ onBackToBooking, onOpenLeaflet 
             <span>{labels.customer}用予約画面へ</span>
             <ArrowRight size={15} />
           </button>
+          <a
+            href="https://connect.inteve-cloud.com/about/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full py-2 rounded-2xl text-slate-500 hover:text-teal-700 hover:bg-teal-50/60 font-bold text-xs flex items-center justify-center gap-1.5 transition-all text-center"
+          >
+            <span>サービス紹介 (About)</span>
+            <ExternalLink size={13} />
+          </a>
         </div>
       </aside>
 
