@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Printer,
   Calendar,
@@ -94,7 +94,9 @@ export default function LeafletView({ onBack, onBackToAdmin, onBackToBooking }) 
     try {
       const params = new URLSearchParams(window.location.search);
       if (params.get('mode') === 'spread') return 'spread';
-    } catch (e) {}
+    } catch {
+      // ignore
+    }
     return 'paged';
   });
 
