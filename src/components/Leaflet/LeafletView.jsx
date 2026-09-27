@@ -15,7 +15,7 @@ const A3_SPREADS = [
 
 const PRICING_PAGE = {
   id: 'pricing',
-  label: 'A4 料金プラン表（3カ月無料トライアル付）',
+  label: 'A4 料金プラン表（1カ月無料トライアル付）',
   src: '/about/images/CONNECT_Pricing_A4.jpg',
   alt: 'CONNECT A4 料金プラン表',
   pdf: '/CONNECT_Pricing_A4.pdf',
