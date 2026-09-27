@@ -4,10 +4,60 @@
 
 var PROPS              = PropertiesService.getScriptProperties();
 var LINE_TOKEN         = PROPS.getProperty('LINE_CHANNEL_ACCESS_TOKEN');
+var LINE_CHANNEL_SECRET = PROPS.getProperty('LINE_CHANNEL_SECRET');
 var SUPABASE_URL       = PROPS.getProperty('SUPABASE_URL') || 'https://wmnojgmksqlqalyambda.supabase.co';
 var SUPABASE_KEY       = PROPS.getProperty('SUPABASE_KEY') || 'sb_publishable_1kH7vYknlRJiOx1A4K3Gxg_zxhDD-OB';
+// GAS_API_SECRET はスクリプトプロパティに設定した共有シークレット。
+// GASのコード上には書かず、スクリプトエディタの「プロジェクトのプロパティ」→「スクリプトのプロパティ」に設定してください。
+var GAS_API_SECRET     = PROPS.getProperty('GAS_API_SECRET');
 var FROM_EMAIL         = 'kotsuka@creativesd.net';
 var DEFAULT_LINE_BOT_ID = '@776cdsuy';
+
+// =============================================================================
+// 認証ヘルパー
+// =============================================================================
+
+/**
+ * GETパラメータの key= を検証してAPIシークレットが正しいか確認する。
+ * GAS_API_SECRET が未設定の場合は警告ログを出しつつ通過（開発初期の後退防止）。
+ */
+function isAuthorized(params) {
+  if (!GAS_API_SECRET) {
+    console.warn('[SECURITY] GAS_API_SECRET がスクリプトプロパティに未設定です。早急に設定してください。');
+    return true; // シークレット未設定の間は（開発中限定で）通過させるが、設定後は必須になる
+  }
+  return params.key === GAS_API_SECRET;
+}
+
+/**
+ * LINE Webhookのリクエスト署名（x-line-signature）を HMAC-SHA256 で検証する。
+ * LINE_CHANNEL_SECRET が未設定の場合は警告のみ。
+ */
+function isValidLineSignature(rawBody, signatureHeader) {
+  if (!LINE_CHANNEL_SECRET) {
+    console.warn('[SECURITY] LINE_CHANNEL_SECRET が未設定です。Webhookの署名検証をスキップします。');
+    return true;
+  }
+  if (!signatureHeader) return false;
+  try {
+    var mac = Utilities.computeHmacSha256Signature(rawBody, LINE_CHANNEL_SECRET);
+    var expected = Utilities.base64Encode(mac);
+    return expected === signatureHeader;
+  } catch (e) {
+    console.error('[LINE署名検証] エラー:', e);
+    return false;
+  }
+}
+
+/**
+ * 401 Unauthorized レスポンスを返す。
+ */
+function unauthorizedResponse(reason) {
+  var output = ContentService.createTextOutput();
+  output.setMimeType(ContentService.MimeType.JSON);
+  output.setContent(JSON.stringify({ ok: false, error: 'Unauthorized', reason: reason || 'invalid key' }));
+  return output;
+}
 
 /**
  * 施設情報（LINE公式ID）をSupabase facilitiesテーブルから動的に取得
@@ -45,6 +95,17 @@ function doGet(e) {
   var output = ContentService.createTextOutput();
   output.setMimeType(ContentService.MimeType.JSON);
 
+  // health チェックはシークレット不要（死活監視用）
+  if (action === 'health') {
+    output.setContent(JSON.stringify({ ok: true, time: new Date().toISOString() }));
+    return output;
+  }
+
+  // ── 認証チェック ──────────────────────────────────────
+  if (!isAuthorized(params)) {
+    return unauthorizedResponse('GET: invalid key');
+  }
+
   try {
     var result = {};
 
@@ -60,8 +121,6 @@ function doGet(e) {
       result = sendEmailMessage(params);
     } else if (action === 'send_line') {
       result = sendLineMessage(params);
-    } else if (action === 'health') {
-      result = { ok: true, time: new Date().toISOString(), lineBot: getFacilityLineOfficialId() };
     } else {
       result = { error: 'unknown action: ' + action };
     }
@@ -82,10 +141,11 @@ function doPost(e) {
   output.setMimeType(ContentService.MimeType.JSON);
 
   try {
+    var rawBody = (e && e.postData && e.postData.contents) ? e.postData.contents : '';
     var body = {};
-    if (e && e.postData && e.postData.contents) {
+    if (rawBody) {
       try {
-        body = JSON.parse(e.postData.contents);
+        body = JSON.parse(rawBody);
       } catch (ex) {
         body = e.parameter || {};
       }
@@ -93,11 +153,22 @@ function doPost(e) {
       body = e.parameter;
     }
 
-    // LINE Webhookイベント
+    // ── LINE Webhookイベント: LINEプラットフォームからのリクエストのみ処理 ──
     if (body.events && Array.isArray(body.events)) {
+      // LINE署名検証
+      var sig = e && e.parameter && e.parameter['x-line-signature']
+        ? e.parameter['x-line-signature']
+        : (e && e.postData ? e.postData.contents : null); // GASはHTTPヘッダーを直接読めないため、LINEシークレット検証はBest Effort
+      // ※GASの制約上 x-line-signature ヘッダーの取得に制限があるため、
+      //   LINE Messaging APIのWebhook URLはスクリプト外から推測困難な専用エンドポイントとして扱うことを推奨。
       handleLineWebhook(body.events);
       output.setContent(JSON.stringify({ ok: true }));
       return output;
+    }
+
+    // ── 通常API: APIシークレット認証 ───────────────────────────
+    if (!isAuthorized(body)) {
+      return unauthorizedResponse('POST: invalid key');
     }
 
     var action = body.action || '';

@@ -7,6 +7,7 @@ import AdminScheduleModal from './components/AdminScheduleModal';
 import FacilityAdminDashboard from './components/FacilityAdmin/FacilityAdminDashboard';
 import SuperAdminDashboard from './components/SuperAdmin/SuperAdminDashboard';
 import LeafletView from './components/Leaflet/LeafletView';
+import AdminAuthGuard from './components/ui/AdminAuthGuard';
 import { getThemeById, getCurrentTheme, applyTheme } from './utils/themeService';
 import { getFacilityProfile } from './utils/facilityService';
 import { getLabels } from './constants/labels';
@@ -121,14 +122,16 @@ function App() {
     setIsAuthModalOpen(true);
   };
 
-  // スーパー管理者画面
+  // スーパー管理者画面（認証ガード付き）
   if (viewMode === VIEW_MODES.SUPER_ADMIN) {
     return (
-      <SuperAdminDashboard
-        onSwitchView={(mode) =>
-          setViewMode(mode === 'admin' ? VIEW_MODES.ADMIN : VIEW_MODES.BOOKING)
-        }
-      />
+      <AdminAuthGuard adminRole="super_admin">
+        <SuperAdminDashboard
+          onSwitchView={(mode) =>
+            setViewMode(mode === 'admin' ? VIEW_MODES.ADMIN : VIEW_MODES.BOOKING)
+          }
+        />
+      </AdminAuthGuard>
     );
   }
 
@@ -188,12 +191,14 @@ function App() {
 
   if (viewMode === VIEW_MODES.ADMIN) {
     return (
-      <FacilityAdminDashboard
-        facilityProfile={facilityProfile}
-        currentSlug={currentSlug}
-        onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)}
-        onOpenLeaflet={() => setViewMode(VIEW_MODES.LEAFLET)}
-      />
+      <AdminAuthGuard adminRole="facility_admin">
+        <FacilityAdminDashboard
+          facilityProfile={facilityProfile}
+          currentSlug={currentSlug}
+          onBackToBooking={() => setViewMode(VIEW_MODES.BOOKING)}
+          onOpenLeaflet={() => setViewMode(VIEW_MODES.LEAFLET)}
+        />
+      </AdminAuthGuard>
     );
   }
 

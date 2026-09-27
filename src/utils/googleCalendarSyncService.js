@@ -1,6 +1,7 @@
 import { supabase } from './supabaseClient';
 
-const GAS_API_URL = import.meta.env.VITE_GAS_API_URL;
+const GAS_API_URL    = import.meta.env.VITE_GAS_API_URL;
+const GAS_API_SECRET = import.meta.env.VITE_GAS_API_SECRET;
 
 // スタッフのGoogleカレンダーID
 export const STAFF_CALENDARS = [
@@ -13,6 +14,7 @@ export const STAFF_CALENDARS = [
 
 /**
  * GAS API を安全に呼び出すヘルパー（GETパラメータ経由でCORS完全回避）
+ * GAS_API_SECRET が設定されている場合は key= パラメータを付与して認証する。
  */
 export async function callGasApi(action, params = {}) {
   if (!GAS_API_URL) return { ok: false, error: 'GAS_API_URL未設定' };
@@ -20,6 +22,10 @@ export async function callGasApi(action, params = {}) {
   try {
     const url = new URL(GAS_API_URL);
     url.searchParams.set('action', action);
+    // APIシークレット認証キーを付与（GAS側の isAuthorized() で検証）
+    if (GAS_API_SECRET) {
+      url.searchParams.set('key', GAS_API_SECRET);
+    }
     Object.entries(params).forEach(([key, val]) => {
       if (val !== undefined && val !== null) {
         url.searchParams.set(key, String(val));

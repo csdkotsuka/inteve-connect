@@ -1,9 +1,23 @@
 import { supabase } from './supabaseClient';
 
-const LOCAL_CUSTOMERS_KEY = 'inteve_connect_customers_cache';
+// ローカルキャッシュキー（スタッフ・管理者専用のセッションストレージのみ使用）
+// 【セキュリティ注意】患者の個人情報（氏名・電話番号・LINEユーザーID）を
+// localStorage に一覧保存することは禁止です（共用端末での情報漏洩リスク）。
+// 以下のキーは患者本人の直近セッション情報のみを保存するために限定使用します。
+const LOCAL_LAST_PATIENT_KEY = 'last_patient_info';
+// ※ inteve_connect_customers_cache は廃止済み（全患者一覧のlocalStorage保存禁止）
 
 /**
  * LINE固有ユーザーID（line_user_id）でSupabaseのcustomersテーブルを照合する
+ *
+ * 【セキュリティ設計】
+ * - このクエリは anon ユーザーから実行される。
+ * - Supabase RLS の "customers_anon_insert" ポリシーは anon の SELECT を許可していないため、
+ *   RLSが正しく設定されている環境ではこのクエリは常に空配列 or Permission Denied を返す。
+ * - anon での照合が必要な場合は、Supabase Edge Function（サーバーサイド）経由で
+ *   service_role キーを使って照合し、必要最小限の情報のみ返すアーキテクチャを推奨。
+ * - 現時点ではRLS設定の移行期間として、エラー時は新患として安全にフォールバックする。
+ *
  * @param {string} lineUserId - LINEの固有ユーザーID（例: Uxxxx...）
  * @param {string} [facilityId] - 施設ID
  * @returns {Promise<object>} 照合結果 { isFound: boolean, isReturning: boolean, record: object|null }
@@ -13,7 +27,7 @@ export async function findPatientByLineUserId(lineUserId, facilityId = null) {
     return { isFound: false, isReturning: false, record: null };
   }
 
-  // 1. Supabase から検索
+  // Supabase から照合（RLSが有効な場合はこのクエリはポリシーにより制限される）
   if (supabase) {
     try {
       let query = supabase.from('customers').select('*').eq('line_user_id', lineUserId);
@@ -23,97 +37,75 @@ export async function findPatientByLineUserId(lineUserId, facilityId = null) {
 
       const { data, error } = await query.limit(1);
 
-      if (!error && data) {
-        if (data.length > 0) {
-          const customer = data[0];
-
-          // 過去の予約履歴を1件取得
-          let lastVisit = '受診歴あり';
-          let notes = 'LINE連携済み患者';
-          const { data: resData } = await supabase
-            .from('reservations')
-            .select('start_at, ai_summary, status')
-            .eq('customer_id', customer.id)
-            .order('start_at', { ascending: false })
-            .limit(1);
-
-          if (resData && resData.length > 0) {
-            lastVisit = resData[0].start_at ? resData[0].start_at.substring(0, 10) : '受診歴あり';
-            notes = resData[0].ai_summary || '受診歴あり';
-          }
-
-          const customerCode = customer.customer_code || `No.${customer.id.substring(0, 5)}`;
-
-          return {
-            isFound: true,
-            isReturning: true,
-            patientType: 'returning',
-            patientTypeLabel: 'LINE連携済み（再診）',
-            customerCode,
-            customerRank: customer.customer_rank || 'regular',
-            assigned_staff_id: customer.assigned_staff_id || null,
-            record: {
-              id: customer.id,
-              name: customer.name || customer.line_display_name,
-              phone: customer.phone || '',
-              email: customer.email || '',
-              line_user_id: customer.line_user_id,
-              line_display_name: customer.line_display_name,
-              line_picture_url: customer.line_picture_url,
-              customer_code: customerCode,
-              assigned_staff_id: customer.assigned_staff_id || null,
-              last_visit: lastVisit,
-              notes: notes,
-            },
-          };
+      // RLSエラー（Permission Denied）の場合は新患として安全にフォールバック
+      if (error) {
+        if (error.code === 'PGRST301' || error.message?.includes('permission denied')) {
+          console.info('[patientService] customers SELECT はRLSにより制限されています（正常）。新患フローへ移行します。');
         } else {
-          // Supabase実DBに該当LINE患者が存在しない場合（レコード削除直後、または未登録の場合）
-          // ローカルキャッシュとの不整合を防ぐため、該当line_user_idをローカルストレージからも削除
-          try {
-            const saved = localStorage.getItem(LOCAL_CUSTOMERS_KEY);
-            if (saved) {
-              const customers = JSON.parse(saved);
-              const filtered = customers.filter((c) => c.line_user_id !== lineUserId);
-              localStorage.setItem(LOCAL_CUSTOMERS_KEY, JSON.stringify(filtered));
-            }
-            localStorage.removeItem('last_patient_info');
-          } catch (e) {}
-
-          return {
-            isFound: false,
-            isReturning: false,
-            patientType: 'new',
-            patientTypeLabel: 'LINE未連携（初診）',
-            customerCode: null,
-            customerRank: 'new',
-            record: null,
-          };
+          console.warn('Supabase LINE患者照合エラー:', error);
         }
-      }
-    } catch (err) {
-      console.warn('Supabase LINE患者照合エラー:', err);
-    }
-  }
+        // エラーの場合は新患として処理（照合不可 = 安全側に倒す）
+      } else if (data && data.length > 0) {
+        const customer = data[0];
 
-  // 2. Supabaseオフライン時のみ、ローカルキャッシュからのフォールバック検索
-  try {
-    const saved = localStorage.getItem(LOCAL_CUSTOMERS_KEY);
-    if (saved) {
-      const customers = JSON.parse(saved);
-      const match = customers.find((c) => c.line_user_id === lineUserId);
-      if (match) {
+        // 過去の予約履歴を1件取得
+        let lastVisit = '受診歴あり';
+        let notes = 'LINE連携済み患者';
+        const { data: resData } = await supabase
+          .from('reservations')
+          .select('start_at, ai_summary, status')
+          .eq('customer_id', customer.id)
+          .order('start_at', { ascending: false })
+          .limit(1);
+
+        if (resData && resData.length > 0) {
+          lastVisit = resData[0].start_at ? resData[0].start_at.substring(0, 10) : '受診歴あり';
+          notes = resData[0].ai_summary || '受診歴あり';
+        }
+
+        const customerCode = customer.customer_code || `No.${customer.id.substring(0, 5)}`;
+
+        // 照合成功時は localStorage に全患者キャッシュではなく直近患者のみ保存
+        try {
+          localStorage.setItem(LOCAL_LAST_PATIENT_KEY, JSON.stringify({
+            id: customer.id,
+            name: customer.name || customer.line_display_name,
+            phone: customer.phone || '',
+            line_user_id: customer.line_user_id,
+            customer_code: customerCode,
+          }));
+        } catch (e) {}
+
         return {
           isFound: true,
           isReturning: true,
           patientType: 'returning',
           patientTypeLabel: 'LINE連携済み（再診）',
-          customerCode: match.customer_code || 'No.LINE',
-          customerRank: 'regular',
-          record: match,
+          customerCode,
+          customerRank: customer.customer_rank || 'regular',
+          assigned_staff_id: customer.assigned_staff_id || null,
+          record: {
+            id: customer.id,
+            name: customer.name || customer.line_display_name,
+            phone: customer.phone || '',
+            email: customer.email || '',
+            line_user_id: customer.line_user_id,
+            line_display_name: customer.line_display_name,
+            line_picture_url: customer.line_picture_url,
+            customer_code: customerCode,
+            assigned_staff_id: customer.assigned_staff_id || null,
+            last_visit: lastVisit,
+            notes: notes,
+          },
         };
+      } else if (data && data.length === 0) {
+        // DBに存在しない LINE ユーザー → キャッシュも削除
+        try { localStorage.removeItem(LOCAL_LAST_PATIENT_KEY); } catch (e) {}
       }
+    } catch (err) {
+      console.warn('Supabase LINE患者照合エラー:', err);
     }
-  } catch (e) {}
+  }
 
   return {
     isFound: false,
@@ -252,13 +244,10 @@ export async function registerOrLinkLinePatient({
     };
   }
 
-  // ローカルキャッシュに保存
+  // 直近患者のセッション情報のみ保存（共用端末漏洩防止のため一覧キャッシュは行わない）
   try {
-    const saved = localStorage.getItem(LOCAL_CUSTOMERS_KEY);
-    const list = saved ? JSON.parse(saved) : [];
-    const filtered = list.filter((c) => c.line_user_id !== lineUserId && c.id !== customerRecord.id);
-    localStorage.setItem(LOCAL_CUSTOMERS_KEY, JSON.stringify([...filtered, customerRecord]));
-  } catch (e) {}
+    localStorage.setItem(LOCAL_LAST_PATIENT_KEY, JSON.stringify(customerRecord));
+  } catch (_e) {}
 
   return {
     isReturning: patientType === 'returning' || Boolean(customerRecord.customer_code),
@@ -270,6 +259,14 @@ export async function registerOrLinkLinePatient({
 
 /**
  * 電話番号または氏名でSupabaseのcustomersテーブルを照合し、新患か再診かを判定する
+ *
+ * 【セキュリティ設計】
+ * - RLSが正しく設定されている場合、anon ユーザーは customers の SELECT ができないため
+ *   このクエリは Permission Denied またはゼロ件を返す。
+ * - その場合は「新患」として安全にフォールバックする（照合エラー ≠ 新患確定ではないが、
+ *   セキュリティ優先で新患フローへ誘導し、医院スタッフが来院時に確認する設計とする）。
+ * - 将来的には Supabase Edge Function 経由での照合に移行する予定。
+ *
  * @param {string} name - 患者氏名
  * @param {string} phone - 電話番号
  * @returns {Promise<object>} 照合結果 { isReturning: boolean, patientType: 'new'|'returning', customerCode: string, record: object|null }
@@ -279,7 +276,7 @@ export async function matchPatient(name, phone) {
   const rawPhone = (phone || '').trim();
   const cleanName = (name || '').trim();
 
-  // 1. Supabaseの customers テーブルから検索
+  // Supabase customers テーブルから照合（RLSが有効な場合は制限される）
   if (supabase && (cleanPhone || cleanName)) {
     try {
       let query = supabase.from('customers').select('*');
@@ -292,7 +289,14 @@ export async function matchPatient(name, phone) {
 
       const { data, error } = await query.limit(1);
 
-      if (!error && data && data.length > 0) {
+      if (error) {
+        // RLS Permission Denied → 新患として処理（安全側にフォールバック）
+        if (error.code === 'PGRST301' || error.message?.includes('permission denied')) {
+          console.info('[patientService] customers SELECT はRLSにより制限されています（正常）。新患フローへ移行します。');
+        } else {
+          console.warn('Supabase患者照合エラー:', error);
+        }
+      } else if (data && data.length > 0) {
         const customer = data[0];
 
         // 過去の予約履歴を1件取得
@@ -335,7 +339,7 @@ export async function matchPatient(name, phone) {
     }
   }
 
-  // 2. 該当患者が見つからない場合は新患（初診）として扱う
+  // 該当患者が見つからない、またはRLS制限により照合不可の場合は新患（初診）として扱う
   return {
     isReturning: false,
     patientType: 'new',
@@ -346,4 +350,3 @@ export async function matchPatient(name, phone) {
     record: null,
   };
 }
-
